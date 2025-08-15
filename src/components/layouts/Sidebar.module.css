@@ -1,0 +1,220 @@
+.sidebar {
+  width: 260px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+}
+
+.theme-dark .sidebar,
+.theme-cyber .sidebar {
+  background: rgba(18, 22, 27, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.logo {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoGradient {
+  width: 36px;
+  height: 36px;
+  background: var(--gradient);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}
+
+.theme-light .logoGradient {
+  box-shadow: var(--shadow-md);
+}
+
+.logoText {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.logoBadge {
+  margin-left: auto;
+  padding: 4px 8px;
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.theme-light .logoBadge {
+  background: rgba(8, 145, 178, 0.1);
+}
+
+.nav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+}
+
+.navSection {
+  margin-bottom: 24px;
+}
+
+.navTitle {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 0 12px 8px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s;
+  margin-bottom: 2px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.navItem:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.navItemActive {
+  background: linear-gradient(90deg, rgba(0, 217, 255, 0.15) 0%, transparent 100%);
+  color: var(--accent);
+  position: relative;
+}
+
+.theme-light .navItemActive {
+  background: linear-gradient(90deg, rgba(8, 145, 178, 0.15) 0%, transparent 100%);
+}
+
+.navItemActive::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.theme-light .navItemActive::before {
+  box-shadow: var(--shadow-sm);
+}
+
+.navIcon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+}
+
+.footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.version {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-family: var(--font-mono);
+}
+
+/* Cyber theme specific */
+.navItem {
+  position: relative;
+}
+
+:global(.theme-cyber) .navItem:hover:not(.navItemActive)::before {
+  content: '> ';
+  position: absolute;
+  left: -8px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+:global(.theme-cyber) .navItem:hover:not(.navItemActive) {
+  color: var(--accent);
+  background: transparent !important; /* Remove grey highlighting for non-active items */
+}
+
+:global(.theme-cyber) .navItemActive {
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.1) 0%, transparent 100%) !important;
+  color: var(--accent);
+}
+
+:global(.theme-cyber) .navItemActive:hover {
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.1) 0%, transparent 100%) !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  transform: none !important;
+  /* Force exact same appearance as non-hover state */
+}
+
+:global(.theme-cyber) .navItemActive:hover::before {
+  opacity: 1 !important;
+  /* Ensure the accent bar doesn't fade */
+}
+
+/* Apply same no-hover-effect to dark and light themes */
+:global(.theme-dark) .navItemActive:hover,
+:global(.theme-light) .navItemActive:hover {
+  background: linear-gradient(90deg, rgba(0, 217, 255, 0.15) 0%, transparent 100%) !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+:global(.theme-light) .navItemActive:hover {
+  background: linear-gradient(90deg, rgba(8, 145, 178, 0.15) 0%, transparent 100%) !important;
+}
+
+:global(.theme-dark) .navItemActive:hover::before,
+:global(.theme-light) .navItemActive:hover::before {
+  opacity: 1 !important;
+}
+
+/* Cyber theme logo adjustments */
+:global(.theme-cyber) .logoText {
+  font-size: 16px;
+}
+
+:global(.theme-cyber) .logoBadge {
+  font-size: 10px;
+}
+
+
+/* Cyber theme nav title styling */
+:global(.theme-cyber) .navTitle::before {
+  content: '// ';
+  color: var(--accent-3);
+  opacity: 0.6;
+}

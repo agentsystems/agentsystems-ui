@@ -1,0 +1,267 @@
+.agents {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.loading,
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: var(--text-secondary);
+}
+
+.error {
+  color: var(--error);
+}
+
+.agentCard {
+  transition: all 0.3s;
+  cursor: pointer;
+  position: relative;
+}
+
+.agentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.agentInfo {
+  flex: 1;
+}
+
+.agentName {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.agentImage {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status.running {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status.stopped {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status.notcreated {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-muted);
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.agentInfo {
+  margin-bottom: 1rem;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.label {
+  color: var(--text-secondary);
+}
+
+.value {
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.agentActions {
+  display: flex;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.agentActions button {
+  flex: 1;
+  padding: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agentActions button:hover {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.theme-light .agentActions button:hover {
+  background: rgba(8, 145, 178, 0.1);
+}
+
+.startBtn {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.startBtn:hover {
+  background: var(--success);
+  color: white;
+}
+
+.stopBtn {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.stopBtn:hover {
+  background: var(--error);
+  color: white;
+}
+
+.invokeBtn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+}
+
+.invokeBtn:hover {
+  opacity: 0.9;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.emptyHint {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* Cyber theme specific */
+:global(.theme-cyber) .agentName {
+  color: var(--accent);
+}
+
+:global(.theme-cyber) .agentName::before {
+  content: '@';
+  color: var(--accent-3);
+  opacity: 0.7;
+}
+
+:global(.theme-cyber) .agentCard {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+:global(.theme-cyber) .agentCard:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+}
+
+:global(.theme-cyber) .status.running {
+  background: rgba(0, 255, 65, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+:global(.theme-cyber) .status.running::before {
+  content: '[ACTIVE] ';
+}
+
+:global(.theme-cyber) .status.stopped {
+  background: rgba(255, 204, 0, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(255, 204, 0, 0.2);
+}
+
+:global(.theme-cyber) .status.stopped::before {
+  content: '[IDLE] ';
+}
+
+:global(.theme-cyber) .agentActions button {
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+:global(.theme-cyber) .agentActions button:hover {
+  color: var(--accent);
+  border-color: var(--accent-3);
+  background: var(--surface-3);
+}
+
+:global(.theme-cyber) .agentActions button::before {
+  content: '> ';
+  opacity: 0.5;
+}
+
+/* Cyber theme - show cursor when hovering anywhere on the card */
+:global(.theme-cyber) .agentCard:hover .agentName::after {
+  content: '_';
+  animation: cyberBlink 1s infinite;
+}
+
+@keyframes cyberBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+

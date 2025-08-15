@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  agentsystems-ui:
+    build: .
+    ports:
+      - "3001:80"
+    environment:
+      - API_GATEWAY_URL=http://localhost:18080
+      - WS_ENDPOINT_URL=ws://localhost:18080
+    networks:
+      - agents-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ui.rule=Host(`ui.localhost`)"
+      - "traefik.http.services.ui.loadbalancer.server.port=80"
+
+networks:
+  agents-net:
+    external: true

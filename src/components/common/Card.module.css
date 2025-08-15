@@ -1,0 +1,52 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient);
+}
+
+.default {
+  /* Default styling already applied above */
+}
+
+.bordered {
+  border: 2px solid var(--border-strong);
+}
+
+.elevated {
+  box-shadow: var(--shadow-lg);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  background: var(--surface-3);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 217, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.theme-light .clickable:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.theme-cyber .clickable:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+  border-color: var(--border-strong);
+}
