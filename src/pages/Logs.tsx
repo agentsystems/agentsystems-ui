@@ -42,7 +42,10 @@ export default function Logs() {
           <select
             className={styles.levelSelect}
             value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
+            onChange={(e) => {
+              setLevelFilter(e.target.value)
+              e.target.blur() // Remove focus after selection
+            }}
           >
             <option value="all">All Levels</option>
             <option value="info">Info</option>

@@ -77,7 +77,10 @@ export default function Settings() {
               <select
                 id="theme"
                 value={theme}
-                onChange={(e) => setTheme(e.target.value as any)}
+                onChange={(e) => {
+                  setTheme(e.target.value as any)
+                  e.target.blur() // Remove focus after selection
+                }}
                 className={styles.select}
               >
                 <option value="dark">🌙 Dark</option>
@@ -112,7 +115,10 @@ export default function Settings() {
                     <select
                       id="scanline-frequency"
                       value={scanlineFrequency}
-                      onChange={(e) => setScanlineFrequency(e.target.value as any)}
+                      onChange={(e) => {
+                        setScanlineFrequency(e.target.value as any)
+                        e.target.blur() // Remove focus after selection
+                      }}
                       className={styles.select}
                     >
                       <option value="30">Every ~30 seconds (frequent)</option>
@@ -124,26 +130,23 @@ export default function Settings() {
                     </span>
                   </div>
                 )}
+
+                <div className={styles.formGroup}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={audioEnabled}
+                      onChange={(e) => handleAudioToggle(e.target.checked)}
+                      className={styles.checkbox}
+                    />
+                    Enable sound effects
+                  </label>
+                  <span className={styles.hint}>
+                    Plays digital click sounds for button interactions
+                  </span>
+                </div>
               </>
             )}
-
-            <div className={styles.formGroup}>
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={audioEnabled}
-                  onChange={(e) => handleAudioToggle(e.target.checked)}
-                  className={styles.checkbox}
-                />
-                Enable sound effects
-              </label>
-              <span className={styles.hint}>
-                {theme === 'cyber' 
-                  ? 'Plays digital click sounds for button interactions'
-                  : 'Sound effects are currently only available in cyber theme'
-                }
-              </span>
-            </div>
           </div>
         </Card>
 
