@@ -34,7 +34,6 @@ export default function Agents() {
         {agents.map((agent) => (
           <Card
             key={agent.name}
-            variant="bordered"
             onClick={() => navigate(`/agents/${agent.name}`)}
             className={styles.agentCard}
           >

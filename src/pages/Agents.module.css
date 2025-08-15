@@ -1,21 +1,25 @@
 .agents {
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0;
 }
 
 .header {
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
 }
 
 .header h1 {
-  font-size: 2rem;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--text);
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .subtitle {
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .grid {
@@ -189,4 +193,62 @@
   margin-top: 0.5rem;
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+/* Cyber theme specific */
+:global(.theme-cyber) .agentName {
+  color: var(--accent);
+}
+
+:global(.theme-cyber) .agentName::before {
+  content: '@';
+  color: var(--accent-3);
+  opacity: 0.7;
+}
+
+:global(.theme-cyber) .agentCard {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+:global(.theme-cyber) .agentCard:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+}
+
+:global(.theme-cyber) .status.running {
+  background: rgba(0, 255, 65, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+:global(.theme-cyber) .status.running::before {
+  content: '[ACTIVE] ';
+}
+
+:global(.theme-cyber) .status.stopped {
+  background: rgba(255, 204, 0, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(255, 204, 0, 0.2);
+}
+
+:global(.theme-cyber) .status.stopped::before {
+  content: '[IDLE] ';
+}
+
+:global(.theme-cyber) .agentActions button {
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+:global(.theme-cyber) .agentActions button:hover {
+  color: var(--accent);
+  border-color: var(--accent-3);
+  background: var(--surface-3);
+}
+
+:global(.theme-cyber) .agentActions button::before {
+  content: '> ';
+  opacity: 0.5;
 }

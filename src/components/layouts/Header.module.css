@@ -57,21 +57,23 @@
   border-radius: 50%;
   background: var(--success);
   box-shadow: 0 0 8px var(--success);
-  animation: pulse 2s infinite;
+  animation: statusPulse 2s infinite;
 }
 
 .theme-light .statusDot {
   box-shadow: var(--shadow-sm);
 }
 
-@keyframes pulse {
+@keyframes statusPulse {
   0%, 100% { 
     opacity: 1; 
-    transform: scale(1); 
+    transform: scale(1);
+    box-shadow: 0 0 8px var(--success);
   }
   50% { 
     opacity: 0.8; 
-    transform: scale(1.1); 
+    transform: scale(1.1);
+    box-shadow: 0 0 16px var(--success);
   }
 }
 
@@ -115,4 +117,15 @@
 .themeSelector:focus {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Cyber theme specific */
+:global(.theme-cyber) .status::before {
+  content: '{ ';
+  color: var(--accent);
+}
+
+:global(.theme-cyber) .status::after {
+  content: ' }';
+  color: var(--accent);
 }

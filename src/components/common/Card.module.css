@@ -39,8 +39,14 @@
   border-color: var(--accent);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 217, 255, 0.1);
+  transition: all 0.3s ease;
 }
 
 .theme-light .clickable:hover {
   box-shadow: var(--shadow-lg);
+}
+
+.theme-cyber .clickable:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+  border-color: var(--border-strong);
 }

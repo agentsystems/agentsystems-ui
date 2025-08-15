@@ -1,21 +1,25 @@
 .dashboard {
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0;
 }
 
 .header {
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
 }
 
 .header h1 {
-  font-size: 2rem;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--text);
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .subtitle {
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .stats {
@@ -57,6 +61,26 @@
   color: var(--error);
 }
 
+/* Cyber theme specific */
+:global(.theme-cyber) .statLabel::before {
+  content: '$ ';
+}
+
+:global(.theme-cyber) .statValue {
+  color: var(--accent);
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
+}
+
+:global(.theme-cyber) .stat:hover .statValue::after {
+  content: '_';
+  animation: blink-cursor 1s infinite;
+}
+
+@keyframes blink-cursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
 .panels {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -65,8 +89,9 @@
 
 .recentActivity h2,
 .systemHealth h2 {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
   color: var(--text);
 }
 
