@@ -8,13 +8,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- Professional Theme (Default) - Exactly from v2 -->
-<style id="professional-theme">
+<!-- Dark Theme (Default) - Professional Dark -->
+<style id="dark-theme">
   /* =====================
-     PROFESSIONAL THEME
+     DARK THEME (Professional)
      ===================== */
-  .theme-professional {
-    /* Core colors - more technical but inviting */
+  .theme-dark {
+    /* Core colors - deep space */
     --bg:#0a0d11;           /* Deep space background */
     --surface:#12161b;      /* Panel background */
     --surface-2:#0f1318;    /* Alternate panels */
@@ -44,8 +44,104 @@
     /* Spacing */
     --radius: 10px;
     --radius-lg: 14px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
   }
+</style>
 
+<!-- Light Theme - Professional Light -->
+<style id="light-theme">
+  /* =====================
+     LIGHT THEME (Professional)
+     ===================== */
+  .theme-light {
+    /* Core colors - clean and bright */
+    --bg:#f8fafc;           /* Light background */
+    --surface:#ffffff;      /* Panel background */
+    --surface-2:#f1f5f9;    /* Alternate panels */
+    --surface-3:#e2e8f0;    /* Hover state */
+    --border:#e2e8f0;       /* Subtle borders */
+    --border-strong:#cbd5e1; /* Stronger borders */
+    --text:#0f172a;         /* Primary text */
+    --text-secondary:#475569; /* Secondary text */
+    --text-muted:#94a3b8;   /* Muted text */
+
+    /* Accent colors - vibrant but professional */
+    --accent:#0891b2;       /* Cyan 600 */
+    --accent-2:#2563eb;     /* Blue 600 */
+    --accent-3:#7c3aed;     /* Purple 600 */
+    --gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+    
+    /* Status colors */
+    --success:#059669;      /* Green 600 */
+    --warning:#d97706;      /* Amber 600 */
+    --error:#dc2626;        /* Red 600 */
+    --info:#0891b2;         /* Cyan 600 */
+
+    /* Typography */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    
+    /* Spacing */
+    --radius: 10px;
+    --radius-lg: 14px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<!-- Cyberpunk Theme - Green hacker aesthetic -->
+<style id="cyberpunk-theme">
+  /* =====================
+     CYBERPUNK THEME
+     ===================== */
+  .theme-cyber {
+    /* Core colors - subtle terminal aesthetic */
+    --bg:#0a0a0a;           /* Very dark background */
+    --surface:#0f0f0f;      /* Dark panels */
+    --surface-2:#141414;    /* Slightly lighter */
+    --surface-3:#1a1a1a;    /* Hover state */
+    --border:#1a3320;       /* Dark green borders */
+    --border-strong:#254d2e; /* Slightly brighter */
+    --text:#a0a0a0;         /* Light gray text (not green) */
+    --text-secondary:#808080; /* Medium gray */
+    --text-muted:#606060;   /* Muted gray */
+
+    /* Accent colors - selective green use */
+    --accent:#00ff41;       /* Bright green for key elements */
+    --accent-2:#00cc33;     /* Darker green */
+    --accent-3:#009922;     /* Even darker */
+    --gradient: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+    
+    /* Status colors */
+    --success:#00ff41;      /* Green */
+    --warning:#ffcc00;      /* Yellow */
+    --error:#ff0033;        /* Red */
+    --info:#00ffff;         /* Cyan */
+
+    /* Typography - all monospace */
+    --font-sans: 'JetBrains Mono', 'Courier New', monospace;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    
+    /* Spacing - more blocky */
+    --radius: 0px;
+    --radius-lg: 0px;
+    
+    /* Shadows */
+    --shadow-sm: 0 0 5px rgba(0, 255, 65, 0.1);
+    --shadow-md: 0 0 10px rgba(0, 255, 65, 0.15);
+    --shadow-lg: 0 0 20px rgba(0, 255, 65, 0.2);
+  }
+</style>
+
+<!-- Base Styles -->
+<style>
   * {
     margin: 0;
     padding: 0;
@@ -63,8 +159,8 @@
     transition: all 0.3s ease;
   }
 
-  /* Grid background pattern */
-  .theme-professional body::before {
+  /* Dark theme background pattern */
+  .theme-dark body::before {
     content: '';
     position: fixed;
     top: 0;
@@ -75,6 +171,58 @@
       radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
       radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Light theme background pattern */
+  .theme-light body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(8, 145, 178, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(37, 99, 235, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Cyber theme scanline effect */
+  .theme-cyber body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(180deg, 
+      transparent 0%, 
+      rgba(0, 255, 65, 0.015) 50%, 
+      transparent 100%);
+    pointer-events: none;
+    z-index: 9999;
+    animation: scanline 12s linear infinite;
+  }
+
+  @keyframes scanline {
+    0% { top: -100%; }
+    100% { top: 100%; }
+  }
+
+  /* Cyber theme grid effect */
+  .theme-cyber body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0, 255, 65, 0.01) 1px, rgba(0, 255, 65, 0.01) 2px);
     pointer-events: none;
     z-index: 0;
   }
@@ -90,12 +238,17 @@
   /* Sidebar */
   .sidebar {
     width: 260px;
-    background: rgba(18, 22, 27, 0.8);
-    backdrop-filter: blur(10px);
+    background: var(--surface);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     transition: width 0.3s ease;
+  }
+
+  .theme-dark .sidebar,
+  .theme-cyber .sidebar {
+    background: rgba(18, 22, 27, 0.8);
+    backdrop-filter: blur(10px);
   }
 
   .logo {
@@ -120,6 +273,10 @@
     box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
   }
 
+  .theme-light .logo-icon {
+    box-shadow: var(--shadow-md);
+  }
+
   .logo-text {
     font-size: 18px;
     font-weight: 700;
@@ -135,6 +292,10 @@
     font-size: 11px;
     font-weight: 600;
     font-family: var(--font-mono);
+  }
+
+  .theme-light .logo-badge {
+    background: rgba(8, 145, 178, 0.1);
   }
 
   /* Navigation */
@@ -186,6 +347,10 @@
     position: relative;
   }
 
+  .theme-light .nav-item.active {
+    background: linear-gradient(90deg, rgba(8, 145, 178, 0.15) 0%, transparent 100%);
+  }
+
   .nav-item.active::before {
     content: '';
     position: absolute;
@@ -197,6 +362,10 @@
     background: var(--accent);
     border-radius: 0 3px 3px 0;
     box-shadow: 0 0 10px var(--accent);
+  }
+
+  .theme-light .nav-item.active::before {
+    box-shadow: var(--shadow-sm);
   }
 
   .nav-icon {
@@ -226,13 +395,17 @@
   /* Header */
   .header {
     height: 64px;
-    background: rgba(18, 22, 27, 0.6);
-    backdrop-filter: blur(10px);
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     padding: 0 24px;
     gap: 24px;
+  }
+
+  .theme-dark .header {
+    background: rgba(18, 22, 27, 0.6);
+    backdrop-filter: blur(10px);
   }
 
   .header-title {
@@ -256,6 +429,10 @@
     font-family: var(--font-mono);
   }
 
+  .theme-light .header-status {
+    background: var(--surface-2);
+  }
+
   .status-dot {
     width: 8px;
     height: 8px;
@@ -263,6 +440,10 @@
     background: var(--success);
     box-shadow: 0 0 8px var(--success);
     animation: pulse 2s infinite;
+  }
+
+  .theme-light .status-dot {
+    box-shadow: var(--shadow-sm);
   }
 
   @keyframes pulse {
@@ -293,6 +474,10 @@
     gap: 4px;
   }
 
+  .theme-light .btn {
+    background: var(--surface-2);
+  }
+
   .btn:hover {
     background: var(--surface-3);
     border-color: var(--border-strong);
@@ -307,6 +492,10 @@
   .btn-primary:hover {
     box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
     transform: translateY(-1px);
+  }
+
+  .theme-light .btn-primary:hover {
+    box-shadow: var(--shadow-lg);
   }
 
   /* Theme Toggle */
@@ -324,6 +513,10 @@
     align-items: center;
     gap: 8px;
     white-space: nowrap;
+  }
+
+  .theme-light .theme-toggle {
+    background: var(--surface-2);
   }
 
   .theme-toggle:hover {
@@ -420,6 +613,10 @@
     border: 1px solid var(--border);
   }
 
+  .theme-light .view-toggle {
+    background: var(--surface-2);
+  }
+
   .toggle-btn {
     padding: 6px 12px;
     background: transparent;
@@ -460,6 +657,10 @@
     border-color: var(--accent);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 217, 255, 0.1);
+  }
+
+  .theme-light .agent-card:hover {
+    box-shadow: var(--shadow-lg);
   }
 
   .agent-header {
@@ -575,6 +776,10 @@
     border-color: var(--accent);
   }
 
+  .theme-light .agent-action:hover {
+    background: rgba(8, 145, 178, 0.1);
+  }
+
   /* Activity Feed */
   .activity-panel {
     background: var(--surface);
@@ -635,6 +840,10 @@
     padding: 10px 0;
     border-bottom: 1px solid rgba(30, 36, 43, 0.5);
     animation: slideIn 0.3s ease;
+  }
+
+  .theme-light .activity-item {
+    border-bottom: 1px solid var(--border);
   }
 
   @keyframes slideIn {
@@ -710,6 +919,12 @@
       repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px);
   }
 
+  .theme-light .chart-grid {
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,0,0,0.03) 39px, rgba(0,0,0,0.03) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,0,0,0.03) 39px, rgba(0,0,0,0.03) 40px);
+  }
+
   .chart-bars {
     position: absolute;
     bottom: 0;
@@ -747,10 +962,18 @@
     transition: all 0.2s;
   }
 
+  .theme-light .search-input {
+    background: var(--surface-2);
+  }
+
   .search-input:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+  }
+
+  .theme-light .search-input:focus {
+    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
   }
 
   .search-input::placeholder {
@@ -768,115 +991,7 @@
     pointer-events: none;
   }
 
-  /* Quick Command */
-  .quick-command {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    background: rgba(18, 22, 27, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    z-index: 100;
-  }
-
-  .command-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-  }
-
-  .command-shortcut {
-    padding: 4px 8px;
-    background: var(--surface-3);
-    border-radius: 4px;
-    font-size: 11px;
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
-  }
-</style>
-
-<!-- Cyberpunk Theme - Green hacker aesthetic -->
-<style id="cyberpunk-theme">
-  /* =====================
-     CYBERPUNK THEME
-     ===================== */
-  .theme-cyberpunk {
-    /* Core colors - subtle terminal aesthetic */
-    --bg:#0a0a0a;           /* Very dark background */
-    --surface:#0f0f0f;      /* Dark panels */
-    --surface-2:#141414;    /* Slightly lighter */
-    --surface-3:#1a1a1a;    /* Hover state */
-    --border:#1a3320;       /* Dark green borders */
-    --border-strong:#254d2e; /* Slightly brighter */
-    --text:#a0a0a0;         /* Light gray text (not green) */
-    --text-secondary:#808080; /* Medium gray */
-    --text-muted:#606060;   /* Muted gray */
-
-    /* Accent colors - selective green use */
-    --accent:#00ff41;       /* Bright green for key elements */
-    --accent-2:#00cc33;     /* Darker green */
-    --accent-3:#009922;     /* Even darker */
-    --gradient: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
-    
-    /* Status colors */
-    --success:#00ff41;      /* Green */
-    --warning:#ffcc00;      /* Yellow */
-    --error:#ff0033;        /* Red */
-    --info:#00ffff;         /* Cyan */
-
-    /* Typography - all monospace */
-    --font-sans: 'JetBrains Mono', 'Courier New', monospace;
-    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-    
-    /* Spacing - more blocky */
-    --radius: 0px;
-    --radius-lg: 0px;
-  }
-
-  /* Scanline effect - more subtle */
-  .theme-cyberpunk body::after {
-    content: '';
-    position: fixed;
-    top: -100%;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: linear-gradient(180deg, 
-      transparent 0%, 
-      rgba(0, 255, 65, 0.015) 50%, 
-      transparent 100%);
-    pointer-events: none;
-    z-index: 9999;
-    animation: scanline 12s linear infinite;
-  }
-
-  @keyframes scanline {
-    0% { top: -100%; }
-    100% { top: 100%; }
-  }
-
-  /* Terminal grid effect - much more subtle */
-  .theme-cyberpunk body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0, 255, 65, 0.01) 1px, rgba(0, 255, 65, 0.01) 2px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Glitch effect */
+  /* Cyber Theme Specific Styles */
   @keyframes glitch {
     0%, 100% { 
       text-shadow: 
@@ -895,33 +1010,33 @@
     }
   }
 
-  .theme-cyberpunk .logo-icon {
+  .theme-cyber .logo-icon {
     background: var(--accent);
     color: var(--bg);
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
     text-shadow: none;
   }
 
-  .theme-cyberpunk .logo-icon:hover {
+  .theme-cyber .logo-icon:hover {
     animation: glitch 0.3s;
   }
 
-  .theme-cyberpunk .logo-text::before {
+  .theme-cyber .logo-text::before {
     content: '> ';
     color: var(--accent);
   }
 
-  .theme-cyberpunk .nav-title::before {
+  .theme-cyber .nav-title::before {
     content: '// ';
     color: var(--accent-3);
     opacity: 0.6;
   }
 
-  .theme-cyberpunk .nav-item:hover {
+  .theme-cyber .nav-item:hover {
     color: var(--accent);
   }
 
-  .theme-cyberpunk .nav-item:hover::before {
+  .theme-cyber .nav-item:hover::before {
     content: '> ';
     position: absolute;
     left: -8px;
@@ -929,29 +1044,29 @@
     opacity: 0.7;
   }
 
-  .theme-cyberpunk .header-title::before {
+  .theme-cyber .header-title::before {
     content: '[';
     color: var(--accent);
     margin-right: 4px;
   }
 
-  .theme-cyberpunk .header-title::after {
+  .theme-cyber .header-title::after {
     content: ']';
     color: var(--accent);
     margin-left: 4px;
   }
 
-  .theme-cyberpunk .header-status::before {
+  .theme-cyber .header-status::before {
     content: '{ ';
     color: var(--accent);
   }
 
-  .theme-cyberpunk .header-status::after {
+  .theme-cyber .header-status::after {
     content: ' }';
     color: var(--accent);
   }
 
-  .theme-cyberpunk .btn {
+  .theme-cyber .btn {
     text-transform: uppercase;
     letter-spacing: 1px;
     border: 1px solid var(--border-strong);
@@ -961,30 +1076,30 @@
     min-width: fit-content;
   }
 
-  .theme-cyberpunk .btn:hover {
+  .theme-cyber .btn:hover {
     background: var(--surface-3);
     border-color: var(--accent-3);
     color: var(--accent);
     text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
   }
 
-  .theme-cyberpunk .btn-primary {
+  .theme-cyber .btn-primary {
     background: var(--accent);
     color: black;
     font-weight: 700;
     padding: 8px 20px;
   }
 
-  .theme-cyberpunk .stat-label::before {
+  .theme-cyber .stat-label::before {
     content: '$ ';
   }
 
-  .theme-cyberpunk .stat-value {
+  .theme-cyber .stat-value {
     color: var(--accent);
     text-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
   }
 
-  .theme-cyberpunk .stat-card:hover .stat-value::after {
+  .theme-cyber .stat-card:hover .stat-value::after {
     content: '_';
     animation: blink-cursor 1s infinite;
   }
@@ -994,211 +1109,167 @@
     50%, 100% { opacity: 0; }
   }
 
-  .theme-cyberpunk .section-title::before {
+  .theme-cyber .section-title::before {
     content: '# ';
     color: var(--accent-3);
     opacity: 0.7;
   }
 
-  .theme-cyberpunk .agent-name {
+  .theme-cyber .agent-name {
     color: var(--accent);
   }
 
-  .theme-cyberpunk .agent-name::before {
+  .theme-cyber .agent-name::before {
     content: '@';
     color: var(--accent-3);
     opacity: 0.7;
   }
 
-  .theme-cyberpunk .agent-card {
+  .theme-cyber .agent-card {
     border: 1px solid var(--border);
     background: var(--surface);
   }
 
-  .theme-cyberpunk .agent-card:hover {
+  .theme-cyber .agent-card:hover {
     border-color: var(--border-strong);
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
   }
 
-  .theme-cyberpunk .status-running {
+  .theme-cyber .status-running {
     background: rgba(0, 255, 65, 0.1);
     color: var(--accent);
     border: 1px solid rgba(0, 255, 65, 0.2);
   }
 
-  .theme-cyberpunk .status-running::before {
+  .theme-cyber .status-running::before {
     content: '[ACTIVE] ';
   }
 
-  .theme-cyberpunk .status-stopped {
+  .theme-cyber .status-stopped {
     background: rgba(255, 204, 0, 0.1);
     color: var(--warning);
     border: 1px solid rgba(255, 204, 0, 0.2);
   }
 
-  .theme-cyberpunk .status-stopped::before {
+  .theme-cyber .status-stopped::before {
     content: '[IDLE] ';
   }
 
-  .theme-cyberpunk .agent-action {
+  .theme-cyber .agent-action {
     color: var(--text-secondary);
     background: var(--surface-2);
     border: 1px solid var(--border);
   }
 
-  .theme-cyberpunk .agent-action:hover {
+  .theme-cyber .agent-action:hover {
     color: var(--accent);
     border-color: var(--accent-3);
     background: var(--surface-3);
   }
 
-  .theme-cyberpunk .agent-action::before {
+  .theme-cyber .agent-action::before {
     content: '> ';
     opacity: 0.5;
   }
 
-  .theme-cyberpunk .activity-item::before {
+  .theme-cyber .activity-item::before {
     content: '> ';
     color: var(--accent-3);
     opacity: 0.5;
   }
 
-  .theme-cyberpunk .activity-time {
-    font-family: var(--font-mono);
-  }
-
-  .theme-cyberpunk .activity-time {
-    color: var(--text-muted);
-  }
-
-  .theme-cyberpunk .activity-time::after {
+  .theme-cyber .activity-time::after {
     content: ' |';
     color: var(--text-muted);
     opacity: 0.5;
   }
 
-  .theme-cyberpunk .activity-agent {
-    color: var(--accent);
-  }
-
-  .theme-cyberpunk .activity-message {
-    color: var(--text-secondary);
-  }
-
-  .theme-cyberpunk .search-input {
+  .theme-cyber .search-input {
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--text);
     font-family: var(--font-mono);
   }
 
-  .theme-cyberpunk .search-input:focus {
+  .theme-cyber .search-input:focus {
     border-color: var(--accent-3);
     box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.1);
   }
 
-  .theme-cyberpunk .search-input::placeholder {
-    content: 'grep -r ""';
-    color: var(--text-muted);
-  }
-
-  .theme-cyberpunk .command-label::before {
-    content: '$ ';
-    color: var(--accent-3);
-  }
-
-  /* Make everything more terminal-like */
-  .theme-cyberpunk * {
+  /* Make everything more terminal-like in cyber theme */
+  .theme-cyber * {
     font-family: var(--font-mono) !important;
     letter-spacing: 0.5px;
   }
 
-  /* Keep key navigation elements visible */
-  .theme-cyberpunk .nav-item.active {
+  .theme-cyber .nav-item.active {
     background: linear-gradient(90deg, rgba(0, 255, 65, 0.1) 0%, transparent 100%);
     color: var(--accent);
   }
 
-  .theme-cyberpunk .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-  }
-
-  .theme-cyberpunk .stat-card:hover {
-    border-color: var(--border-strong);
-  }
-
-  .theme-cyberpunk .stat-label {
-    color: var(--text-muted);
-  }
-
-  .theme-cyberpunk .stat-change {
+  .theme-cyber .stat-change {
     color: var(--accent-2);
   }
 
-  .theme-cyberpunk .stat-change.negative {
+  .theme-cyber .stat-change.negative {
     color: var(--error);
   }
 
-  .theme-cyberpunk .metric-bar {
-    background: var(--surface-3);
-  }
-
-  .theme-cyberpunk .metric-bar-fill {
+  .theme-cyber .metric-bar-fill {
     background: linear-gradient(90deg, var(--accent-3) 0%, var(--accent-2) 100%);
     box-shadow: none;
   }
 
-  .theme-cyberpunk .chart-bar {
+  .theme-cyber .chart-bar {
     background: linear-gradient(180deg, var(--accent-2) 0%, var(--accent-3) 100%);
     box-shadow: none;
   }
 
-  /* Flashing cursor on hover */
-  .theme-cyberpunk .nav-item:hover span::after,
-  .theme-cyberpunk .agent-card:hover .agent-name::after {
+  /* Flashing cursor on hover for cyber theme */
+  .theme-cyber .nav-item:hover span::after,
+  .theme-cyber .agent-card:hover .agent-name::after {
     content: '_';
     animation: blink-cursor 0.5s infinite;
   }
 
   /* Terminal boot text */
-  .theme-cyberpunk .logo-badge::before {
+  .theme-cyber .logo-badge::before {
     content: 'v';
   }
 
-  /* Fix Cyberpunk mode layout issues */
-  .theme-cyberpunk .header {
+  /* Fix Cyber mode layout issues */
+  .theme-cyber .header {
     min-height: 64px;
     height: auto;
     padding: 12px 24px;
   }
 
-  .theme-cyberpunk .header-title {
+  .theme-cyber .header-title {
     font-size: 18px;
     flex-shrink: 0;
   }
 
-  .theme-cyberpunk .header-status {
+  .theme-cyber .header-status {
     flex-shrink: 0;
     padding: 6px 14px;
   }
 
-  .theme-cyberpunk .theme-toggle {
+  .theme-cyber .theme-toggle {
     padding: 6px 14px;
     min-width: fit-content;
   }
 
-  .theme-cyberpunk .logo-text {
+  .theme-cyber .logo-text {
     font-size: 16px;
   }
 
-  .theme-cyberpunk .logo-badge {
+  .theme-cyber .logo-badge {
     font-size: 10px;
   }
 </style>
 
 </head>
-<body class="theme-professional">
+<body class="theme-dark">
   <div class="app">
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -1284,10 +1355,10 @@
 
         <div class="header-actions">
           <button class="theme-toggle" id="theme-toggle">
-            <svg class="theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            <svg class="theme-icon" id="theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <!-- Will be updated by JS -->
             </svg>
-            <span id="theme-label">Cyber</span>
+            <span id="theme-label">Light</span>
           </button>
           <button class="btn">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1531,30 +1602,42 @@
     </main>
   </div>
 
-  <!-- Quick Command Palette -->
-  <div class="quick-command">
-    <span class="command-label">Quick Command</span>
-    <span class="command-shortcut">⌘K</span>
-    <span style="color: var(--text-muted); font-size: 12px;">or</span>
-    <span class="command-shortcut">Ctrl+K</span>
-  </div>
-
   <script>
     // Theme Management
-    let currentTheme = localStorage.getItem('theme') || 'professional';
+    const themes = ['dark', 'light', 'cyber'];
+    const themeIcons = {
+      dark: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>',
+      light: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>',
+      cyber: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>'
+    };
     
-    function setTheme(theme) {
-      document.body.className = `theme-${theme}`;
-      currentTheme = theme;
-      localStorage.setItem('theme', theme);
+    let currentThemeIndex = 0;
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme && themes.includes(savedTheme)) {
+      currentThemeIndex = themes.indexOf(savedTheme);
+    }
+    
+    function setTheme(themeName) {
+      document.body.className = `theme-${themeName}`;
+      localStorage.setItem('theme', themeName);
       
-      // Update theme toggle label - inverted to show what you'll switch TO
+      // Update icon and label
+      const icon = document.getElementById('theme-icon');
       const label = document.getElementById('theme-label');
-      label.textContent = theme === 'professional' ? 'Cyber' : 'Pro';
+      
+      // Determine next theme
+      const nextIndex = (themes.indexOf(themeName) + 1) % themes.length;
+      const nextTheme = themes[nextIndex];
+      
+      // Set icon to next theme's icon
+      icon.innerHTML = themeIcons[nextTheme];
+      
+      // Set label to next theme's name
+      label.textContent = nextTheme.charAt(0).toUpperCase() + nextTheme.slice(1);
       
       // Update search placeholder based on theme
       const searchInput = document.querySelector('.search-input');
-      if (theme === 'cyberpunk') {
+      if (themeName === 'cyber') {
         searchInput.placeholder = 'grep -r "agent" ./';
       } else {
         searchInput.placeholder = 'Search agents, executions...';
@@ -1562,12 +1645,12 @@
     }
     
     // Initialize theme
-    setTheme(currentTheme);
+    setTheme(themes[currentThemeIndex]);
     
-    // Theme toggle
+    // Theme toggle - cycles through all three themes
     document.getElementById('theme-toggle').addEventListener('click', () => {
-      const newTheme = currentTheme === 'professional' ? 'cyberpunk' : 'professional';
-      setTheme(newTheme);
+      currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+      setTheme(themes[currentThemeIndex]);
     });
 
     // Activity Feed Simulation
@@ -1582,7 +1665,7 @@
         { agent: 'code-analyzer', message: 'Memory cleanup initiated', type: 'info' },
         { agent: 'data-processor', message: 'Pipeline stage 3/5 complete', type: 'success' },
       ],
-      cyberpunk: [
+      cyber: [
         { agent: 'assistant-agent', message: '[SUCCESS] text_gen_4821 completed', type: 'success' },
         { agent: 'research-agent', message: '[INIT] web_scrape operation started', type: 'info' },
         { agent: 'code-analyzer', message: '[OK] 0 vulnerabilities found', type: 'success' },
@@ -1596,7 +1679,8 @@
 
     function addActivityItem() {
       const feed = document.getElementById('activity-feed');
-      const messages = activityMessages[currentTheme] || activityMessages.professional;
+      const currentTheme = themes[currentThemeIndex];
+      const messages = currentTheme === 'cyber' ? activityMessages.cyber : activityMessages.professional;
       const item = messages[Math.floor(Math.random() * messages.length)];
       const time = new Date().toLocaleTimeString('en-US', { 
         hour12: false, 
@@ -1608,7 +1692,7 @@
       const div = document.createElement('div');
       div.className = 'activity-item';
       
-      if (currentTheme === 'cyberpunk') {
+      if (currentTheme === 'cyber') {
         const ms = String(Date.now()).slice(-3);
         div.innerHTML = `
           <span class="activity-time">${time}.${ms}</span>
@@ -1679,9 +1763,9 @@
       });
     });
 
-    // Random glitch effect for cyberpunk theme
+    // Random glitch effect for cyber theme
     setInterval(() => {
-      if (currentTheme === 'cyberpunk' && Math.random() > 0.98) {
+      if (themes[currentThemeIndex] === 'cyber' && Math.random() > 0.98) {
         const elements = document.querySelectorAll('.agent-name, .stat-value');
         const el = elements[Math.floor(Math.random() * elements.length)];
         el.style.animation = 'glitch 0.1s';
