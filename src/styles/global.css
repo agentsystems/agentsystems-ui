@@ -90,43 +90,43 @@
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* Cyberpunk Theme - Matrix green aesthetic */
-.theme-cyberpunk {
-  /* Core colors - matrix black and green */
+/* Cyberpunk Theme - Subtle terminal aesthetic */
+.theme-cyber {
+  /* Core colors - subtle terminal aesthetic */
   --bg: #0a0a0a;
-  --surface: #0d0d0d;
-  --surface-2: #111111;
+  --surface: #0f0f0f;
+  --surface-2: #141414;
   --surface-3: #1a1a1a;
-  --border: #00ff00;
-  --border-strong: #00ff00;
-  --text: #00ff00;
-  --text-secondary: #00cc00;
-  --text-muted: #008800;
+  --border: #1a3320;
+  --border-strong: #254d2e;
+  --text: #a0a0a0;
+  --text-secondary: #808080;
+  --text-muted: #606060;
 
-  /* Accent colors - neon green variations */
-  --accent: #00ff00;
-  --accent-2: #00ffff;
-  --accent-3: #ff00ff;
-  --gradient: linear-gradient(135deg, #00ff00 0%, #00ffff 50%, #ff00ff 100%);
+  /* Accent colors - selective green use */
+  --accent: #00ff41;
+  --accent-2: #00cc33;
+  --accent-3: #009922;
+  --gradient: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
   
   /* Status colors */
-  --success: #00ff00;
-  --warning: #ffff00;
-  --error: #ff0000;
+  --success: #00ff41;
+  --warning: #ffcc00;
+  --error: #ff0033;
   --info: #00ffff;
 
-  /* Typography */
+  /* Typography - all monospace */
   --font-sans: 'JetBrains Mono', 'Courier New', monospace;
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
   
-  /* Spacing */
+  /* Spacing - more blocky */
   --radius: 0px;
   --radius-lg: 0px;
   
   /* Shadows */
-  --shadow-sm: 0 0 10px rgba(0, 255, 0, 0.3);
-  --shadow-md: 0 0 20px rgba(0, 255, 0, 0.4);
-  --shadow-lg: 0 0 40px rgba(0, 255, 0, 0.5);
+  --shadow-sm: 0 0 5px rgba(0, 255, 65, 0.1);
+  --shadow-md: 0 0 10px rgba(0, 255, 65, 0.15);
+  --shadow-lg: 0 0 20px rgba(0, 255, 65, 0.2);
 }
 
 /* =====================
@@ -137,15 +137,89 @@ html,
 body {
   height: 100%;
   font-family: var(--font-sans);
-  background-color: var(--bg);
+  background: var(--bg);
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 14px;
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: all 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Dark theme background pattern */
+.theme-dark body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Light theme background pattern */
+.theme-light body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(8, 145, 178, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(37, 99, 235, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Cyber theme scanline effect */
+.theme-cyber body::after {
+  content: '';
+  position: fixed;
+  top: -100%;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    rgba(0, 255, 65, 0.015) 50%, 
+    transparent 100%);
+  pointer-events: none;
+  z-index: 9999;
+  animation: scanline 12s linear infinite;
+}
+
+@keyframes scanline {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+/* Cyber theme grid effect */
+.theme-cyber body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0, 255, 65, 0.01) 1px, rgba(0, 255, 65, 0.01) 2px);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Typography */

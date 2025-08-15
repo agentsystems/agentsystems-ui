@@ -1,11 +1,16 @@
 .header {
-  height: 60px;
-  background-color: var(--surface);
+  height: 64px;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 1.5rem;
+  padding: 0 24px;
+  gap: 24px;
+}
+
+.theme-dark .header {
+  background: rgba(18, 22, 27, 0.6);
+  backdrop-filter: blur(10px);
 }
 
 .left {
@@ -15,41 +20,58 @@
 }
 
 .title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .right {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 12px;
 }
 
 .status {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: var(--surface-2);
-  border-radius: var(--radius);
-  font-size: 0.875rem;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.theme-light .status {
+  background: var(--surface-2);
 }
 
 .statusDot {
   width: 8px;
   height: 8px;
-  background-color: var(--success);
   border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
   animation: pulse 2s infinite;
 }
 
+.theme-light .statusDot {
+  box-shadow: var(--shadow-sm);
+}
+
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1); 
   }
-  50% {
-    opacity: 0.5;
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.1); 
   }
 }
 
@@ -61,23 +83,33 @@
 .statusUrl {
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 11px;
 }
 
 .themeSelector {
-  padding: 0.5rem 1rem;
-  background-color: var(--surface-2);
-  color: var(--text);
+  padding: 6px 12px;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 0.875rem;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: var(--font-mono);
   cursor: pointer;
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.theme-light .themeSelector {
+  background: var(--surface-2);
 }
 
 .themeSelector:hover {
-  background-color: var(--surface-3);
-  border-color: var(--border-strong);
+  background: var(--surface-3);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .themeSelector:focus {

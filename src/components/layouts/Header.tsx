@@ -9,14 +9,12 @@ export default function Header() {
   const themes = [
     { value: 'dark', label: '🌙 Dark' },
     { value: 'light', label: '☀️ Light' },
-    { value: 'cyberpunk', label: '👾 Cyber' },
+    { value: 'cyber', label: '👾 Cyber' },
   ] as const
 
   return (
     <header className={styles.header}>
-      <div className={styles.left}>
-        <h1 className={styles.title}>Mission Control</h1>
-      </div>
+      <h1 className={styles.title}>Mission Control</h1>
       
       <div className={styles.right}>
         <div className={styles.status}>

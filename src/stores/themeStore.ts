@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type Theme = 'dark' | 'light' | 'cyberpunk'
+export type Theme = 'dark' | 'light' | 'cyber'
 
 interface ThemeStore {
   theme: Theme

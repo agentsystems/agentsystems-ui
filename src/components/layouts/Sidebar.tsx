@@ -20,6 +20,7 @@ export default function Sidebar() {
       <div className={styles.logo}>
         <div className={styles.logoGradient}>AS</div>
         <span className={styles.logoText}>AgentSystems</span>
+        <div className={styles.logoBadge}>v0.1</div>
       </div>
       
       <nav className={styles.nav}>
