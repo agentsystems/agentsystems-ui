@@ -171,6 +171,24 @@
   /* Ensure the accent bar doesn't fade */
 }
 
+/* Apply same no-hover-effect to dark and light themes */
+:global(.theme-dark) .navItemActive:hover,
+:global(.theme-light) .navItemActive:hover {
+  background: linear-gradient(90deg, rgba(0, 217, 255, 0.15) 0%, transparent 100%) !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+:global(.theme-light) .navItemActive:hover {
+  background: linear-gradient(90deg, rgba(8, 145, 178, 0.15) 0%, transparent 100%) !important;
+}
+
+:global(.theme-dark) .navItemActive:hover::before,
+:global(.theme-light) .navItemActive:hover::before {
+  opacity: 1 !important;
+}
+
 /* Cyber theme logo adjustments */
 :global(.theme-cyber) .logoText {
   font-size: 16px;
