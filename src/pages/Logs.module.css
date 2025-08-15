@@ -1,0 +1,113 @@
+.logs {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+
+.searchInput:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.levelSelect {
+  padding: 0.75rem 1rem;
+  background-color: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.logContainer {
+  background-color: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 1rem;
+  height: 600px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+.logEntry {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.logEntry:hover {
+  background-color: var(--surface-3);
+}
+
+.timestamp {
+  color: var(--text-muted);
+  min-width: 80px;
+}
+
+.level {
+  min-width: 70px;
+  font-weight: 600;
+}
+
+.source {
+  color: var(--text-secondary);
+  min-width: 100px;
+}
+
+.message {
+  flex: 1;
+  color: var(--text);
+}
+
+.logEntry.info .level {
+  color: var(--info);
+}
+
+.logEntry.warning .level {
+  color: var(--warning);
+}
+
+.logEntry.error .level {
+  color: var(--error);
+}
+
+.logEntry.error {
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.logEntry.warning {
+  background-color: rgba(245, 158, 11, 0.05);
+}
