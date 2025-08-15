@@ -74,6 +74,22 @@
   color: var(--text-muted);
 }
 
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
 .saveButton {
   padding: 0.75rem 1.5rem;
   background-color: var(--accent);

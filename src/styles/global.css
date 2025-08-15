@@ -186,26 +186,40 @@ body {
   z-index: 0;
 }
 
-/* Cyber theme scanline effect */
-.theme-cyber body::after {
+/* Cyber theme scanline effect - triggered dynamically */
+.theme-cyber .scanline-active::after {
   content: '';
   position: fixed;
-  top: -100%;
+  top: -120px;
   left: 0;
   right: 0;
-  height: 100px;
+  height: 120px;
   background: linear-gradient(180deg, 
     transparent 0%, 
-    rgba(0, 255, 65, 0.015) 50%, 
+    rgba(0, 255, 65, 0.02) 20%,
+    rgba(0, 255, 65, 0.12) 50%, 
+    rgba(0, 255, 65, 0.02) 80%,
     transparent 100%);
   pointer-events: none;
   z-index: 9999;
-  animation: scanline 12s linear infinite;
+  animation: scanlineOnce 6s ease-out;
 }
 
-@keyframes scanline {
-  0% { top: -100%; }
-  100% { top: 100%; }
+@keyframes scanlineOnce {
+  0% { 
+    top: -120px;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% { 
+    top: 100vh;
+    opacity: 0;
+  }
 }
 
 /* Cyber theme grid effect */
@@ -408,5 +422,7 @@ a:hover {
 /* Flashing cursor on hover for cyber theme */
 .theme-cyber .nav-item:hover span::after {
   content: '_';
-  animation: blink-cursor 0.5s infinite;
+  animation: blink-cursor 1s infinite;
 }
+
+

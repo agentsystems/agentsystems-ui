@@ -6,7 +6,7 @@ import styles from './Settings.module.css'
 
 export default function Settings() {
   const { token, gatewayUrl, setToken, setGatewayUrl } = useAuthStore()
-  const { theme, setTheme } = useThemeStore()
+  const { theme, scanlineEnabled, scanlineFrequency, setTheme, setScanlineEnabled, setScanlineFrequency } = useThemeStore()
   
   const [localToken, setLocalToken] = useState(token || '')
   const [localGatewayUrl, setLocalGatewayUrl] = useState(gatewayUrl)
@@ -73,14 +73,52 @@ export default function Settings() {
                 onChange={(e) => setTheme(e.target.value as any)}
                 className={styles.select}
               >
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-                <option value="cyberpunk">Cyberpunk</option>
+                <option value="dark">🌙 Dark</option>
+                <option value="light">☀️ Light</option>
+                <option value="cyber">👾 Cyber</option>
               </select>
               <span className={styles.hint}>
                 Choose your preferred color theme
               </span>
             </div>
+
+            {theme === 'cyber' && (
+              <>
+                <div className={styles.formGroup}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={scanlineEnabled}
+                      onChange={(e) => setScanlineEnabled(e.target.checked)}
+                      className={styles.checkbox}
+                    />
+                    Enable matrix scanline effect
+                  </label>
+                  <span className={styles.hint}>
+                    Adds periodic animated scanlines that move down the screen
+                  </span>
+                </div>
+
+                {scanlineEnabled && (
+                  <div className={styles.formGroup}>
+                    <label htmlFor="scanline-frequency">Scanline Frequency</label>
+                    <select
+                      id="scanline-frequency"
+                      value={scanlineFrequency}
+                      onChange={(e) => setScanlineFrequency(e.target.value as any)}
+                      className={styles.select}
+                    >
+                      <option value="30">Every ~30 seconds (frequent)</option>
+                      <option value="90">Every ~90 seconds (moderate)</option>
+                      <option value="300">Every ~5 minutes (subtle)</option>
+                    </select>
+                    <span className={styles.hint}>
+                      How often scanlines appear (with random variation)
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </Card>
 

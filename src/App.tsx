@@ -7,17 +7,29 @@ import Logs from '@pages/Logs'
 import Settings from '@pages/Settings'
 import AgentDetail from '@pages/AgentDetail'
 import { useThemeStore } from '@stores/themeStore'
+import { useScanline } from '@hooks/useScanline'
 
 function App() {
-  const { theme, initTheme } = useThemeStore()
+  const { theme, scanlineEnabled, initTheme } = useThemeStore()
+
+  // Initialize scanline timing system
+  useScanline()
 
   useEffect(() => {
     initTheme()
   }, [initTheme])
 
   useEffect(() => {
-    document.documentElement.className = `theme-${theme}`
-  }, [theme])
+    // Fallback to 'dark' if theme is not yet loaded from localStorage
+    const currentTheme = theme || 'dark'
+    const classes = [`theme-${currentTheme}`]
+    if (currentTheme === 'cyber' && scanlineEnabled) {
+      classes.push('scanline-enabled')
+    }
+    console.log('Applying theme classes:', classes.join(' '))
+    document.documentElement.className = classes.join(' ')
+  }, [theme, scanlineEnabled])
+
 
   return (
     <Routes>

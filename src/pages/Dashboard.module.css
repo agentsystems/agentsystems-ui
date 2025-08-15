@@ -71,7 +71,8 @@
   text-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
 }
 
-:global(.theme-cyber) .stat:hover .statValue::after {
+/* Cyber theme - show cursor when hovering anywhere on the card */
+:global(.theme-cyber) .stats > :hover .statValue::after {
   content: '_';
   animation: blink-cursor 1s infinite;
 }
