@@ -5,6 +5,7 @@ import {
   DocumentTextIcon, 
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline'
+import { useAudio } from '@hooks/useAudio'
 import styles from './Sidebar.module.css'
 
 const navigationSections = [
@@ -25,6 +26,8 @@ const navigationSections = [
 ]
 
 export default function Sidebar() {
+  const { playClickSound } = useAudio()
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
@@ -44,6 +47,7 @@ export default function Sidebar() {
                 className={({ isActive }) =>
                   `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
                 }
+                onClick={playClickSound}
               >
                 <item.icon className={styles.navIcon} aria-hidden="true" />
                 <span>{item.name}</span>

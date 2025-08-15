@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import ErrorMessage from '@components/ErrorMessage'
+import { useAudio } from '@hooks/useAudio'
 import styles from './Agents.module.css'
 
 export default function Agents() {
   const navigate = useNavigate()
+  const { playClickSound } = useAudio()
   
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['agents'],
@@ -69,12 +71,39 @@ export default function Agents() {
 
             <div className={styles.agentActions}>
               {agent.state === 'stopped' && (
-                <button className={styles.startBtn}>Start</button>
+                <button 
+                  className={styles.startBtn}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    playClickSound()
+                    // TODO: Implement start functionality
+                  }}
+                >
+                  Start
+                </button>
               )}
               {agent.state === 'running' && (
-                <button className={styles.stopBtn}>Stop</button>
+                <button 
+                  className={styles.stopBtn}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    playClickSound()
+                    // TODO: Implement stop functionality
+                  }}
+                >
+                  Stop
+                </button>
               )}
-              <button className={styles.invokeBtn}>Invoke</button>
+              <button 
+                className={styles.invokeBtn}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  playClickSound()
+                  navigate(`/agents/${agent.name}`)
+                }}
+              >
+                Invoke
+              </button>
             </div>
           </Card>
         ))}

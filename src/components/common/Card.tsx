@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import clsx from 'clsx'
+import { useAudio } from '@hooks/useAudio'
 import styles from './Card.module.css'
 
 interface CardProps {
@@ -15,6 +16,13 @@ export default function Card({
   variant = 'default',
   onClick 
 }: CardProps) {
+  const { playClickSound } = useAudio()
+
+  const handleClick = () => {
+    playClickSound()
+    onClick?.()
+  }
+
   return (
     <div 
       className={clsx(
@@ -23,7 +31,7 @@ export default function Card({
         onClick && styles.clickable,
         className
       )}
-      onClick={onClick}
+      onClick={onClick ? handleClick : undefined}
     >
       {children}
     </div>

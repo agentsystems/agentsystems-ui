@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuthStore } from '@stores/authStore'
 import { useThemeStore } from '@stores/themeStore'
+import { isAudioEnabled, setAudioEnabled } from '@utils/audioFx'
 import Card from '@components/common/Card'
 import styles from './Settings.module.css'
 
 export default function Settings() {
   const { token, gatewayUrl, setToken, setGatewayUrl } = useAuthStore()
   const { theme, scanlineEnabled, scanlineFrequency, setTheme, setScanlineEnabled, setScanlineFrequency } = useThemeStore()
+  const [audioEnabled, setAudioEnabledState] = useState(isAudioEnabled())
   
   const [localToken, setLocalToken] = useState(token || '')
   const [localGatewayUrl, setLocalGatewayUrl] = useState(gatewayUrl)
@@ -15,6 +17,11 @@ export default function Settings() {
     setToken(localToken)
     setGatewayUrl(localGatewayUrl)
     alert('Settings saved!')
+  }
+
+  const handleAudioToggle = (enabled: boolean) => {
+    setAudioEnabled(enabled)
+    setAudioEnabledState(enabled)
   }
 
   return (
@@ -119,6 +126,24 @@ export default function Settings() {
                 )}
               </>
             )}
+
+            <div className={styles.formGroup}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={audioEnabled}
+                  onChange={(e) => handleAudioToggle(e.target.checked)}
+                  className={styles.checkbox}
+                />
+                Enable sound effects
+              </label>
+              <span className={styles.hint}>
+                {theme === 'cyber' 
+                  ? 'Plays digital click sounds for button interactions'
+                  : 'Sound effects are currently only available in cyber theme'
+                }
+              </span>
+            </div>
           </div>
         </Card>
 
