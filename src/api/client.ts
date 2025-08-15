@@ -17,8 +17,13 @@ class ApiClient {
       (config) => {
         const { token, gatewayUrl } = useAuthStore.getState()
         
-        // Set base URL
-        config.baseURL = gatewayUrl
+        // In development, use Vite proxy to avoid CORS issues
+        if (import.meta.env.DEV) {
+          config.baseURL = '/api'
+        } else {
+          // In production, use the configured gateway URL
+          config.baseURL = gatewayUrl
+        }
         
         // Add auth header
         if (token) {
