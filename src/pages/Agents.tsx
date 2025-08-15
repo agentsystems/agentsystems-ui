@@ -2,15 +2,17 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
+import ErrorMessage from '@components/ErrorMessage'
 import styles from './Agents.module.css'
 
 export default function Agents() {
   const navigate = useNavigate()
   
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['agents'],
     queryFn: agentsApi.list,
     refetchInterval: 5000,
+    retry: 2,
   })
 
   if (isLoading) {
@@ -18,7 +20,18 @@ export default function Agents() {
   }
 
   if (error) {
-    return <div className={styles.error}>Failed to load agents</div>
+    return (
+      <div className={styles.agents}>
+        <div className={styles.header}>
+          <h1>Agents</h1>
+          <p className={styles.subtitle}>Manage and monitor your deployed agents</p>
+        </div>
+        <ErrorMessage 
+          message="Failed to load agents. Please check your connection to the AgentSystems gateway."
+          onRetry={() => refetch()}
+        />
+      </div>
+    )
   }
 
   const agents = data?.agents || []

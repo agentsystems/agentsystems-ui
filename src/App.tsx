@@ -6,6 +6,7 @@ import Agents from '@pages/Agents'
 import Logs from '@pages/Logs'
 import Settings from '@pages/Settings'
 import AgentDetail from '@pages/AgentDetail'
+import ErrorBoundary from '@components/ErrorBoundary'
 import { useThemeStore } from '@stores/themeStore'
 import { useScanline } from '@hooks/useScanline'
 
@@ -32,16 +33,18 @@ function App() {
 
 
   return (
-    <Routes>
-      <Route path="/" element={<MainLayout />}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="agents" element={<Agents />} />
-        <Route path="agents/:agentName" element={<AgentDetail />} />
-        <Route path="logs" element={<Logs />} />
-        <Route path="settings" element={<Settings />} />
-      </Route>
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="agents" element={<Agents />} />
+          <Route path="agents/:agentName" element={<AgentDetail />} />
+          <Route path="logs" element={<Logs />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+      </Routes>
+    </ErrorBoundary>
   )
 }
 
