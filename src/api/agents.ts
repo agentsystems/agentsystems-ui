@@ -1,43 +1,13 @@
 import { api } from './client'
-import type { Agent, AgentInvocation } from '@stores/agentStore'
-
-export interface AgentsResponse {
-  agents: Array<{
-    name: string
-    state: 'running' | 'stopped' | 'not-created'
-  }>
-}
-
-export interface InvokeRequest {
-  sync?: boolean
-  [key: string]: any
-}
-
-export interface InvokeResponse {
-  thread_id: string
-  status_url: string
-  result_url: string
-  result?: any
-}
-
-export interface StatusResponse {
-  state: 'pending' | 'running' | 'completed' | 'failed'
-  progress?: {
-    percent: number
-    message?: string
-    current?: string
-    steps?: Array<{
-      id: string
-      label: string
-      state: string
-    }>
-  }
-}
-
-export interface ResultResponse {
-  result?: any
-  error?: string
-}
+import type {
+  AgentsResponse,
+  AgentMetadata,
+  AgentHealth,
+  InvokeRequest,
+  InvokeResponse,
+  InvocationStatus,
+  InvocationResult,
+} from '@types/api'
 
 export const agentsApi = {
   // List all agents
@@ -45,11 +15,11 @@ export const agentsApi = {
 
   // Get agent metadata
   getMetadata: (agentName: string) => 
-    api.get(`/${agentName}/metadata`),
+    api.get<AgentMetadata>(`/${agentName}/metadata`),
 
   // Get agent health
   getHealth: (agentName: string) =>
-    api.get(`/${agentName}/health`),
+    api.get<AgentHealth>(`/${agentName}/health`),
 
   // Invoke agent
   invoke: (agentName: string, data: InvokeRequest) =>
@@ -57,11 +27,11 @@ export const agentsApi = {
 
   // Get invocation status
   getStatus: (threadId: string) =>
-    api.get<StatusResponse>(`/status/${threadId}`),
+    api.get<InvocationStatus>(`/status/${threadId}`),
 
   // Get invocation result
   getResult: (threadId: string) =>
-    api.get<ResultResponse>(`/result/${threadId}`),
+    api.get<InvocationResult>(`/result/${threadId}`),
 
   // Upload files and invoke
   uploadAndInvoke: (agentName: string, formData: FormData) =>

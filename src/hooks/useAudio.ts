@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useThemeStore } from '@stores/themeStore'
 import { playCyberClick, playUIClick, isAudioEnabled } from '@utils/audioFx'
+import type { Theme } from '@types/common'
 
 /**
  * Hook for playing theme-appropriate audio effects

@@ -57,19 +57,19 @@ export const apiClient = new ApiClient().instance
 
 // Helper functions for common requests
 export const api = {
-  get: <T = any>(url: string, params?: any) =>
+  get: <T = unknown>(url: string, params?: Record<string, unknown>) =>
     apiClient.get<T>(url, { params }).then((res) => res.data),
   
-  post: <T = any>(url: string, data?: any) =>
+  post: <T = unknown>(url: string, data?: unknown) =>
     apiClient.post<T>(url, data).then((res) => res.data),
   
-  put: <T = any>(url: string, data?: any) =>
+  put: <T = unknown>(url: string, data?: unknown) =>
     apiClient.put<T>(url, data).then((res) => res.data),
   
-  delete: <T = any>(url: string) =>
+  delete: <T = unknown>(url: string) =>
     apiClient.delete<T>(url).then((res) => res.data),
   
-  upload: <T = any>(url: string, formData: FormData) =>
+  upload: <T = unknown>(url: string, formData: FormData) =>
     apiClient.post<T>(url, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
