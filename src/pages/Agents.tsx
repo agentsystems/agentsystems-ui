@@ -40,7 +40,7 @@ export default function Agents() {
           >
             <div className={styles.agentHeader}>
               <h3 className={styles.agentName}>{agent.name}</h3>
-              <div className={`${styles.status} ${styles[agent.state]}`}>
+              <div className={`${styles.status} ${styles[agent.state === 'not-created' ? 'notcreated' : agent.state]}`}>
                 {agent.state}
               </div>
             </div>

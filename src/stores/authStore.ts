@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { config } from '@/config/runtime'
 
 interface AuthStore {
   token: string | null
@@ -11,23 +12,12 @@ interface AuthStore {
   isAuthenticated: () => boolean
 }
 
-// Get runtime config or use defaults
-const getRuntimeConfig = () => {
-  const config = (window as any).__RUNTIME_CONFIG__ || {}
-  return {
-    gatewayUrl: config.API_GATEWAY_URL || 'http://localhost:18080',
-    wsUrl: config.WS_ENDPOINT_URL || 'ws://localhost:18080',
-  }
-}
-
-const { gatewayUrl, wsUrl } = getRuntimeConfig()
-
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       token: 'demo', // Default demo token
-      gatewayUrl,
-      wsUrl,
+      gatewayUrl: config.API_GATEWAY_URL,
+      wsUrl: config.WS_ENDPOINT_URL,
       
       setToken: (token) => set({ token }),
       setGatewayUrl: (url) => set({ gatewayUrl: url }),

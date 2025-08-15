@@ -80,7 +80,7 @@
   border: 1px solid var(--warning);
 }
 
-.status['not-created'] {
+.status.notcreated {
   background-color: rgba(100, 116, 139, 0.1);
   color: var(--text-muted);
   border: 1px solid var(--text-muted);
