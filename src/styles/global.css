@@ -23,7 +23,7 @@
   --border-strong: #2a313a;
   --text: #e8ecf1;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-muted: #94a3b8;
 
   /* Accent colors - technical but warm */
   --accent: #00d9ff;
@@ -62,7 +62,7 @@
   --border-strong: #cbd5e1;
   --text: #0f172a;
   --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-muted: #64748b;
 
   /* Accent colors - vibrant but professional */
   --accent: #0891b2;
@@ -99,9 +99,9 @@
   --surface-3: #1a1a1a;
   --border: #1a3320;
   --border-strong: #254d2e;
-  --text: #a0a0a0;
-  --text-secondary: #808080;
-  --text-muted: #606060;
+  --text: #c0c0c0;
+  --text-secondary: #a0a0a0;
+  --text-muted: #b0b0b0;
 
   /* Accent colors - selective green use */
   --accent: #00ff41;
@@ -396,4 +396,17 @@ a:hover {
   content: '# ';
   color: var(--accent-3);
   opacity: 0.7;
+}
+
+/* Make everything terminal-like in cyber theme */
+.theme-cyber * {
+  font-family: var(--font-mono) !important;
+  letter-spacing: 0.5px;
+  font-weight: 500; /* Make text slightly thicker for better readability */
+}
+
+/* Flashing cursor on hover for cyber theme */
+.theme-cyber .nav-item:hover span::after {
+  content: '_';
+  animation: blink-cursor 0.5s infinite;
 }

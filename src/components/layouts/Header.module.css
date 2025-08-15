@@ -129,3 +129,25 @@
   content: ' }';
   color: var(--accent);
 }
+
+/* Cyber theme layout fixes */
+:global(.theme-cyber) .header {
+  min-height: 64px;
+  height: auto;
+  padding: 12px 24px;
+}
+
+:global(.theme-cyber) .title {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+:global(.theme-cyber) .status {
+  flex-shrink: 0;
+  padding: 6px 14px;
+}
+
+:global(.theme-cyber) .themeSelector {
+  padding: 6px 14px;
+  min-width: fit-content;
+}

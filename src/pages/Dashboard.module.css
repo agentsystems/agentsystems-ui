@@ -81,6 +81,14 @@
   50%, 100% { opacity: 0; }
 }
 
+:global(.theme-cyber) .statChange {
+  color: var(--accent-2);
+}
+
+:global(.theme-cyber) .statChange.negative {
+  color: var(--error);
+}
+
 .panels {
   display: grid;
   grid-template-columns: 2fr 1fr;

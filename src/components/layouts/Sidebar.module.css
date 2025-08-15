@@ -148,6 +148,38 @@
   opacity: 0.7;
 }
 
-:global(.theme-cyber) .navItem:hover {
+:global(.theme-cyber) .navItem:hover:not(.navItemActive) {
   color: var(--accent);
+  background: transparent !important; /* Remove grey highlighting for non-active items */
+}
+
+:global(.theme-cyber) .navItemActive {
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.1) 0%, transparent 100%) !important;
+  color: var(--accent);
+}
+
+:global(.theme-cyber) .navItemActive:hover {
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.1) 0%, transparent 100%) !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  transform: none !important;
+  /* Force exact same appearance as non-hover state */
+}
+
+:global(.theme-cyber) .navItemActive:hover::before {
+  opacity: 1 !important;
+  /* Ensure the accent bar doesn't fade */
+}
+
+/* Cyber theme logo adjustments */
+:global(.theme-cyber) .logoText {
+  font-size: 16px;
+}
+
+:global(.theme-cyber) .logoBadge {
+  font-size: 10px;
+}
+
+:global(.theme-cyber) .logoBadge::before {
+  content: 'v';
 }

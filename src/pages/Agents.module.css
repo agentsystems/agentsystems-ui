@@ -252,3 +252,9 @@
   content: '> ';
   opacity: 0.5;
 }
+
+/* Cyber theme hover cursor effects */
+:global(.theme-cyber) .agentCard:hover .agentName::after {
+  content: '_';
+  animation: blink-cursor 0.5s infinite;
+}
