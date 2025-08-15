@@ -39,16 +39,19 @@ export default function Agents() {
             className={styles.agentCard}
           >
             <div className={styles.agentHeader}>
-              <h3 className={styles.agentName}>{agent.name}</h3>
+              <div className={styles.agentInfo}>
+                <h3 className={styles.agentName}>{agent.name}</h3>
+                <div className={styles.agentImage}>
+                  {agent.name.includes('hello-world') ? 'agentsystems/hello-world-agent:latest' :
+                   agent.name.includes('template') ? 'agentsystems/agent-template:latest' :
+                   agent.name.includes('jokes') ? 'private-repository-examples/historical-events-jokes:0.1.0' :
+                   agent.name.includes('poetry') ? 'public-repository-examples/historical-events-poetry:0.1.0' :
+                   agent.name.includes('ibl') ? 'ironbirdlabs/ibl-agent-hello-there:latest' :
+                   `${agent.name}:latest`}
+                </div>
+              </div>
               <div className={`${styles.status} ${styles[agent.state === 'not-created' ? 'notcreated' : agent.state]}`}>
                 {agent.state}
-              </div>
-            </div>
-            
-            <div className={styles.agentInfo}>
-              <div className={styles.infoRow}>
-                <span className={styles.label}>Status:</span>
-                <span className={styles.value}>{agent.state}</span>
               </div>
             </div>
 

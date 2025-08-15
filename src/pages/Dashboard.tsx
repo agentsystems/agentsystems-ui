@@ -27,35 +27,39 @@ export default function Dashboard() {
       <div className={styles.stats}>
         <Card>
           <div className={styles.stat}>
-            <div className={styles.statValue}>{stats.totalAgents}</div>
             <div className={styles.statLabel}>Total Agents</div>
+            <div className={styles.statValue}>{stats.totalAgents}</div>
+            <div className={styles.statChange}>+0 from last hour</div>
           </div>
         </Card>
         
         <Card>
           <div className={styles.stat}>
+            <div className={styles.statLabel}>Running</div>
             <div className={styles.statValue} style={{ color: 'var(--success)' }}>
               {stats.runningAgents}
             </div>
-            <div className={styles.statLabel}>Running</div>
+            <div className={styles.statChange}>+{stats.runningAgents} active</div>
           </div>
         </Card>
         
         <Card>
           <div className={styles.stat}>
+            <div className={styles.statLabel}>Stopped</div>
             <div className={styles.statValue} style={{ color: 'var(--warning)' }}>
               {stats.stoppedAgents}
             </div>
-            <div className={styles.statLabel}>Stopped</div>
+            <div className={styles.statChange}>-{stats.stoppedAgents} idle</div>
           </div>
         </Card>
         
         <Card>
           <div className={styles.stat}>
+            <div className={styles.statLabel}>Not Created</div>
             <div className={styles.statValue} style={{ color: 'var(--text-muted)' }}>
               {stats.notCreated}
             </div>
-            <div className={styles.statLabel}>Not Created</div>
+            <div className={styles.statChange}>Configured but not deployed</div>
           </div>
         </Card>
       </div>
