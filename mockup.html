@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgentSystems • Mission Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Professional Theme (Default) - Exactly from v2 -->
+<style id="professional-theme">
+  /* =====================
+     PROFESSIONAL THEME
+     ===================== */
+  .theme-professional {
+    /* Core colors - more technical but inviting */
+    --bg:#0a0d11;           /* Deep space background */
+    --surface:#12161b;      /* Panel background */
+    --surface-2:#0f1318;    /* Alternate panels */
+    --surface-3:#1a1f26;    /* Hover state */
+    --border:#1e242b;       /* Subtle borders */
+    --border-strong:#2a313a; /* Stronger borders */
+    --text:#e8ecf1;         /* Primary text */
+    --text-secondary:#94a3b8; /* Secondary text */
+    --text-muted:#64748b;   /* Muted text */
+
+    /* Accent colors - technical but warm */
+    --accent:#00d9ff;       /* Electric cyan */
+    --accent-2:#3b82f6;     /* Bright blue */
+    --accent-3:#8b5cf6;     /* Purple */
+    --gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+    
+    /* Status colors */
+    --success:#10b981;      /* Green */
+    --warning:#f59e0b;      /* Amber */
+    --error:#ef4444;        /* Red */
+    --info:#06b6d4;         /* Cyan */
+
+    /* Typography */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    
+    /* Spacing */
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 14px;
+    overflow-x: hidden;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+  }
+
+  /* Grid background pattern */
+  .theme-professional body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Layout Container */
+  .app {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    background: rgba(18, 22, 27, 0.8);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+  }
+
+  .logo {
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--gradient);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+  }
+
+  .logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-badge {
+    margin-left: auto;
+    padding: 4px 8px;
+    background: rgba(0, 217, 255, 0.1);
+    color: var(--accent);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  /* Navigation */
+  .nav {
+    flex: 1;
+    padding: 16px 12px;
+    overflow-y: auto;
+  }
+
+  .nav-section {
+    margin-bottom: 24px;
+  }
+
+  .nav-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 0 12px 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-size: 14px;
+    font-family: inherit;
+  }
+
+  .nav-item:hover {
+    background: var(--surface-3);
+    color: var(--text);
+  }
+
+  .nav-item.active {
+    background: linear-gradient(90deg, rgba(0, 217, 255, 0.15) 0%, transparent 100%);
+    color: var(--accent);
+    position: relative;
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+  }
+
+  .nav-count {
+    margin-left: auto;
+    padding: 2px 6px;
+    background: var(--surface-3);
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  /* Main Content */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .header {
+    height: 64px;
+    background: rgba(18, 22, 27, 0.6);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 24px;
+  }
+
+  .header-title {
+    font-size: 20px;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+  }
+
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .btn:hover {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    border: none;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Theme Toggle */
+  .theme-toggle {
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .theme-toggle:hover {
+    background: var(--surface-3);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .theme-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Content Area */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gradient);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin-bottom: 4px;
+  }
+
+  .stat-change {
+    font-size: 12px;
+    color: var(--success);
+    font-family: var(--font-mono);
+  }
+
+  .stat-change.negative {
+    color: var(--error);
+  }
+
+  /* Section Headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  /* View Toggle */
+  .view-toggle {
+    display: flex;
+    gap: 4px;
+    padding: 2px;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .toggle-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .toggle-btn.active {
+    background: var(--surface-3);
+    color: var(--text);
+  }
+
+  /* Agent Cards */
+  .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .agent-card:hover {
+    background: var(--surface-3);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 217, 255, 0.1);
+  }
+
+  .agent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 16px;
+  }
+
+  .agent-info {
+    flex: 1;
+  }
+
+  .agent-name {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .agent-image {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .agent-status {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-running {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+  .status-stopped {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .agent-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .metric {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .metric-value {
+    font-size: 18px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  .metric-bar {
+    margin-top: 6px;
+    height: 3px;
+    background: var(--surface-3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .metric-bar-fill {
+    height: 100%;
+    background: var(--gradient);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .agent-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .agent-action {
+    flex: 1;
+    padding: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .agent-action:hover {
+    background: rgba(0, 217, 255, 0.1);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Activity Feed */
+  .activity-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .activity-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .activity-live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--error);
+  }
+
+  .activity-live-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--error);
+    border-radius: 50%;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .activity-feed {
+    flex: 1;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(30, 36, 43, 0.5);
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .activity-time {
+    color: var(--text-muted);
+    min-width: 60px;
+  }
+
+  .activity-agent {
+    color: var(--accent);
+    min-width: 120px;
+  }
+
+  .activity-message {
+    flex: 1;
+    color: var(--text-secondary);
+  }
+
+  .activity-type-success {
+    color: var(--success);
+  }
+
+  .activity-type-error {
+    color: var(--error);
+  }
+
+  /* Execution Monitor */
+  .monitor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .monitor-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+  }
+
+  .monitor-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .monitor-chart {
+    height: 200px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chart-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px);
+  }
+
+  .chart-bars {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 10px;
+    gap: 2px;
+  }
+
+  .chart-bar {
+    flex: 1;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    border-radius: 2px 2px 0 0;
+    min-height: 4px;
+    transition: height 0.3s ease;
+  }
+
+  /* Search */
+  .search-box {
+    position: relative;
+    width: 300px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+  }
+
+  .search-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  /* Quick Command */
+  .quick-command {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(18, 22, 27, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+  }
+
+  .command-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .command-shortcut {
+    padding: 4px 8px;
+    background: var(--surface-3);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+  }
+</style>
+
+<!-- Cyberpunk Theme - Green hacker aesthetic -->
+<style id="cyberpunk-theme">
+  /* =====================
+     CYBERPUNK THEME
+     ===================== */
+  .theme-cyberpunk {
+    /* Core colors - subtle terminal aesthetic */
+    --bg:#0a0a0a;           /* Very dark background */
+    --surface:#0f0f0f;      /* Dark panels */
+    --surface-2:#141414;    /* Slightly lighter */
+    --surface-3:#1a1a1a;    /* Hover state */
+    --border:#1a3320;       /* Dark green borders */
+    --border-strong:#254d2e; /* Slightly brighter */
+    --text:#a0a0a0;         /* Light gray text (not green) */
+    --text-secondary:#808080; /* Medium gray */
+    --text-muted:#606060;   /* Muted gray */
+
+    /* Accent colors - selective green use */
+    --accent:#00ff41;       /* Bright green for key elements */
+    --accent-2:#00cc33;     /* Darker green */
+    --accent-3:#009922;     /* Even darker */
+    --gradient: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+    
+    /* Status colors */
+    --success:#00ff41;      /* Green */
+    --warning:#ffcc00;      /* Yellow */
+    --error:#ff0033;        /* Red */
+    --info:#00ffff;         /* Cyan */
+
+    /* Typography - all monospace */
+    --font-sans: 'JetBrains Mono', 'Courier New', monospace;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    
+    /* Spacing - more blocky */
+    --radius: 0px;
+    --radius-lg: 0px;
+  }
+
+  /* Scanline effect - more subtle */
+  .theme-cyberpunk body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(180deg, 
+      transparent 0%, 
+      rgba(0, 255, 65, 0.015) 50%, 
+      transparent 100%);
+    pointer-events: none;
+    z-index: 9999;
+    animation: scanline 12s linear infinite;
+  }
+
+  @keyframes scanline {
+    0% { top: -100%; }
+    100% { top: 100%; }
+  }
+
+  /* Terminal grid effect - much more subtle */
+  .theme-cyberpunk body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0, 255, 65, 0.01) 1px, rgba(0, 255, 65, 0.01) 2px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glitch effect */
+  @keyframes glitch {
+    0%, 100% { 
+      text-shadow: 
+        2px 0 0 rgba(0, 255, 65, 0.75),
+        -2px 0 0 rgba(0, 255, 65, 0.75);
+    }
+    25% {
+      text-shadow: 
+        -2px 0 0 rgba(0, 255, 65, 0.75),
+        2px 0 0 rgba(0, 255, 65, 0.75);
+    }
+    50% {
+      text-shadow: 
+        2px 0 0 rgba(0, 255, 65, 0.75),
+        -2px 0 0 rgba(0, 255, 65, 0.75);
+    }
+  }
+
+  .theme-cyberpunk .logo-icon {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    text-shadow: none;
+  }
+
+  .theme-cyberpunk .logo-icon:hover {
+    animation: glitch 0.3s;
+  }
+
+  .theme-cyberpunk .logo-text::before {
+    content: '> ';
+    color: var(--accent);
+  }
+
+  .theme-cyberpunk .nav-title::before {
+    content: '// ';
+    color: var(--accent-3);
+    opacity: 0.6;
+  }
+
+  .theme-cyberpunk .nav-item:hover {
+    color: var(--accent);
+  }
+
+  .theme-cyberpunk .nav-item:hover::before {
+    content: '> ';
+    position: absolute;
+    left: -8px;
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  .theme-cyberpunk .header-title::before {
+    content: '[';
+    color: var(--accent);
+    margin-right: 4px;
+  }
+
+  .theme-cyberpunk .header-title::after {
+    content: ']';
+    color: var(--accent);
+    margin-left: 4px;
+  }
+
+  .theme-cyberpunk .header-status::before {
+    content: '{ ';
+    color: var(--accent);
+  }
+
+  .theme-cyberpunk .header-status::after {
+    content: ' }';
+    color: var(--accent);
+  }
+
+  .theme-cyberpunk .btn {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-secondary);
+    padding: 8px 20px;
+    min-width: fit-content;
+  }
+
+  .theme-cyberpunk .btn:hover {
+    background: var(--surface-3);
+    border-color: var(--accent-3);
+    color: var(--accent);
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+  }
+
+  .theme-cyberpunk .btn-primary {
+    background: var(--accent);
+    color: black;
+    font-weight: 700;
+    padding: 8px 20px;
+  }
+
+  .theme-cyberpunk .stat-label::before {
+    content: '$ ';
+  }
+
+  .theme-cyberpunk .stat-value {
+    color: var(--accent);
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
+  }
+
+  .theme-cyberpunk .stat-card:hover .stat-value::after {
+    content: '_';
+    animation: blink-cursor 1s infinite;
+  }
+
+  @keyframes blink-cursor {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  .theme-cyberpunk .section-title::before {
+    content: '# ';
+    color: var(--accent-3);
+    opacity: 0.7;
+  }
+
+  .theme-cyberpunk .agent-name {
+    color: var(--accent);
+  }
+
+  .theme-cyberpunk .agent-name::before {
+    content: '@';
+    color: var(--accent-3);
+    opacity: 0.7;
+  }
+
+  .theme-cyberpunk .agent-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .theme-cyberpunk .agent-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+  }
+
+  .theme-cyberpunk .status-running {
+    background: rgba(0, 255, 65, 0.1);
+    color: var(--accent);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+  }
+
+  .theme-cyberpunk .status-running::before {
+    content: '[ACTIVE] ';
+  }
+
+  .theme-cyberpunk .status-stopped {
+    background: rgba(255, 204, 0, 0.1);
+    color: var(--warning);
+    border: 1px solid rgba(255, 204, 0, 0.2);
+  }
+
+  .theme-cyberpunk .status-stopped::before {
+    content: '[IDLE] ';
+  }
+
+  .theme-cyberpunk .agent-action {
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+
+  .theme-cyberpunk .agent-action:hover {
+    color: var(--accent);
+    border-color: var(--accent-3);
+    background: var(--surface-3);
+  }
+
+  .theme-cyberpunk .agent-action::before {
+    content: '> ';
+    opacity: 0.5;
+  }
+
+  .theme-cyberpunk .activity-item::before {
+    content: '> ';
+    color: var(--accent-3);
+    opacity: 0.5;
+  }
+
+  .theme-cyberpunk .activity-time {
+    font-family: var(--font-mono);
+  }
+
+  .theme-cyberpunk .activity-time {
+    color: var(--text-muted);
+  }
+
+  .theme-cyberpunk .activity-time::after {
+    content: ' |';
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+
+  .theme-cyberpunk .activity-agent {
+    color: var(--accent);
+  }
+
+  .theme-cyberpunk .activity-message {
+    color: var(--text-secondary);
+  }
+
+  .theme-cyberpunk .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+  }
+
+  .theme-cyberpunk .search-input:focus {
+    border-color: var(--accent-3);
+    box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.1);
+  }
+
+  .theme-cyberpunk .search-input::placeholder {
+    content: 'grep -r ""';
+    color: var(--text-muted);
+  }
+
+  .theme-cyberpunk .command-label::before {
+    content: '$ ';
+    color: var(--accent-3);
+  }
+
+  /* Make everything more terminal-like */
+  .theme-cyberpunk * {
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.5px;
+  }
+
+  /* Keep key navigation elements visible */
+  .theme-cyberpunk .nav-item.active {
+    background: linear-gradient(90deg, rgba(0, 255, 65, 0.1) 0%, transparent 100%);
+    color: var(--accent);
+  }
+
+  .theme-cyberpunk .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .theme-cyberpunk .stat-card:hover {
+    border-color: var(--border-strong);
+  }
+
+  .theme-cyberpunk .stat-label {
+    color: var(--text-muted);
+  }
+
+  .theme-cyberpunk .stat-change {
+    color: var(--accent-2);
+  }
+
+  .theme-cyberpunk .stat-change.negative {
+    color: var(--error);
+  }
+
+  .theme-cyberpunk .metric-bar {
+    background: var(--surface-3);
+  }
+
+  .theme-cyberpunk .metric-bar-fill {
+    background: linear-gradient(90deg, var(--accent-3) 0%, var(--accent-2) 100%);
+    box-shadow: none;
+  }
+
+  .theme-cyberpunk .chart-bar {
+    background: linear-gradient(180deg, var(--accent-2) 0%, var(--accent-3) 100%);
+    box-shadow: none;
+  }
+
+  /* Flashing cursor on hover */
+  .theme-cyberpunk .nav-item:hover span::after,
+  .theme-cyberpunk .agent-card:hover .agent-name::after {
+    content: '_';
+    animation: blink-cursor 0.5s infinite;
+  }
+
+  /* Terminal boot text */
+  .theme-cyberpunk .logo-badge::before {
+    content: 'v';
+  }
+
+  /* Fix Cyberpunk mode layout issues */
+  .theme-cyberpunk .header {
+    min-height: 64px;
+    height: auto;
+    padding: 12px 24px;
+  }
+
+  .theme-cyberpunk .header-title {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .theme-cyberpunk .header-status {
+    flex-shrink: 0;
+    padding: 6px 14px;
+  }
+
+  .theme-cyberpunk .theme-toggle {
+    padding: 6px 14px;
+    min-width: fit-content;
+  }
+
+  .theme-cyberpunk .logo-text {
+    font-size: 16px;
+  }
+
+  .theme-cyberpunk .logo-badge {
+    font-size: 10px;
+  }
+</style>
+
+</head>
+<body class="theme-professional">
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">AS</div>
+        <div class="logo-text">AgentSystems</div>
+        <div class="logo-badge">0.3.3</div>
+      </div>
+      
+      <nav class="nav">
+        <div class="nav-section">
+          <div class="nav-title">Main</div>
+          <button class="nav-item active">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            <span>Mission Control</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+            </svg>
+            <span>Agents</span>
+            <span class="nav-count">12</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <span>Executions</span>
+            <span class="nav-count">47</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+            </svg>
+            <span>Artifacts</span>
+          </button>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-title">Platform</div>
+          <button class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+            </svg>
+            <span>Registries</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Monitoring</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Settings</span>
+          </button>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Header -->
+      <header class="header">
+        <h1 class="header-title">Mission Control</h1>
+        
+        <div class="header-status">
+          <div class="status-dot"></div>
+          <span>System Operational</span>
+        </div>
+
+        <div class="search-box">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" class="search-input" placeholder="Search agents, executions...">
+        </div>
+
+        <div class="header-actions">
+          <button class="theme-toggle" id="theme-toggle">
+            <svg class="theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+            <span id="theme-label">Cyber</span>
+          </button>
+          <button class="btn">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Refresh</span>
+          </button>
+          <button class="btn btn-primary">+ Deploy Agent</button>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Active Agents</div>
+            <div class="stat-value">12</div>
+            <div class="stat-change">↑ 3 from yesterday</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Executions</div>
+            <div class="stat-value">3,847</div>
+            <div class="stat-change">↑ 18.2% this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Success Rate</div>
+            <div class="stat-value">99.4%</div>
+            <div class="stat-change">↑ 0.2% improvement</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg Response</div>
+            <div class="stat-value">247ms</div>
+            <div class="stat-change negative">↓ 12ms faster</div>
+          </div>
+        </div>
+
+        <!-- Agent Fleet -->
+        <div class="section-header">
+          <h2 class="section-title">Agent Fleet</h2>
+          <div class="view-toggle">
+            <button class="toggle-btn active">Grid</button>
+            <button class="toggle-btn">List</button>
+            <button class="toggle-btn">Graph</button>
+          </div>
+        </div>
+
+        <div class="agents-grid">
+          <!-- Agent Card 1 -->
+          <div class="agent-card">
+            <div class="agent-header">
+              <div class="agent-info">
+                <div class="agent-name">assistant-agent</div>
+                <div class="agent-image">ghcr.io/agentsystems/v1.2.3</div>
+              </div>
+              <div class="agent-status status-running">Running</div>
+            </div>
+            <div class="agent-metrics">
+              <div class="metric">
+                <div class="metric-label">CPU Usage</div>
+                <div class="metric-value">24%</div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: 24%"></div>
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Memory</div>
+                <div class="metric-value">256MB</div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: 50%"></div>
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Requests/min</div>
+                <div class="metric-value">142</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Uptime</div>
+                <div class="metric-value">3d 14h</div>
+              </div>
+            </div>
+            <div class="agent-actions">
+              <button class="agent-action">Execute</button>
+              <button class="agent-action">Logs</button>
+              <button class="agent-action">Details</button>
+            </div>
+          </div>
+
+          <!-- Agent Card 2 -->
+          <div class="agent-card">
+            <div class="agent-header">
+              <div class="agent-info">
+                <div class="agent-name">research-agent</div>
+                <div class="agent-image">docker.io/agents/latest</div>
+              </div>
+              <div class="agent-status status-running">Running</div>
+            </div>
+            <div class="agent-metrics">
+              <div class="metric">
+                <div class="metric-label">CPU Usage</div>
+                <div class="metric-value">67%</div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: 67%"></div>
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Memory</div>
+                <div class="metric-value">512MB</div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: 75%"></div>
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Requests/min</div>
+                <div class="metric-value">89</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Uptime</div>
+                <div class="metric-value">18h 22m</div>
+              </div>
+            </div>
+            <div class="agent-actions">
+              <button class="agent-action">Execute</button>
+              <button class="agent-action">Logs</button>
+              <button class="agent-action">Details</button>
+            </div>
+          </div>
+
+          <!-- Agent Card 3 -->
+          <div class="agent-card">
+            <div class="agent-header">
+              <div class="agent-info">
+                <div class="agent-name">code-analyzer</div>
+                <div class="agent-image">ghcr.io/agentsystems/v2.0.1</div>
+              </div>
+              <div class="agent-status status-stopped">Stopped</div>
+            </div>
+            <div class="agent-metrics">
+              <div class="metric">
+                <div class="metric-label">CPU Usage</div>
+                <div class="metric-value">—</div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: 0%"></div>
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Memory</div>
+                <div class="metric-value">—</div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: 0%"></div>
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Last Active</div>
+                <div class="metric-value">2h ago</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Total Runs</div>
+                <div class="metric-value">1,247</div>
+              </div>
+            </div>
+            <div class="agent-actions">
+              <button class="agent-action">Start</button>
+              <button class="agent-action">Logs</button>
+              <button class="agent-action">Details</button>
+            </div>
+          </div>
+
+          <!-- Agent Card 4 -->
+          <div class="agent-card">
+            <div class="agent-header">
+              <div class="agent-info">
+                <div class="agent-name">data-processor</div>
+                <div class="agent-image">ecr.aws/team/v3.1.0</div>
+              </div>
+              <div class="agent-status status-running">Running</div>
+            </div>
+            <div class="agent-metrics">
+              <div class="metric">
+                <div class="metric-label">CPU Usage</div>
+                <div class="metric-value">89%</div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: 89%"></div>
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Memory</div>
+                <div class="metric-value">768MB</div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: 95%"></div>
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Requests/min</div>
+                <div class="metric-value">523</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Uptime</div>
+                <div class="metric-value">7d 3h</div>
+              </div>
+            </div>
+            <div class="agent-actions">
+              <button class="agent-action">Execute</button>
+              <button class="agent-action">Logs</button>
+              <button class="agent-action">Details</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monitoring Section -->
+        <div class="monitor-grid">
+          <!-- Activity Feed -->
+          <div class="activity-panel">
+            <div class="activity-header">
+              <h3 style="font-size: 14px; font-weight: 600;">Live Activity</h3>
+              <div class="activity-live">
+                <div class="activity-live-dot"></div>
+                <span>LIVE</span>
+              </div>
+            </div>
+            <div class="activity-feed" id="activity-feed">
+              <!-- Activity items will be added here by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Execution Chart -->
+          <div class="monitor-panel">
+            <div class="monitor-title">
+              <span>Execution Rate</span>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">Last 60 seconds</span>
+            </div>
+            <div class="monitor-chart">
+              <div class="chart-grid"></div>
+              <div class="chart-bars" id="chart-bars">
+                <!-- Chart bars will be added here by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Quick Command Palette -->
+  <div class="quick-command">
+    <span class="command-label">Quick Command</span>
+    <span class="command-shortcut">⌘K</span>
+    <span style="color: var(--text-muted); font-size: 12px;">or</span>
+    <span class="command-shortcut">Ctrl+K</span>
+  </div>
+
+  <script>
+    // Theme Management
+    let currentTheme = localStorage.getItem('theme') || 'professional';
+    
+    function setTheme(theme) {
+      document.body.className = `theme-${theme}`;
+      currentTheme = theme;
+      localStorage.setItem('theme', theme);
+      
+      // Update theme toggle label - inverted to show what you'll switch TO
+      const label = document.getElementById('theme-label');
+      label.textContent = theme === 'professional' ? 'Cyber' : 'Pro';
+      
+      // Update search placeholder based on theme
+      const searchInput = document.querySelector('.search-input');
+      if (theme === 'cyberpunk') {
+        searchInput.placeholder = 'grep -r "agent" ./';
+      } else {
+        searchInput.placeholder = 'Search agents, executions...';
+      }
+    }
+    
+    // Initialize theme
+    setTheme(currentTheme);
+    
+    // Theme toggle
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const newTheme = currentTheme === 'professional' ? 'cyberpunk' : 'professional';
+      setTheme(newTheme);
+    });
+
+    // Activity Feed Simulation
+    const activityMessages = {
+      professional: [
+        { agent: 'assistant-agent', message: 'Completed text generation task', type: 'success' },
+        { agent: 'research-agent', message: 'Starting web search query', type: 'info' },
+        { agent: 'code-analyzer', message: 'Code review completed', type: 'success' },
+        { agent: 'data-processor', message: 'Processing batch #4821', type: 'info' },
+        { agent: 'assistant-agent', message: 'Token limit reached, scaling...', type: 'warning' },
+        { agent: 'research-agent', message: 'Retrieved 15 documents', type: 'success' },
+        { agent: 'code-analyzer', message: 'Memory cleanup initiated', type: 'info' },
+        { agent: 'data-processor', message: 'Pipeline stage 3/5 complete', type: 'success' },
+      ],
+      cyberpunk: [
+        { agent: 'assistant-agent', message: '[SUCCESS] text_gen_4821 completed', type: 'success' },
+        { agent: 'research-agent', message: '[INIT] web_scrape operation started', type: 'info' },
+        { agent: 'code-analyzer', message: '[OK] 0 vulnerabilities found', type: 'success' },
+        { agent: 'data-processor', message: '[PROC] batch_4821 processing...', type: 'info' },
+        { agent: 'assistant-agent', message: '[WARN] token limit reached', type: 'warning' },
+        { agent: 'research-agent', message: '[DATA] 15 documents retrieved', type: 'success' },
+        { agent: 'code-analyzer', message: '[GC] memory cleanup initiated', type: 'info' },
+        { agent: 'data-processor', message: '[STAGE] pipeline 3/5 complete', type: 'success' },
+      ]
+    };
+
+    function addActivityItem() {
+      const feed = document.getElementById('activity-feed');
+      const messages = activityMessages[currentTheme] || activityMessages.professional;
+      const item = messages[Math.floor(Math.random() * messages.length)];
+      const time = new Date().toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      });
+      
+      const div = document.createElement('div');
+      div.className = 'activity-item';
+      
+      if (currentTheme === 'cyberpunk') {
+        const ms = String(Date.now()).slice(-3);
+        div.innerHTML = `
+          <span class="activity-time">${time}.${ms}</span>
+          <span class="activity-agent">${item.agent}</span>
+          <span class="activity-message ${item.type === 'success' ? 'activity-type-success' : item.type === 'error' ? 'activity-type-error' : ''}">${item.message}</span>
+        `;
+      } else {
+        div.innerHTML = `
+          <span class="activity-time">${time}</span>
+          <span class="activity-agent">${item.agent}</span>
+          <span class="activity-message ${item.type === 'success' ? 'activity-type-success' : item.type === 'error' ? 'activity-type-error' : ''}">${item.message}</span>
+        `;
+      }
+      
+      feed.insertBefore(div, feed.firstChild);
+      
+      // Keep only last 20 items
+      while (feed.children.length > 20) {
+        feed.removeChild(feed.lastChild);
+      }
+    }
+
+    // Initialize activity feed
+    for (let i = 0; i < 5; i++) {
+      addActivityItem();
+    }
+
+    // Add new activity every 2-4 seconds
+    setInterval(addActivityItem, 2000 + Math.random() * 2000);
+
+    // Chart Animation
+    function initChart() {
+      const chartBars = document.getElementById('chart-bars');
+      for (let i = 0; i < 30; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'chart-bar';
+        bar.style.height = `${20 + Math.random() * 60}%`;
+        chartBars.appendChild(bar);
+      }
+    }
+
+    function animateChart() {
+      const bars = document.querySelectorAll('.chart-bar');
+      bars.forEach(bar => {
+        const currentHeight = parseFloat(bar.style.height);
+        const change = (Math.random() - 0.5) * 20;
+        const newHeight = Math.max(10, Math.min(90, currentHeight + change));
+        bar.style.height = `${newHeight}%`;
+      });
+    }
+
+    initChart();
+    setInterval(animateChart, 1000);
+
+    // View Toggle
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+      });
+    });
+
+    // Random glitch effect for cyberpunk theme
+    setInterval(() => {
+      if (currentTheme === 'cyberpunk' && Math.random() > 0.98) {
+        const elements = document.querySelectorAll('.agent-name, .stat-value');
+        const el = elements[Math.floor(Math.random() * elements.length)];
+        el.style.animation = 'glitch 0.1s';
+        setTimeout(() => {
+          el.style.animation = '';
+        }, 100);
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
