@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuthStore } from '@stores/authStore'
 import { useThemeStore } from '@stores/themeStore'
 import { isAudioEnabled, setAudioEnabled } from '@utils/audioFx'
@@ -139,7 +139,7 @@ export default function Settings() {
                 id="theme"
                 value={theme}
                 onChange={(e) => {
-                  setTheme(e.target.value as any)
+                  setTheme(e.target.value as 'dark' | 'light' | 'cyber')
                   e.target.blur() // Remove focus after selection
                 }}
                 className={styles.select}
@@ -177,7 +177,7 @@ export default function Settings() {
                       id="scanline-frequency"
                       value={scanlineFrequency}
                       onChange={(e) => {
-                        setScanlineFrequency(e.target.value as any)
+                        setScanlineFrequency(e.target.value as '30' | '90' | '300')
                         e.target.blur() // Remove focus after selection
                       }}
                       className={styles.select}

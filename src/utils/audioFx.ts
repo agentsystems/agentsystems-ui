@@ -17,7 +17,7 @@ const VOLUME_KEY = "audio-volume"
 const getAudioContext = (): MaybeCtx => {
   if (audioContext) return audioContext
   try {
-    const Ctx = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext
+    const Ctx = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext) as typeof AudioContext
     audioContext = new Ctx()
     
     limiter = audioContext.createDynamicsCompressor()
@@ -43,7 +43,11 @@ const getAudioContext = (): MaybeCtx => {
 
 const resumeIfSuspended = async (ctx: AudioContext) => {
   if (ctx.state === "suspended") {
-    try { await ctx.resume() } catch {}
+    try { 
+      await ctx.resume() 
+    } catch (error) {
+      console.warn('Failed to resume audio context:', error)
+    }
   }
 }
 
@@ -163,8 +167,7 @@ export const playUIClick = (): void => {
   if (!ctx || !limiter) return
 
   if (ctx.state === 'suspended') {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ctx.resume()
+    void ctx.resume()
   }
 
   const t0 = ctx.currentTime

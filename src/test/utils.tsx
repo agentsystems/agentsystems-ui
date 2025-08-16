@@ -33,10 +33,9 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 export const renderWithProviders = (
   ui: ReactElement,
   {
-    initialEntries = ['/'],
     queryClient = createTestQueryClient(),
     ...renderOptions
-  }: CustomRenderOptions = {}
+  }: Omit<CustomRenderOptions, 'initialEntries'> = {}
 ) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
@@ -109,5 +108,13 @@ export const mockApiResponses = {
 }
 
 // Re-export testing library functions for convenience
-export * from '@testing-library/react'
+export { 
+  render, 
+  screen, 
+  waitFor, 
+  fireEvent, 
+  cleanup,
+  renderHook,
+  act 
+} from '@testing-library/react'
 export { default as userEvent } from '@testing-library/user-event'

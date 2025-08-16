@@ -15,7 +15,7 @@ const getConfig = (): RuntimeConfig => {
   }
 
   // In production, use runtime-injected config from window
-  const runtimeConfig = (window as any).__RUNTIME_CONFIG__
+  const runtimeConfig = (window as unknown as { __RUNTIME_CONFIG__?: RuntimeConfig }).__RUNTIME_CONFIG__
   if (runtimeConfig) {
     return {
       API_GATEWAY_URL: runtimeConfig.API_GATEWAY_URL || 'http://localhost:18080',
