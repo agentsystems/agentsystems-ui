@@ -5,6 +5,7 @@ import { isAudioEnabled, setAudioEnabled } from '@utils/audioFx'
 import { useAudio } from '@hooks/useAudio'
 import { useToast } from '@hooks/useToast'
 import { validateSettings } from '@utils/validation'
+import { sanitizeUrl, sanitizeToken, rateLimiter } from '@utils/security'
 import { APP_VERSION } from '@constants/app'
 import Card from '@components/common/Card'
 import Toast from '@components/Toast'
@@ -24,8 +25,30 @@ export default function Settings() {
   const handleSave = () => {
     playClickSound()
     
+    // Rate limiting to prevent spam
+    if (!rateLimiter.isAllowed('settings-save', 5, 60000)) {
+      showError('Too many save attempts. Please wait a moment before trying again.')
+      return
+    }
+    
+    // Sanitize inputs before validation
+    const sanitizedUrl = sanitizeUrl(localGatewayUrl)
+    const sanitizedToken = sanitizeToken(localToken)
+    
+    if (sanitizedUrl !== localGatewayUrl) {
+      showError('Gateway URL contains invalid characters and was cleaned.')
+      setLocalGatewayUrl(sanitizedUrl)
+      return
+    }
+    
+    if (sanitizedToken !== localToken) {
+      showError('Auth token contains invalid characters and was cleaned.')
+      setLocalToken(sanitizedToken)
+      return
+    }
+    
     // Validate form
-    const validation = validateSettings(localGatewayUrl, localToken)
+    const validation = validateSettings(sanitizedUrl, sanitizedToken)
     
     if (!validation.isValid) {
       setErrors(validation.errors)
@@ -37,8 +60,8 @@ export default function Settings() {
     setErrors({})
     
     try {
-      setToken(localToken)
-      setGatewayUrl(localGatewayUrl)
+      setToken(sanitizedToken)
+      setGatewayUrl(sanitizedUrl)
       showSuccess('Settings saved successfully!')
     } catch (error) {
       showError('Failed to save settings. Please try again.')

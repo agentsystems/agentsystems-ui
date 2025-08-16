@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios'
 import { useAuthStore } from '@stores/authStore'
 import { API_DEFAULTS } from '@constants/app'
+import { getSecurityHeaders } from '@utils/security'
 
 /**
  * HTTP client for AgentSystems API with automatic authentication and error handling
@@ -23,6 +24,7 @@ class ApiClient {
       timeout: API_DEFAULTS.TIMEOUT,
       headers: {
         'Content-Type': 'application/json',
+        ...getSecurityHeaders(),
       },
     })
 

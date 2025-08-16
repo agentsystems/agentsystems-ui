@@ -64,4 +64,4 @@ global.IntersectionObserver = class IntersectionObserver {
   disconnect() { return null }
   unobserve() { return null }
   takeRecords() { return [] }
-} as any
+} as unknown as typeof IntersectionObserver
