@@ -20,7 +20,7 @@ export default function AgentDetail() {
   })
 
   const invokeMutation = useMutation({
-    mutationFn: (payload: any) => agentsApi.invoke(agentName!, payload),
+    mutationFn: (payload: Record<string, unknown>) => agentsApi.invoke(agentName!, payload),
     onSuccess: async (response) => {
       // Poll for status
       const pollStatus = async () => {
@@ -41,8 +41,8 @@ export default function AgentDetail() {
     try {
       const payload = JSON.parse(invokePayload)
       invokeMutation.mutate(payload)
-    } catch (e) {
-      console.error('Invalid JSON payload')
+    } catch (error) {
+      console.error('Invalid JSON payload:', error)
     }
   }
 

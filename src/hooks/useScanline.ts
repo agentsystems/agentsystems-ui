@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useThemeStore, type ScanlineFrequency } from '@stores/themeStore'
+import { useThemeStore } from '@stores/themeStore'
 
 const getRandomizedInterval = (baseSeconds: number): number => {
   // Add ±20% randomization to the base interval

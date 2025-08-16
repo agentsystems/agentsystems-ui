@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Card from '@components/common/Card'
 import styles from './Logs.module.css'
 
@@ -11,7 +11,7 @@ const mockLogs = [
 ]
 
 export default function Logs() {
-  const [logs, setLogs] = useState(mockLogs)
+  const [logs] = useState(mockLogs)
   const [filter, setFilter] = useState('')
   const [levelFilter, setLevelFilter] = useState('all')
 
