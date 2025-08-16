@@ -186,7 +186,7 @@ export default function Agents() {
             <div className={styles.agentHeader}>
               <div className={styles.agentInfo}>
                 <h3 className={styles.agentName} title={agent.name}>
-                  {agent.name.length > 20 ? `${agent.name.substring(0, 20)}...` : agent.name}
+                  {agent.name.length > 18 ? `${agent.name.substring(0, 18)}...` : agent.name}
                 </h3>
                 <div className={styles.agentVersion}>
                   {getAgentVersion(agent.name)}
