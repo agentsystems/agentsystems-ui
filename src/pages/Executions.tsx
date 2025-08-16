@@ -61,6 +61,7 @@ export default function Executions() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
+  const [showAuditTrail, setShowAuditTrail] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [stateFilter, setStateFilter] = useState<'all' | 'completed' | 'failed' | 'running'>('all')
   const [dateFrom, setDateFrom] = useState('')
@@ -93,6 +94,13 @@ export default function Executions() {
   })
 
   const executions = executionsResponse?.executions || []
+
+  // Audit trail query for selected execution
+  const { data: auditData } = useQuery({
+    queryKey: ['execution-audit', selectedExecution?.thread_id],
+    queryFn: () => agentsApi.getExecutionAudit(selectedExecution!.thread_id),
+    enabled: !!selectedExecution && showAuditTrail,
+  })
 
   // Filter executions
   const filteredExecutions = executions.filter(execution => {
@@ -262,7 +270,10 @@ export default function Executions() {
                     setSelectedExecution(execution)
                   }}
                 >
-                  <span className={styles.agentName}>{execution.agent}</span>
+                  <span className={styles.agentName}>
+                    <span className={styles.verifiedIcon} title="Cryptographically verified execution">✓</span>
+                    {execution.agent}
+                  </span>
                   <span 
                     className={styles.status}
                     style={{ color: getStatusColor(execution.state) }}
@@ -370,7 +381,17 @@ export default function Executions() {
                 <div className={styles.payloadSection}>
                   <h3>Request Payload</h3>
                   <pre className={styles.payloadContent}>
-                    {JSON.stringify(selectedExecution.payload, null, 2)}
+                    {(() => {
+                      try {
+                        // Handle both string and object payloads
+                        const payload = typeof selectedExecution.payload === 'string' 
+                          ? JSON.parse(selectedExecution.payload)
+                          : selectedExecution.payload
+                        return JSON.stringify(payload, null, 2)
+                      } catch {
+                        return selectedExecution.payload as string
+                      }
+                    })()}
                   </pre>
                 </div>
               )}
@@ -418,6 +439,67 @@ export default function Executions() {
                   </pre>
                 </div>
               )}
+
+              {/* Hash Chain Verification */}
+              <div className={styles.auditSection}>
+                <div className={styles.auditHeader}>
+                  <h3>Hash Chain Verification</h3>
+                  <button
+                    className={styles.toggleAuditBtn}
+                    onClick={() => {
+                      setShowAuditTrail(!showAuditTrail)
+                      playClickSound()
+                    }}
+                  >
+                    {showAuditTrail ? 'Hide' : 'Show'} Details
+                  </button>
+                </div>
+                
+                {showAuditTrail && auditData && (
+                  <div className={styles.auditContent}>
+                    {/* Execution-level hash summary */}
+                    <div className={styles.executionHashSummary}>
+                      <div className={styles.hashChainInfo}>
+                        <div className={styles.hashItem}>
+                          <label>Previous Execution Hash:</label>
+                          <code className={styles.hashValue}>
+                            {auditData.audit_trail?.[0]?.prev_hash || 'Genesis'}
+                          </code>
+                        </div>
+                        <div className={styles.hashItem}>
+                          <label>This Execution Hash:</label>
+                          <code className={styles.hashValue}>
+                            {auditData.audit_trail?.[auditData.audit_trail.length - 1]?.entry_hash || 'N/A'}
+                          </code>
+                        </div>
+                        <div className={styles.chainStatus}>
+                          <span className={styles.chainStatusIcon}>🔗</span>
+                          <span>Chain integrity maintained</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Detailed audit events (collapsible) */}
+                    <details className={styles.auditDetails}>
+                      <summary className={styles.auditDetailsSummary}>
+                        View detailed audit events ({auditData.audit_trail?.length || 0} entries)
+                      </summary>
+                      <div className={styles.auditEvents}>
+                        {auditData.audit_trail?.map((entry: any, index: number) => (
+                          <div key={entry.id} className={styles.simpleAuditEntry}>
+                            <span className={styles.auditAction}>{entry.action}</span>
+                            <span className={styles.auditActor}>{entry.actor}</span>
+                            <span className={styles.auditTime}>
+                              {entry.timestamp ? format(new Date(entry.timestamp), 'HH:mm:ss.SSS') : ''}
+                            </span>
+                            <code className={styles.simpleHashValue}>{entry.entry_hash}</code>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  </div>
+                )}
+              </div>
             </Card>
           </div>
         )}

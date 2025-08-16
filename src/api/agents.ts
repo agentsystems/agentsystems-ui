@@ -107,4 +107,12 @@ export const agentsApi = {
     agent?: string
     state?: string
   }) => api.get(`/executions`, params),
+
+  /**
+   * Get audit trail for a specific execution including hash chain data
+   * @param threadId - Thread ID of the execution
+   * @returns Promise with audit trail, input payload, and hash verification
+   */
+  getExecutionAudit: (threadId: string) =>
+    api.get(`/executions/${threadId}/audit`),
 }
