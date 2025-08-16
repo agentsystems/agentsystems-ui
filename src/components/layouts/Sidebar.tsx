@@ -50,7 +50,6 @@ export default function Sidebar() {
                 }
                 onClick={playClickSound}
                 aria-label={`Navigate to ${item.name} page`}
-                aria-current={({ isActive }) => isActive ? 'page' : undefined}
               >
                 <item.icon className={styles.navIcon} aria-hidden="true" />
                 <span>{item.name}</span>

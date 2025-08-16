@@ -7,7 +7,7 @@ import type {
   InvokeResponse,
   InvocationStatus,
   InvocationResult,
-} from '@types/api'
+} from '../types/api'
 
 /**
  * API client for AgentSystems agent management and invocation

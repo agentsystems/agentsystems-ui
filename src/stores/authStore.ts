@@ -15,7 +15,7 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
-      token: 'demo', // Default demo token
+      token: null, // No default token for security
       gatewayUrl: config.API_GATEWAY_URL,
       wsUrl: config.WS_ENDPOINT_URL,
       

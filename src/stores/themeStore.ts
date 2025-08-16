@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Theme, ScanlineFrequency } from '@types/common'
+import type { Theme, ScanlineFrequency } from '../types/common'
 
 interface ThemeStore {
   theme: Theme
