@@ -28,7 +28,7 @@ export interface AgentInvocation {
       state: 'pending' | 'running' | 'completed' | 'failed'
     }>
   }
-  result?: any
+  result?: unknown
   error?: string
   createdAt: Date
   startedAt?: Date

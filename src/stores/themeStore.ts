@@ -1,9 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-export type Theme = 'dark' | 'light' | 'cyber'
-
-export type ScanlineFrequency = '30' | '90' | '300'
+import type { Theme, ScanlineFrequency } from '@types/common'
 
 interface ThemeStore {
   theme: Theme

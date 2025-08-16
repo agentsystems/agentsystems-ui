@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { config } from '@/config/runtime'
+import { API_DEFAULTS } from '@constants/app'
 
 interface AuthStore {
   token: string | null

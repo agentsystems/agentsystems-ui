@@ -3,12 +3,15 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
+import { useAudio } from '@hooks/useAudio'
+import type { InvocationResult } from '@types/api'
 import styles from './AgentDetail.module.css'
 
 export default function AgentDetail() {
   const { agentName } = useParams<{ agentName: string }>()
+  const { playClickSound } = useAudio()
   const [invokePayload, setInvokePayload] = useState('{}')
-  const [invocationResult, setInvocationResult] = useState<any>(null)
+  const [invocationResult, setInvocationResult] = useState<InvocationResult | null>(null)
 
   const { data: metadata } = useQuery({
     queryKey: ['agent-metadata', agentName],
@@ -34,6 +37,7 @@ export default function AgentDetail() {
   })
 
   const handleInvoke = () => {
+    playClickSound()
     try {
       const payload = JSON.parse(invokePayload)
       invokeMutation.mutate(payload)
