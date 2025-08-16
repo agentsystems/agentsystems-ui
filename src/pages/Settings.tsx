@@ -3,24 +3,46 @@ import { useAuthStore } from '@stores/authStore'
 import { useThemeStore } from '@stores/themeStore'
 import { isAudioEnabled, setAudioEnabled } from '@utils/audioFx'
 import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
+import { validateSettings } from '@utils/validation'
 import { APP_VERSION } from '@constants/app'
 import Card from '@components/common/Card'
+import Toast from '@components/Toast'
 import styles from './Settings.module.css'
 
 export default function Settings() {
   const { token, gatewayUrl, setToken, setGatewayUrl } = useAuthStore()
   const { theme, scanlineEnabled, scanlineFrequency, setTheme, setScanlineEnabled, setScanlineFrequency } = useThemeStore()
   const { playClickSound } = useAudio()
+  const { toasts, removeToast, showSuccess, showError } = useToast()
   const [audioEnabled, setAudioEnabledState] = useState(isAudioEnabled())
   
   const [localToken, setLocalToken] = useState(token || '')
   const [localGatewayUrl, setLocalGatewayUrl] = useState(gatewayUrl)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleSave = () => {
     playClickSound()
-    setToken(localToken)
-    setGatewayUrl(localGatewayUrl)
-    alert('Settings saved!')
+    
+    // Validate form
+    const validation = validateSettings(localGatewayUrl, localToken)
+    
+    if (!validation.isValid) {
+      setErrors(validation.errors)
+      showError('Please fix the validation errors before saving')
+      return
+    }
+    
+    // Clear any previous errors
+    setErrors({})
+    
+    try {
+      setToken(localToken)
+      setGatewayUrl(localGatewayUrl)
+      showSuccess('Settings saved successfully!')
+    } catch (error) {
+      showError('Failed to save settings. Please try again.')
+    }
   }
 
   const handleAudioToggle = (enabled: boolean) => {
@@ -45,9 +67,17 @@ export default function Settings() {
                 id="gateway-url"
                 type="text"
                 value={localGatewayUrl}
-                onChange={(e) => setLocalGatewayUrl(e.target.value)}
-                className={styles.input}
+                onChange={(e) => {
+                  setLocalGatewayUrl(e.target.value)
+                  if (errors.gatewayUrl) {
+                    setErrors(prev => ({ ...prev, gatewayUrl: '' }))
+                  }
+                }}
+                className={`${styles.input} ${errors.gatewayUrl ? styles.inputError : ''}`}
               />
+              {errors.gatewayUrl && (
+                <span className={styles.errorText}>{errors.gatewayUrl}</span>
+              )}
               <span className={styles.hint}>
                 The URL of your AgentSystems gateway
               </span>
@@ -59,9 +89,17 @@ export default function Settings() {
                 id="auth-token"
                 type="password"
                 value={localToken}
-                onChange={(e) => setLocalToken(e.target.value)}
-                className={styles.input}
+                onChange={(e) => {
+                  setLocalToken(e.target.value)
+                  if (errors.token) {
+                    setErrors(prev => ({ ...prev, token: '' }))
+                  }
+                }}
+                className={`${styles.input} ${errors.token ? styles.inputError : ''}`}
               />
+              {errors.token && (
+                <span className={styles.errorText}>{errors.token}</span>
+              )}
               <span className={styles.hint}>
                 Bearer token for authentication
               </span>
@@ -174,6 +212,17 @@ export default function Settings() {
           </div>
         </Card>
       </div>
+
+      {/* Toast notifications */}
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
     </div>
   )
 }
