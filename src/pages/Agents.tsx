@@ -174,7 +174,7 @@ export default function Agents() {
           
           {(data?.agents || []).some(a => a.state === 'running') && (
             <button
-              className={styles.stopAllBtn}
+              className="btn btn-sm btn-subtle"
               onClick={() => {
                 playClickSound()
                 const runningAgents = (data?.agents || []).filter(a => a.state === 'running')
@@ -182,7 +182,7 @@ export default function Agents() {
               }}
               disabled={stopMutation.isPending}
             >
-              Stop All Running
+              Turn Off All
             </button>
           )}
         </div>
@@ -217,7 +217,7 @@ export default function Agents() {
             <div className={styles.agentActions} role="group" aria-label={`Actions for ${agent.name}`}>
               {agent.state === 'stopped' && (
                 <button 
-                  className={styles.startBtn}
+                  className="btn btn-sm btn-subtle"
                   onClick={(e) => {
                     e.stopPropagation()
                     playClickSound()
@@ -232,7 +232,7 @@ export default function Agents() {
               )}
               {agent.state === 'running' && (
                 <button 
-                  className={styles.stopBtn}
+                  className="btn btn-sm btn-subtle"
                   onClick={(e) => {
                     e.stopPropagation()
                     playClickSound()
@@ -246,7 +246,7 @@ export default function Agents() {
                 </button>
               )}
               <button 
-                className={styles.viewBtn}
+                className="btn btn-sm btn-subtle"
                 onClick={(e) => {
                   e.stopPropagation()
                   playClickSound()

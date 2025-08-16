@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
-import { ChartBarIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
@@ -201,18 +201,18 @@ export default function AgentDetail() {
             <>
               {currentAgent.state === 'stopped' || currentAgent.state === 'not-created' ? (
                 <button
-                  className={styles.startBtn}
+                  className="btn btn-sm btn-subtle btn-success-color"
                   onClick={() => {
                     playClickSound()
                     startMutation.mutate(agentName!)
                   }}
                   disabled={startMutation.isPending}
                 >
-                  {startMutation.isPending ? 'Turning On...' : getAgentButtonText(currentAgent.state)}
+                  {startMutation.isPending || invokeMutation.isPending ? 'Turning On...' : getAgentButtonText(currentAgent.state)}
                 </button>
               ) : (
                 <button
-                  className={styles.stopBtn}
+                  className="btn btn-sm btn-subtle btn-danger-color"
                   onClick={() => {
                     playClickSound()
                     stopMutation.mutate(agentName!)
@@ -341,9 +341,10 @@ export default function AgentDetail() {
               href={`${gatewayUrl}/${agentName}/docs`} 
               target="_blank" 
               rel="noopener noreferrer"
-              className={styles.docLink}
+              className="btn btn-sm btn-subtle"
             >
-              📖 View API Documentation
+              <DocumentTextIcon className={styles.docIcon} />
+              View API Documentation
             </a>
             
             <div className={styles.rawMetadata}>
@@ -419,11 +420,11 @@ export default function AgentDetail() {
             </div>
             
             <button
-              className={styles.executeButton}
+              className="btn btn-lg btn-bright"
               onClick={handleInvoke}
               disabled={invokeMutation.isPending || !!pollingStatus}
             >
-              {invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Processing...' : 'Execute'}
+              {invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Running...' : 'Execute'}
             </button>
 
             {pollingStatus && (
@@ -487,7 +488,7 @@ export default function AgentDetail() {
           <div className={styles.executionHistoryHeader}>
             <h2>Recent Executions</h2>
             <button 
-              className={styles.viewAllBtn}
+              className="btn btn-sm btn-subtle"
               onClick={() => {
                 playClickSound()
                 window.open(`/executions?agent=${agentName}`, '_blank')

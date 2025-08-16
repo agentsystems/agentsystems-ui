@@ -142,7 +142,7 @@ export default function Settings() {
 
             <button 
               onClick={handleSave} 
-              className={styles.saveButton}
+              className="btn btn-lg btn-bright"
               aria-describedby="save-button-hint"
             >
               Save Connection Settings

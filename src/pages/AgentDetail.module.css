@@ -441,6 +441,11 @@
   color: var(--bg);
 }
 
+.docIcon {
+  width: 16px;
+  height: 16px;
+}
+
 .metadataGrid {
   display: flex;
   flex-direction: column;
@@ -480,13 +485,16 @@
 }
 
 .modelTag {
-  padding: 0.25rem 0.75rem;
-  background-color: var(--accent);
-  color: var(--bg);
-  border-radius: var(--radius);
+  padding: 4px 10px;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--info);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 6px;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .tag {

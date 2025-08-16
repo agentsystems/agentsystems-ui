@@ -437,7 +437,7 @@
   background-color: var(--surface-2);
   border-radius: var(--radius);
   padding: 1rem;
-  border-left: 4px solid var(--warning);
+  border-left: 4px solid var(--info);
 }
 
 .auditEntry {

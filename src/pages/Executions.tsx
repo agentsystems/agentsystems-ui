@@ -336,7 +336,7 @@ export default function Executions() {
                 <h2>Execution Details</h2>
                 {selectedExecution.payload && selectedExecution.state === 'failed' && (
                   <button
-                    className={styles.retryBtn}
+                    className="btn btn-sm btn-subtle"
                     onClick={() => {
                       playClickSound()
                       retryMutation.mutate(selectedExecution)
@@ -353,7 +353,7 @@ export default function Executions() {
                   <div className={styles.detailValueWithAction}>
                     <span className={styles.detailValue}>{selectedExecution.thread_id}</span>
                     <button
-                      className={styles.actionBtn}
+                      className="btn btn-icon btn-subtle"
                       onClick={() => {
                         navigator.clipboard.writeText(selectedExecution.thread_id)
                         playClickSound()
@@ -363,9 +363,9 @@ export default function Executions() {
                       title="Copy thread ID to clipboard"
                     >
                       {copiedThreadId === selectedExecution.thread_id ? (
-                        <CheckIcon className={styles.actionIcon} />
+                        <CheckIcon />
                       ) : (
-                        <DocumentDuplicateIcon className={styles.actionIcon} />
+                        <DocumentDuplicateIcon />
                       )}
                     </button>
                   </div>
@@ -376,14 +376,14 @@ export default function Executions() {
                   <div className={styles.detailValueWithAction}>
                     <span className={styles.detailValue}>{selectedExecution.agent}</span>
                     <button
-                      className={styles.actionBtn}
+                      className="btn btn-icon btn-subtle"
                       onClick={() => {
                         navigate(`/agents/${selectedExecution.agent}`)
                         playClickSound()
                       }}
                       title="Go to agent details"
                     >
-                      <ArrowTopRightOnSquareIcon className={styles.actionIcon} />
+                      <ArrowTopRightOnSquareIcon />
                     </button>
                   </div>
                 </div>
@@ -497,7 +497,7 @@ export default function Executions() {
                 <div className={styles.auditHeader}>
                   <h3>Hash Chain Verification</h3>
                   <button
-                    className={styles.toggleAuditBtn}
+                    className="btn btn-sm btn-subtle"
                     onClick={() => {
                       setShowAuditTrail(!showAuditTrail)
                       playClickSound()
