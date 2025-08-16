@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, LinkIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -60,12 +61,14 @@ const mockExecutions: Execution[] = [
 export default function Executions() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
   const [showAuditTrail, setShowAuditTrail] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [stateFilter, setStateFilter] = useState<'all' | 'completed' | 'failed' | 'running'>('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [copiedThreadId, setCopiedThreadId] = useState<string | null>(null)
 
   const retryMutation = useMutation({
     mutationFn: (execution: Execution) => {
@@ -94,6 +97,25 @@ export default function Executions() {
   })
 
   const executions = executionsResponse?.executions || []
+
+  // Initialize from URL parameters (one time only)
+  useEffect(() => {
+    const threadParam = searchParams.get('thread')
+    const agentParam = searchParams.get('agent')
+    
+    // Auto-select execution from thread parameter
+    if (threadParam && executions.length > 0) {
+      const execution = executions.find(e => e.thread_id === threadParam)
+      if (execution) {
+        setSelectedExecution(execution)
+      }
+    }
+    
+    // Set initial search query from agent parameter (only if search is empty)
+    if (agentParam && searchQuery === '') {
+      setSearchQuery(agentParam)
+    }
+  }, [executions]) // Removed searchParams and searchQuery from dependencies
 
   // Audit trail query for selected execution
   const { data: auditData } = useQuery({
@@ -271,7 +293,7 @@ export default function Executions() {
                   }}
                 >
                   <span className={styles.agentName}>
-                    <span className={styles.verifiedIcon} title="Cryptographically verified execution">✓</span>
+                    <ShieldCheckIcon className={styles.verifiedIcon} title="Cryptographically verified execution" />
                     {execution.agent}
                   </span>
                   <span 
@@ -312,7 +334,7 @@ export default function Executions() {
             <Card>
               <div className={styles.detailHeader}>
                 <h2>Execution Details</h2>
-                {selectedExecution.payload && (selectedExecution.state === 'completed' || selectedExecution.state === 'failed') && (
+                {selectedExecution.payload && selectedExecution.state === 'failed' && (
                   <button
                     className={styles.retryBtn}
                     onClick={() => {
@@ -328,12 +350,42 @@ export default function Executions() {
               <div className={styles.detailGrid}>
                 <div className={styles.detailItem}>
                   <label>Thread ID</label>
-                  <span className={styles.detailValue}>{selectedExecution.thread_id}</span>
+                  <div className={styles.detailValueWithAction}>
+                    <span className={styles.detailValue}>{selectedExecution.thread_id}</span>
+                    <button
+                      className={styles.actionBtn}
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedExecution.thread_id)
+                        playClickSound()
+                        setCopiedThreadId(selectedExecution.thread_id)
+                        setTimeout(() => setCopiedThreadId(null), 2000)
+                      }}
+                      title="Copy thread ID to clipboard"
+                    >
+                      {copiedThreadId === selectedExecution.thread_id ? (
+                        <CheckIcon className={styles.actionIcon} />
+                      ) : (
+                        <DocumentDuplicateIcon className={styles.actionIcon} />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 
                 <div className={styles.detailItem}>
                   <label>Agent</label>
-                  <span className={styles.detailValue}>{selectedExecution.agent}</span>
+                  <div className={styles.detailValueWithAction}>
+                    <span className={styles.detailValue}>{selectedExecution.agent}</span>
+                    <button
+                      className={styles.actionBtn}
+                      onClick={() => {
+                        navigate(`/agents/${selectedExecution.agent}`)
+                        playClickSound()
+                      }}
+                      title="Go to agent details"
+                    >
+                      <ArrowTopRightOnSquareIcon className={styles.actionIcon} />
+                    </button>
+                  </div>
                 </div>
                 
                 <div className={styles.detailItem}>
@@ -473,7 +525,7 @@ export default function Executions() {
                           </code>
                         </div>
                         <div className={styles.chainStatus}>
-                          <span className={styles.chainStatusIcon}>🔗</span>
+                          <LinkIcon className={styles.chainStatusIcon} />
                           <span>Chain integrity maintained</span>
                         </div>
                       </div>

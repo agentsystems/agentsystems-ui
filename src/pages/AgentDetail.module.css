@@ -521,9 +521,16 @@
 }
 
 .placeholderIcon {
-  font-size: 2rem;
   margin-bottom: 1rem;
   opacity: 0.5;
+  display: flex;
+  justify-content: center;
+}
+
+.placeholderIcon svg {
+  width: 48px;
+  height: 48px;
+  color: var(--text-muted);
 }
 
 .unavailableState p {
@@ -583,6 +590,98 @@
 /* Hide scrollbar for webkit browsers */
 .rawMetadata .metadata::-webkit-scrollbar {
   display: none;
+}
+
+.executionHistoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.executionHistoryHeader h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.viewAllBtn {
+  padding: 0.5rem 1rem;
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewAllBtn:hover {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.executionsTable {
+  display: flex;
+  flex-direction: column;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 80px 120px 80px 1fr;
+  gap: 1rem;
+  padding: 0.75rem;
+  background-color: var(--surface-2);
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.executionRow {
+  display: grid;
+  grid-template-columns: 80px 120px 80px 1fr;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.executionRow:hover {
+  background-color: var(--surface-2);
+}
+
+.status {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.timestamp {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.duration {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.threadId {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
 }
 
 @media (max-width: 768px) {

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { formatDistanceToNow } from 'date-fns'
+import { ChartBarIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -28,6 +30,14 @@ export default function AgentDetail() {
   })
 
   const currentAgent = agentsData?.agents.find(a => a.name === agentName)
+
+  // Get execution history for this agent
+  const { data: executionHistory } = useQuery({
+    queryKey: ['agent-executions', agentName],
+    queryFn: () => agentsApi.listExecutions({ agent: agentName, limit: 10 }),
+    enabled: !!agentName,
+    refetchInterval: 10000, // Refresh every 10 seconds
+  })
 
   const { data: metadata, isLoading: metadataLoading, error: metadataError } = useQuery({
     queryKey: ['agent-metadata', agentName, currentAgent?.state],
@@ -229,7 +239,9 @@ export default function AgentDetail() {
           <h2>Agent Information</h2>
           {currentAgent && (currentAgent.state === 'stopped' || currentAgent.state === 'not-created') ? (
             <div className={styles.unavailableState}>
-              <div className={styles.placeholderIcon}>📊</div>
+              <div className={styles.placeholderIcon}>
+                <ChartBarIcon />
+              </div>
               <p>Agent metadata unavailable</p>
               <p className={styles.placeholderHint}>
                 Start the agent to view detailed information
@@ -467,6 +479,69 @@ export default function AgentDetail() {
           </div>
         </Card>
       </div>
+
+      {/* Recent Executions */}
+      {executionHistory?.executions && executionHistory.executions.length > 0 && (
+        <Card>
+          <div className={styles.executionHistoryHeader}>
+            <h2>Recent Executions</h2>
+            <button 
+              className={styles.viewAllBtn}
+              onClick={() => {
+                playClickSound()
+                window.open(`/executions?agent=${agentName}`, '_blank')
+              }}
+            >
+              View All
+            </button>
+          </div>
+          
+          <div className={styles.executionsTable}>
+            <div className={styles.tableHeader}>
+              <span>Status</span>
+              <span>Started</span>
+              <span>Duration</span>
+              <span>Thread ID</span>
+            </div>
+            
+            {executionHistory.executions.slice(0, 5).map((execution: any) => (
+              <div
+                key={execution.thread_id}
+                className={styles.executionRow}
+                onClick={() => {
+                  playClickSound()
+                  window.open(`/executions?thread=${execution.thread_id}`, '_blank')
+                }}
+              >
+                <span 
+                  className={styles.status}
+                  style={{ color: execution.state === 'completed' ? 'var(--success)' : execution.state === 'failed' ? 'var(--error)' : 'var(--info)' }}
+                >
+                  {execution.state}
+                </span>
+                <span className={styles.timestamp}>
+                  {execution.started_at 
+                    ? formatDistanceToNow(new Date(execution.started_at))
+                    : 'Not started'
+                  }
+                </span>
+                <span className={styles.duration}>
+                  {(() => {
+                    if (!execution.started_at) return '—'
+                    const start = new Date(execution.started_at)
+                    const end = execution.ended_at ? new Date(execution.ended_at) : new Date()
+                    const duration = Math.round((end.getTime() - start.getTime()) / 1000)
+                    return duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}m ${duration % 60}s`
+                  })()}
+                </span>
+                <span className={styles.threadId}>
+                  {execution.thread_id.substring(0, 8)}...
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   )
 }
