@@ -60,6 +60,36 @@ export const getStatusVariant = (state: string): string => {
 }
 
 /**
+ * Convert API agent state to user-friendly display state
+ */
+export const getAgentDisplayState = (apiState: string): string => {
+  switch (apiState) {
+    case 'running':
+      return 'on'
+    case 'stopped':
+    case 'not-created':
+      return 'off'
+    default:
+      return 'off'
+  }
+}
+
+/**
+ * Get user-friendly button text for agent state
+ */
+export const getAgentButtonText = (apiState: string): string => {
+  switch (apiState) {
+    case 'running':
+      return 'Turn Off'
+    case 'stopped':
+    case 'not-created':
+      return 'Turn On'
+    default:
+      return 'Turn On'
+  }
+}
+
+/**
  * Format agent uptime
  */
 export const formatUptime = (seconds: number): string => {

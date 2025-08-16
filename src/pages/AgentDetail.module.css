@@ -198,7 +198,7 @@
   outline-offset: 2px;
 }
 
-.invokeButton {
+.executeButton {
   padding: 0.75rem 1.5rem;
   background-color: var(--accent);
   color: var(--bg);
@@ -210,11 +210,11 @@
   transition: opacity 0.2s;
 }
 
-.invokeButton:hover {
+.executeButton:hover {
   opacity: 0.9;
 }
 
-.invokeButton:disabled {
+.executeButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

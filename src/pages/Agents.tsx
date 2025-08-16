@@ -5,7 +5,7 @@ import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import ErrorMessage from '@components/ErrorMessage'
 import { useAudio } from '@hooks/useAudio'
-import { getAgentImage, getStatusVariant, getAgentVersion } from '@utils/agentHelpers'
+import { getAgentImage, getStatusVariant, getAgentVersion, getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import { API_DEFAULTS } from '@constants/app'
 import styles from './Agents.module.css'
 
@@ -163,8 +163,8 @@ export default function Agents() {
               className={styles.filterSelect}
             >
               <option value="all">All ({data?.agents.length || 0})</option>
-              <option value="running">Running ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
-              <option value="stopped">Stopped ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
+              <option value="running">On ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
+              <option value="stopped">Off ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
             </select>
           </div>
           
@@ -210,7 +210,7 @@ export default function Agents() {
                 </div>
               </div>
               <div className={`${styles.status} ${styles[getStatusVariant(agent.state)]}`}>
-                {agent.state}
+                {getAgentDisplayState(agent.state)}
               </div>
             </div>
 
@@ -227,7 +227,7 @@ export default function Agents() {
                   aria-label={`Start ${agent.name} agent`}
                   title={`Start the ${agent.name} agent container`}
                 >
-                  {operatingAgent === agent.name ? 'Starting...' : 'Start'}
+                  {operatingAgent === agent.name ? 'Turning On...' : getAgentButtonText(agent.state)}
                 </button>
               )}
               {agent.state === 'running' && (
@@ -242,20 +242,20 @@ export default function Agents() {
                   aria-label={`Stop ${agent.name} agent`}
                   title={`Stop the ${agent.name} agent container`}
                 >
-                  {operatingAgent === agent.name ? 'Stopping...' : 'Stop'}
+                  {operatingAgent === agent.name ? 'Turning Off...' : getAgentButtonText(agent.state)}
                 </button>
               )}
               <button 
-                className={styles.invokeBtn}
+                className={styles.viewBtn}
                 onClick={(e) => {
                   e.stopPropagation()
                   playClickSound()
                   navigate(`/agents/${agent.name}`)
                 }}
-                aria-label={`Invoke ${agent.name} agent`}
-                title={`Open invocation interface for ${agent.name}`}
+                aria-label={`View ${agent.name} agent`}
+                title={`Open ${agent.name} agent page`}
               >
-                Invoke
+                View
               </button>
             </div>
           </Card>

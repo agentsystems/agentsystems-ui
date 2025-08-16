@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { ChartBarIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
+import { getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
 import { useAuthStore } from '@stores/authStore'
@@ -207,7 +208,7 @@ export default function AgentDetail() {
                   }}
                   disabled={startMutation.isPending}
                 >
-                  {startMutation.isPending ? 'Starting...' : 'Start'}
+                  {startMutation.isPending ? 'Turning On...' : getAgentButtonText(currentAgent.state)}
                 </button>
               ) : (
                 <button
@@ -218,7 +219,7 @@ export default function AgentDetail() {
                   }}
                   disabled={stopMutation.isPending}
                 >
-                  {stopMutation.isPending ? 'Stopping...' : 'Stop'}
+                  {stopMutation.isPending ? 'Turning Off...' : getAgentButtonText(currentAgent.state)}
                 </button>
               )}
             </>
@@ -228,7 +229,7 @@ export default function AgentDetail() {
           Agent details and invocation
           {currentAgent && (
             <span className={styles.statusIndicator}>
-              • Status: <span className={styles.statusText}>{currentAgent.state}</span>
+              • Status: <span className={styles.statusText}>{getAgentDisplayState(currentAgent.state)}</span>
             </span>
           )}
         </p>
@@ -244,7 +245,7 @@ export default function AgentDetail() {
               </div>
               <p>Agent metadata unavailable</p>
               <p className={styles.placeholderHint}>
-                Start the agent to view detailed information
+                Turn the agent on to view detailed information
               </p>
             </div>
           ) : metadataLoading ? (
@@ -355,9 +356,9 @@ export default function AgentDetail() {
         </Card>
 
         <Card>
-          <h2>Invoke Agent</h2>
+          <h2>Execute Agent</h2>
           <p className={styles.instructions}>
-            Enter a JSON payload to send to the agent. Make sure you have configured your auth token in{' '}
+            Enter a JSON payload to execute the agent. Make sure you have configured your auth token in{' '}
             <a href="/settings" className={styles.settingsLink}>Settings</a> first.
           </p>
           <div className={styles.invokeForm}>
@@ -418,11 +419,11 @@ export default function AgentDetail() {
             </div>
             
             <button
-              className={styles.invokeButton}
+              className={styles.executeButton}
               onClick={handleInvoke}
               disabled={invokeMutation.isPending || !!pollingStatus}
             >
-              {invokeMutation.isPending ? 'Invoking...' : pollingStatus ? 'Processing...' : 'Invoke'}
+              {invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Processing...' : 'Execute'}
             </button>
 
             {pollingStatus && (
