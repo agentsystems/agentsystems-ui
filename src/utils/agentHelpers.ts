@@ -14,9 +14,14 @@ export const getAgentImage = (agentName: string): string => {
     'ibl-agent-hello-there': 'ironbirdlabs/ibl-agent-hello-there:latest',
   }
 
-  // Check for partial matches
+  // Check for exact matches first
+  if (imageMap[agentName]) {
+    return imageMap[agentName]
+  }
+
+  // Check for partial matches (but more specific)
   for (const [key, value] of Object.entries(imageMap)) {
-    if (agentName.includes(key.split('-')[0])) {
+    if (agentName.includes(key)) {
       return value
     }
   }
