@@ -36,6 +36,6 @@
       "@test/*": ["src/test/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "src/types/global.d.ts", "src/types/css-modules.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

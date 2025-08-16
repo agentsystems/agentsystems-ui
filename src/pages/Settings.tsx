@@ -104,7 +104,7 @@ export default function Settings() {
                 className={`${styles.input} ${errors.token ? styles.inputError : ''}`}
                 aria-describedby="auth-token-hint auth-token-error"
                 aria-invalid={!!errors.token}
-                placeholder="demo"
+                placeholder="Enter your auth token"
                 required
               />
               {errors.token && (

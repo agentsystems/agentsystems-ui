@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
-import type { InvocationResult } from '@types/api'
+import type { InvocationResult } from '../types/api'
 import styles from './AgentDetail.module.css'
 
 export default function AgentDetail() {
