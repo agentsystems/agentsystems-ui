@@ -171,6 +171,20 @@ export default function Agents() {
           <span className={styles.resultCount}>
             Showing {filteredAgents.length} agent{filteredAgents.length !== 1 ? 's' : ''}
           </span>
+          
+          {(data?.agents || []).some(a => a.state === 'running') && (
+            <button
+              className={styles.stopAllBtn}
+              onClick={() => {
+                playClickSound()
+                const runningAgents = (data?.agents || []).filter(a => a.state === 'running')
+                runningAgents.forEach(agent => stopMutation.mutate(agent.name))
+              }}
+              disabled={stopMutation.isPending}
+            >
+              Stop All Running
+            </button>
+          )}
         </div>
       </div>
 

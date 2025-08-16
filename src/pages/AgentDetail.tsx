@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -13,17 +13,28 @@ export default function AgentDetail() {
   const { agentName } = useParams<{ agentName: string }>()
   const { playClickSound } = useAudio()
   const { gatewayUrl } = useAuthStore()
+  const queryClient = useQueryClient()
   const [invokePayload, setInvokePayload] = useState('{\n  "message": "Hello, agent!",\n  "task": "process this request"\n}')
   const [invocationResult, setInvocationResult] = useState<InvocationResult | null>(null)
   const [pollingStatus, setPollingStatus] = useState<string>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [syncMode, setSyncMode] = useState(false)
 
+  // Get agent state from agents list
+  const { data: agentsData } = useQuery({
+    queryKey: ['agents'],
+    queryFn: agentsApi.list,
+    refetchInterval: 5000,
+  })
+
+  const currentAgent = agentsData?.agents.find(a => a.name === agentName)
+
   const { data: metadata, isLoading: metadataLoading, error: metadataError } = useQuery({
-    queryKey: ['agent-metadata', agentName],
+    queryKey: ['agent-metadata', agentName, currentAgent?.state],
     queryFn: () => agentsApi.getMetadata(agentName!),
-    enabled: !!agentName,
-    retry: 3,
+    enabled: !!agentName && currentAgent?.state === 'running',
+    retry: 1,
+    refetchInterval: currentAgent?.state === 'running' ? 5000 : false,
   })
 
   const invokeMutation = useMutation({
@@ -36,6 +47,11 @@ export default function AgentDetail() {
       } else {
         return agentsApi.invoke(agentName!, payload)
       }
+    },
+    onMutate: () => {
+      // Invalidate queries since invocation might trigger agent startup
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+      queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
     },
     onSuccess: async (response) => {
       // Poll for status with proper error handling and timeout
@@ -106,6 +122,30 @@ export default function AgentDetail() {
     }
   })
 
+  const startMutation = useMutation({
+    mutationFn: agentsApi.startAgent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+      queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
+    },
+    onError: (error) => {
+      console.error('Failed to start agent:', error)
+      alert(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    },
+  })
+
+  const stopMutation = useMutation({
+    mutationFn: agentsApi.stopAgent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+      queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
+    },
+    onError: (error) => {
+      console.error('Failed to stop agent:', error)
+      alert(`Failed to stop agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    },
+  })
+
   const handleInvoke = () => {
     playClickSound()
     
@@ -144,14 +184,58 @@ export default function AgentDetail() {
   return (
     <div className={styles.detail}>
       <div className={styles.header}>
-        <h1>{agentName}</h1>
-        <p className={styles.subtitle}>Agent details and invocation</p>
+        <div className={styles.titleRow}>
+          <h1>{agentName}</h1>
+          {currentAgent && (
+            <>
+              {currentAgent.state === 'stopped' || currentAgent.state === 'not-created' ? (
+                <button
+                  className={styles.startBtn}
+                  onClick={() => {
+                    playClickSound()
+                    startMutation.mutate(agentName!)
+                  }}
+                  disabled={startMutation.isPending}
+                >
+                  {startMutation.isPending ? 'Starting...' : 'Start'}
+                </button>
+              ) : (
+                <button
+                  className={styles.stopBtn}
+                  onClick={() => {
+                    playClickSound()
+                    stopMutation.mutate(agentName!)
+                  }}
+                  disabled={stopMutation.isPending}
+                >
+                  {stopMutation.isPending ? 'Stopping...' : 'Stop'}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        <p className={styles.subtitle}>
+          Agent details and invocation
+          {currentAgent && (
+            <span className={styles.statusIndicator}>
+              • Status: <span className={styles.statusText}>{currentAgent.state}</span>
+            </span>
+          )}
+        </p>
       </div>
 
       <div className={styles.grid}>
         <Card>
           <h2>Agent Information</h2>
-          {metadataLoading ? (
+          {currentAgent && (currentAgent.state === 'stopped' || currentAgent.state === 'not-created') ? (
+            <div className={styles.unavailableState}>
+              <div className={styles.placeholderIcon}>📊</div>
+              <p>Agent metadata unavailable</p>
+              <p className={styles.placeholderHint}>
+                Start the agent to view detailed information
+              </p>
+            </div>
+          ) : metadataLoading ? (
             <div className={styles.loadingState}>
               Loading agent metadata...
             </div>

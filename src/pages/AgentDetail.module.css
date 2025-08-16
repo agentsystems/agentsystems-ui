@@ -8,19 +8,118 @@
   margin-bottom: 24px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 8px;
+}
+
 .header h1 {
   font-size: 20px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 8px;
+  margin: 0;
   letter-spacing: -0.5px;
   font-family: var(--font-mono);
+}
+
+.agentStatus {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.agentStatus.running {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.agentStatus.stopped {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.agentStatus.notcreated {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-muted);
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.statusAndActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.startBtn {
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.startBtn:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--success);
+}
+
+.startBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stopBtn {
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stopBtn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--error);
+}
+
+.stopBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .subtitle {
   color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.5;
+}
+
+.statusIndicator {
+  margin-left: 1rem;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.statusText {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
 }
 
 .instructions {
@@ -413,6 +512,29 @@
   text-align: center;
   color: var(--text-muted);
   font-style: italic;
+}
+
+.unavailableState {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.placeholderIcon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.unavailableState p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.placeholderHint {
+  font-size: 0.875rem;
+  margin-top: 0.5rem !important;
+  color: var(--text-muted) !important;
 }
 
 .errorState {
