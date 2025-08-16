@@ -8,6 +8,22 @@ import { getAgentImage, getStatusVariant } from '@utils/agentHelpers'
 import { API_DEFAULTS } from '@constants/app'
 import styles from './Agents.module.css'
 
+/**
+ * Agents page component - displays all discovered agents in a grid layout
+ * 
+ * Features:
+ * - Real-time agent discovery (auto-refreshes every 5 seconds)
+ * - Agent status indicators (running, stopped, not-created)
+ * - Interactive agent cards with hover effects
+ * - Action buttons for start/stop/invoke operations
+ * - Error handling with retry functionality
+ * - Loading states with spinner
+ * - Cyber theme audio feedback
+ * - Repository/image information display
+ * 
+ * The page connects to the AgentSystems control plane to discover
+ * agents via Docker labels and displays their current operational status.
+ */
 export default function Agents() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
