@@ -13,14 +13,20 @@ export const sanitizeHtml = (input: string): string => {
   return input
     // Remove script tags and content
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    // Remove javascript: links
+    // Remove javascript: protocols
     .replace(/javascript:/gi, '')
-    // Remove on* event handlers
+    // Remove on* event handlers more aggressively
     .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/\s*on\w+\s*=\s*[^"'\s>]+/gi, '')
+    // Fix broken HTML after removing onclick
+    .replace(/<(\w+)[^>]*>/g, (match) => {
+      // Remove any remaining onclick or similar attributes
+      return match.replace(/\s+onclick[^=]*="[^"]*"/gi, '')
+    })
     // Remove data: URLs that could contain scripts
     .replace(/data:\s*text\/html/gi, 'data:text/plain')
-    // Remove dangerous protocols
-    .replace(/(src|href)\s*=\s*["']\s*(javascript|vbscript|data:text\/html)/gi, '$1=""')
+    // Remove dangerous protocols from href/src
+    .replace(/(src|href)\s*=\s*["']\s*(javascript|vbscript|data:text\/html)[^"']*/gi, '$1=""')
     // Trim whitespace
     .trim()
 }
@@ -90,7 +96,8 @@ export const sanitizeJsonString = (input: string): string => {
     // Recursively sanitize string values in the object
     const sanitizeObject = (obj: unknown): unknown => {
       if (typeof obj === 'string') {
-        return sanitizeText(obj)
+        // Use both HTML and text sanitization for comprehensive cleaning
+        return sanitizeText(sanitizeHtml(obj))
       } else if (Array.isArray(obj)) {
         return obj.map(sanitizeObject)
       } else if (obj && typeof obj === 'object') {
