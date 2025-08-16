@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import ErrorMessage from '@components/ErrorMessage'
 import { useAudio } from '@hooks/useAudio'
-import { getAgentImage, getStatusVariant } from '@utils/agentHelpers'
+import { getAgentImage, getStatusVariant, getAgentVersion } from '@utils/agentHelpers'
 import { API_DEFAULTS } from '@constants/app'
 import styles from './Agents.module.css'
 
@@ -28,15 +28,17 @@ import styles from './Agents.module.css'
 export default function Agents() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
+  const queryClient = useQueryClient()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'running' | 'idle'>('all')
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'running' | 'stopped'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [operatingAgent, setOperatingAgent] = useState<string | null>(null)
 
   // Initialize filter from URL parameter
   useEffect(() => {
     const filterParam = searchParams.get('filter')
-    if (filterParam && ['all', 'running', 'idle'].includes(filterParam)) {
-      setSelectedFilter(filterParam as 'all' | 'running' | 'idle')
+    if (filterParam && ['all', 'running', 'stopped'].includes(filterParam)) {
+      setSelectedFilter(filterParam as 'all' | 'running' | 'stopped')
     }
   }, [searchParams])
   
@@ -45,6 +47,40 @@ export default function Agents() {
     queryFn: agentsApi.list,
     refetchInterval: API_DEFAULTS.REFETCH_INTERVAL,
     retry: API_DEFAULTS.RETRY_COUNT,
+  })
+
+  const startMutation = useMutation({
+    mutationFn: agentsApi.startAgent,
+    onMutate: (agentName) => {
+      setOperatingAgent(agentName)
+    },
+    onSuccess: (data) => {
+      console.log('Agent started:', data.message)
+      setOperatingAgent(null)
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+    },
+    onError: (error) => {
+      console.error('Failed to start agent:', error)
+      setOperatingAgent(null)
+      alert(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    },
+  })
+
+  const stopMutation = useMutation({
+    mutationFn: agentsApi.stopAgent,
+    onMutate: (agentName) => {
+      setOperatingAgent(agentName)
+    },
+    onSuccess: (data) => {
+      console.log('Agent stopped:', data.message)
+      setOperatingAgent(null)
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+    },
+    onError: (error) => {
+      console.error('Failed to stop agent:', error)
+      setOperatingAgent(null)
+      alert(`Failed to stop agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    },
   })
 
   if (isLoading) {
@@ -71,7 +107,7 @@ export default function Agents() {
     .filter(agent => {
       // State filter
       if (selectedFilter === 'running') return agent.state === 'running'
-      if (selectedFilter === 'idle') return agent.state === 'stopped' || agent.state === 'not-created'
+      if (selectedFilter === 'stopped') return agent.state === 'stopped' || agent.state === 'not-created'
       return true // 'all'
     })
     .filter(agent => {
@@ -120,7 +156,7 @@ export default function Agents() {
               id="agent-filter"
               value={selectedFilter}
               onChange={(e) => {
-                setSelectedFilter(e.target.value as 'all' | 'running' | 'idle')
+                setSelectedFilter(e.target.value as 'all' | 'running' | 'stopped')
                 playClickSound()
                 e.target.blur() // Remove focus after selection
               }}
@@ -128,7 +164,7 @@ export default function Agents() {
             >
               <option value="all">All ({data?.agents.length || 0})</option>
               <option value="running">Running ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
-              <option value="idle">Stopped ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
+              <option value="stopped">Stopped ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
             </select>
           </div>
           
@@ -149,7 +185,12 @@ export default function Agents() {
           >
             <div className={styles.agentHeader}>
               <div className={styles.agentInfo}>
-                <h3 className={styles.agentName}>{agent.name}</h3>
+                <h3 className={styles.agentName} title={agent.name}>
+                  {agent.name.length > 20 ? `${agent.name.substring(0, 20)}...` : agent.name}
+                </h3>
+                <div className={styles.agentVersion}>
+                  {getAgentVersion(agent.name)}
+                </div>
                 <div className={styles.agentImage}>
                   {getAgentImage(agent.name)}
                 </div>
@@ -166,12 +207,13 @@ export default function Agents() {
                   onClick={(e) => {
                     e.stopPropagation()
                     playClickSound()
-                    // TODO: Implement start functionality
+                    startMutation.mutate(agent.name)
                   }}
+                  disabled={operatingAgent === agent.name}
                   aria-label={`Start ${agent.name} agent`}
                   title={`Start the ${agent.name} agent container`}
                 >
-                  Start
+                  {operatingAgent === agent.name ? 'Starting...' : 'Start'}
                 </button>
               )}
               {agent.state === 'running' && (
@@ -180,12 +222,13 @@ export default function Agents() {
                   onClick={(e) => {
                     e.stopPropagation()
                     playClickSound()
-                    // TODO: Implement stop functionality
+                    stopMutation.mutate(agent.name)
                   }}
+                  disabled={operatingAgent === agent.name}
                   aria-label={`Stop ${agent.name} agent`}
                   title={`Stop the ${agent.name} agent container`}
                 >
-                  Stop
+                  {operatingAgent === agent.name ? 'Stopping...' : 'Stop'}
                 </button>
               )}
               <button 

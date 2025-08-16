@@ -29,14 +29,11 @@
   margin-bottom: 24px;
 }
 
-.clickableCard {
-  cursor: pointer;
-  transition: all 0.3s ease;
+/* Ensure dashboard cards have same thin border as agent cards */
+.stats :global(.clickable):hover {
+  border: 1px solid var(--accent) !important;
 }
 
-.clickableCard:hover {
-  transform: translateY(-2px);
-}
 
 .stat {
   text-align: left;

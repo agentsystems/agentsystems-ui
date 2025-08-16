@@ -31,6 +31,19 @@ export const getAgentImage = (agentName: string): string => {
 }
 
 /**
+ * Extract version tag from agent image string
+ */
+export const getAgentVersion = (agentName: string): string => {
+  const imageString = getAgentImage(agentName)
+  const parts = imageString.split(':')
+  if (parts.length > 1) {
+    const tag = parts[parts.length - 1]
+    return tag === 'latest' ? 'latest' : `v${tag}`
+  }
+  return 'latest'
+}
+
+/**
  * Get status badge variant based on agent state
  */
 export const getStatusVariant = (state: string): string => {

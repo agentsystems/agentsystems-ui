@@ -166,9 +166,17 @@
 .agentName {
   font-size: 15px;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-family: var(--font-mono);
   color: var(--text);
+}
+
+.agentVersion {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  margin-bottom: 4px;
 }
 
 .agentImage {
@@ -261,9 +269,14 @@
   border-color: var(--success);
 }
 
-.startBtn:hover {
+.startBtn:hover:not(:disabled) {
   background: var(--success);
   color: white;
+}
+
+.startBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .stopBtn {
@@ -272,9 +285,14 @@
   border-color: var(--error);
 }
 
-.stopBtn:hover {
+.stopBtn:hover:not(:disabled) {
   background: var(--error);
   color: white;
+}
+
+.stopBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .invokeBtn {
