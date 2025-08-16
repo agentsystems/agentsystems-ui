@@ -95,4 +95,16 @@ export const agentsApi = {
    */
   stopAgent: (agentName: string) =>
     api.post<{success: boolean, message: string}>(`/agents/${agentName}/stop`),
+
+  /**
+   * List recent agent executions with optional filtering
+   * @param params - Query parameters for filtering and pagination
+   * @returns Promise with executions and pagination info
+   */
+  listExecutions: (params?: {
+    limit?: number
+    offset?: number
+    agent?: string
+    state?: string
+  }) => api.get(`/executions`, params),
 }

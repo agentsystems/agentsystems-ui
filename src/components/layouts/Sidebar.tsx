@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom'
 import { 
   HomeIcon, 
-  CpuChipIcon, 
+  CpuChipIcon,
+  BoltIcon,
   DocumentTextIcon, 
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline'
@@ -15,6 +16,7 @@ const navigationSections = [
     items: [
       { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: HomeIcon },
       { name: 'Agents', href: ROUTES.AGENTS, icon: CpuChipIcon },
+      { name: 'Executions', href: ROUTES.EXECUTIONS, icon: BoltIcon },
     ]
   },
   {

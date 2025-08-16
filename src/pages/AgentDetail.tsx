@@ -441,7 +441,22 @@ export default function AgentDetail() {
                 ) : (
                   <div className={styles.success}>
                     <h3>Result:</h3>
-                    <pre>{JSON.stringify(invocationResult.result, null, 2)}</pre>
+                    <pre>{
+                      (() => {
+                        try {
+                          // If it's a string, try to parse and beautify it
+                          if (typeof invocationResult.result === 'string') {
+                            const parsed = JSON.parse(invocationResult.result)
+                            return JSON.stringify(parsed, null, 2)
+                          }
+                          // If it's already an object, stringify it
+                          return JSON.stringify(invocationResult.result, null, 2)
+                        } catch {
+                          // If parsing fails, display the raw string
+                          return invocationResult.result as string
+                        }
+                      })()
+                    }</pre>
                   </div>
                 )}
                 <div className={styles.threadInfo}>
