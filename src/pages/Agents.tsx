@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import ErrorMessage from '@components/ErrorMessage'
@@ -27,6 +28,17 @@ import styles from './Agents.module.css'
 export default function Agents() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'running' | 'idle'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Initialize filter from URL parameter
+  useEffect(() => {
+    const filterParam = searchParams.get('filter')
+    if (filterParam && ['all', 'running', 'idle'].includes(filterParam)) {
+      setSelectedFilter(filterParam as 'all' | 'running' | 'idle')
+    }
+  }, [searchParams])
   
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['agents'],
@@ -54,17 +66,80 @@ export default function Agents() {
     )
   }
 
-  const agents = data?.agents || []
+  // Filter agents based on selected filter and search query
+  const filteredAgents = (data?.agents || [])
+    .filter(agent => {
+      // State filter
+      if (selectedFilter === 'running') return agent.state === 'running'
+      if (selectedFilter === 'idle') return agent.state === 'stopped' || agent.state === 'not-created'
+      return true // 'all'
+    })
+    .filter(agent => {
+      // Search filter
+      if (!searchQuery.trim()) return true
+      return agent.name.toLowerCase().includes(searchQuery.toLowerCase())
+    })
 
   return (
     <div className={styles.agents}>
       <div className={styles.header}>
         <h1>Agents</h1>
         <p className={styles.subtitle}>Manage and monitor your deployed agents</p>
+        
+        <div className={styles.filterControls}>
+          <div className={styles.searchGroup}>
+            <label htmlFor="agent-search">Search agents:</label>
+            <div className={styles.searchInputWrapper}>
+              <input
+                id="agent-search"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Type agent name..."
+                className={styles.searchInput}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('')
+                    playClickSound()
+                  }}
+                  className={styles.clearSearch}
+                  aria-label="Clear search"
+                  title="Clear search"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </div>
+          
+          <div className={styles.filterGroup}>
+            <label htmlFor="agent-filter">Filter by state:</label>
+            <select 
+              id="agent-filter"
+              value={selectedFilter}
+              onChange={(e) => {
+                setSelectedFilter(e.target.value as 'all' | 'running' | 'idle')
+                playClickSound()
+                e.target.blur() // Remove focus after selection
+              }}
+              className={styles.filterSelect}
+            >
+              <option value="all">All ({data?.agents.length || 0})</option>
+              <option value="running">Running ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
+              <option value="idle">Stopped ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
+            </select>
+          </div>
+          
+          <span className={styles.resultCount}>
+            Showing {filteredAgents.length} agent{filteredAgents.length !== 1 ? 's' : ''}
+          </span>
+        </div>
       </div>
 
       <div className={styles.grid}>
-        {agents.map((agent) => (
+        {filteredAgents.map((agent) => (
           <Card
             key={agent.name}
             onClick={() => navigate(`/agents/${agent.name}`)}
@@ -130,7 +205,30 @@ export default function Agents() {
         ))}
       </div>
 
-      {agents.length === 0 && (
+      {filteredAgents.length === 0 && (data?.agents || []).length > 0 && (
+        <Card className={styles.emptyState}>
+          <p>No agents match the current {searchQuery ? 'search and filter' : 'filter'}</p>
+          <p className={styles.emptyHint}>
+            {searchQuery 
+              ? `Try clearing the search or changing the filter`
+              : `Try selecting "All Agents" to see all available agents`
+            }
+          </p>
+          {searchQuery && (
+            <button 
+              onClick={() => {
+                setSearchQuery('')
+                playClickSound()
+              }}
+              className={styles.clearFiltersBtn}
+            >
+              Clear Search
+            </button>
+          )}
+        </Card>
+      )}
+
+      {(data?.agents || []).length === 0 && (
         <Card className={styles.emptyState}>
           <p>No agents found</p>
           <p className={styles.emptyHint}>

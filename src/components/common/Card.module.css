@@ -6,6 +6,8 @@
   transition: all 0.3s;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .card::before {
