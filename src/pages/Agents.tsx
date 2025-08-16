@@ -4,6 +4,8 @@ import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import ErrorMessage from '@components/ErrorMessage'
 import { useAudio } from '@hooks/useAudio'
+import { getAgentImage, getStatusVariant } from '@utils/agentHelpers'
+import { API_DEFAULTS } from '@constants/app'
 import styles from './Agents.module.css'
 
 export default function Agents() {
@@ -13,8 +15,8 @@ export default function Agents() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['agents'],
     queryFn: agentsApi.list,
-    refetchInterval: 5000,
-    retry: 2,
+    refetchInterval: API_DEFAULTS.REFETCH_INTERVAL,
+    retry: API_DEFAULTS.RETRY_COUNT,
   })
 
   if (isLoading) {
@@ -56,15 +58,10 @@ export default function Agents() {
               <div className={styles.agentInfo}>
                 <h3 className={styles.agentName}>{agent.name}</h3>
                 <div className={styles.agentImage}>
-                  {agent.name.includes('hello-world') ? 'agentsystems/hello-world-agent:latest' :
-                   agent.name.includes('template') ? 'agentsystems/agent-template:latest' :
-                   agent.name.includes('jokes') ? 'private-repository-examples/historical-events-jokes:0.1.0' :
-                   agent.name.includes('poetry') ? 'public-repository-examples/historical-events-poetry:0.1.0' :
-                   agent.name.includes('ibl') ? 'ironbirdlabs/ibl-agent-hello-there:latest' :
-                   `${agent.name}:latest`}
+                  {getAgentImage(agent.name)}
                 </div>
               </div>
-              <div className={`${styles.status} ${styles[agent.state === 'not-created' ? 'notcreated' : agent.state]}`}>
+              <div className={`${styles.status} ${styles[getStatusVariant(agent.state)]}`}>
                 {agent.state}
               </div>
             </div>

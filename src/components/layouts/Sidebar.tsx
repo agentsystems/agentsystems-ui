@@ -6,21 +6,22 @@ import {
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
+import { APP_VERSION, APP_NAME, ROUTES } from '@constants/app'
 import styles from './Sidebar.module.css'
 
 const navigationSections = [
   {
     title: 'Main',
     items: [
-      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-      { name: 'Agents', href: '/agents', icon: CpuChipIcon },
+      { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: HomeIcon },
+      { name: 'Agents', href: ROUTES.AGENTS, icon: CpuChipIcon },
     ]
   },
   {
     title: 'Platform',
     items: [
-      { name: 'Logs', href: '/logs', icon: DocumentTextIcon },
-      { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
+      { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
+      { name: 'Settings', href: ROUTES.SETTINGS, icon: Cog6ToothIcon },
     ]
   }
 ]
@@ -32,8 +33,8 @@ export default function Sidebar() {
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
         <div className={styles.logoGradient}>AS</div>
-        <span className={styles.logoText}>AgentSystems</span>
-        <div className={styles.logoBadge}>0.1.0</div>
+        <span className={styles.logoText}>{APP_NAME}</span>
+        <div className={styles.logoBadge}>{APP_VERSION}</div>
       </div>
       
       <nav className={styles.nav}>
@@ -58,7 +59,7 @@ export default function Sidebar() {
       </nav>
       
       <div className={styles.footer}>
-        <div className={styles.version}>0.1.0</div>
+        <div className={styles.version}>{APP_VERSION}</div>
       </div>
     </aside>
   )

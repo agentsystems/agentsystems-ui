@@ -2,18 +2,22 @@ import { useState, useEffect } from 'react'
 import { useAuthStore } from '@stores/authStore'
 import { useThemeStore } from '@stores/themeStore'
 import { isAudioEnabled, setAudioEnabled } from '@utils/audioFx'
+import { useAudio } from '@hooks/useAudio'
+import { APP_VERSION } from '@constants/app'
 import Card from '@components/common/Card'
 import styles from './Settings.module.css'
 
 export default function Settings() {
   const { token, gatewayUrl, setToken, setGatewayUrl } = useAuthStore()
   const { theme, scanlineEnabled, scanlineFrequency, setTheme, setScanlineEnabled, setScanlineFrequency } = useThemeStore()
+  const { playClickSound } = useAudio()
   const [audioEnabled, setAudioEnabledState] = useState(isAudioEnabled())
   
   const [localToken, setLocalToken] = useState(token || '')
   const [localGatewayUrl, setLocalGatewayUrl] = useState(gatewayUrl)
 
   const handleSave = () => {
+    playClickSound()
     setToken(localToken)
     setGatewayUrl(localGatewayUrl)
     alert('Settings saved!')
@@ -155,7 +159,7 @@ export default function Settings() {
           <div className={styles.about}>
             <div className={styles.aboutRow}>
               <span>Version</span>
-              <span className={styles.mono}>0.1.0</span>
+              <span className={styles.mono}>{APP_VERSION}</span>
             </div>
             <div className={styles.aboutRow}>
               <span>Gateway</span>

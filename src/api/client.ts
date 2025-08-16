@@ -1,12 +1,13 @@
 import axios, { AxiosInstance, AxiosError } from 'axios'
 import { useAuthStore } from '@stores/authStore'
+import { API_DEFAULTS } from '@constants/app'
 
 class ApiClient {
   private client: AxiosInstance
 
   constructor() {
     this.client = axios.create({
-      timeout: 30000,
+      timeout: API_DEFAULTS.TIMEOUT,
       headers: {
         'Content-Type': 'application/json',
       },
