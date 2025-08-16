@@ -65,7 +65,7 @@ export default function Dashboard() {
         <Card 
           onClick={() => {
             playClickSound()
-            navigate('/agents?filter=idle')
+            navigate('/agents?filter=stopped')
           }}
           className={styles.clickableCard}
           ariaLabel="View stopped agents"

@@ -20,6 +20,7 @@ export const API_DEFAULTS = {
 export const ROUTES = {
   DASHBOARD: '/dashboard',
   AGENTS: '/agents',
+  EXECUTIONS: '/executions',
   LOGS: '/logs',
   SETTINGS: '/settings',
 } as const

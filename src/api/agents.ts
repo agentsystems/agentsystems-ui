@@ -24,10 +24,10 @@ export const agentsApi = {
 
   /**
    * List agents filtered by state
-   * @param state - Filter by 'running', 'idle', or 'all'
+   * @param state - Filter by 'running', 'stopped', or 'all'
    * @returns Promise<{agents: string[]}> List of agent names matching the filter
    */
-  listFiltered: (state: 'running' | 'idle' | 'all') => 
+  listFiltered: (state: 'running' | 'stopped' | 'all') => 
     api.post<{agents: string[]}>('/agents', { state }),
 
   /**
@@ -79,4 +79,40 @@ export const agentsApi = {
    */
   uploadAndInvoke: (agentName: string, formData: FormData) =>
     api.upload<InvokeResponse>(`/invoke/${agentName}`, formData),
+
+  /**
+   * Start a stopped agent container
+   * @param agentName - Name of the agent to start
+   * @returns Promise<{success: boolean, message: string}> Start operation result
+   */
+  startAgent: (agentName: string) =>
+    api.post<{success: boolean, message: string}>(`/agents/${agentName}/start`),
+
+  /**
+   * Stop a running agent container  
+   * @param agentName - Name of the agent to stop
+   * @returns Promise<{success: boolean, message: string}> Stop operation result
+   */
+  stopAgent: (agentName: string) =>
+    api.post<{success: boolean, message: string}>(`/agents/${agentName}/stop`),
+
+  /**
+   * List recent agent executions with optional filtering
+   * @param params - Query parameters for filtering and pagination
+   * @returns Promise with executions and pagination info
+   */
+  listExecutions: (params?: {
+    limit?: number
+    offset?: number
+    agent?: string
+    state?: string
+  }) => api.get(`/executions`, params),
+
+  /**
+   * Get audit trail for a specific execution including hash chain data
+   * @param threadId - Thread ID of the execution
+   * @returns Promise with audit trail, input payload, and hash verification
+   */
+  getExecutionAudit: (threadId: string) =>
+    api.get(`/executions/${threadId}/audit`),
 }

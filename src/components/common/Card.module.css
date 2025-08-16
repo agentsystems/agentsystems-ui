@@ -39,7 +39,6 @@
 .clickable:hover {
   background: var(--surface-3);
   border-color: var(--accent);
-  transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 217, 255, 0.1);
   transition: all 0.3s ease;
 }

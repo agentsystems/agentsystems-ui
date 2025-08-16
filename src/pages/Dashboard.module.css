@@ -29,14 +29,16 @@
   margin-bottom: 24px;
 }
 
-.clickableCard {
-  cursor: pointer;
-  transition: all 0.3s ease;
+/* Override button role styling that might be causing brightness */
+:global(.theme-cyber) .stats [role="button"]:hover {
+  background: var(--surface) !important;
+  border: 1px solid var(--border-strong) !important;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.1) !important;
+  transform: none !important;
+  outline: none !important;
 }
 
-.clickableCard:hover {
-  transform: translateY(-2px);
-}
+
 
 .stat {
   text-align: left;
@@ -66,14 +68,6 @@
   font-family: var(--font-mono);
 }
 
-.clickableCard {
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.clickableCard:hover .statChange {
-  color: var(--accent);
-}
 
 .statChange.negative {
   color: var(--error);
