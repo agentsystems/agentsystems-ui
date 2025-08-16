@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
+import { sanitizeJsonString, rateLimiter } from '@utils/security'
 import type { InvocationResult } from '../types/api'
 import styles from './AgentDetail.module.css'
 
@@ -38,11 +39,27 @@ export default function AgentDetail() {
 
   const handleInvoke = () => {
     playClickSound()
+    
+    // Rate limiting to prevent spam
+    if (!rateLimiter.isAllowed('agent-invoke', 10, 60000)) {
+      alert('Too many invocation attempts. Please wait a moment before trying again.')
+      return
+    }
+    
     try {
-      const payload = JSON.parse(invokePayload)
+      // Sanitize JSON input before parsing
+      const sanitizedPayload = sanitizeJsonString(invokePayload)
+      const payload = JSON.parse(sanitizedPayload)
+      
+      // Update UI with sanitized payload if it was changed
+      if (sanitizedPayload !== invokePayload) {
+        setInvokePayload(sanitizedPayload)
+      }
+      
       invokeMutation.mutate(payload)
     } catch (error) {
       console.error('Invalid JSON payload:', error)
+      alert('Invalid JSON format. Please check your payload.')
     }
   }
 
