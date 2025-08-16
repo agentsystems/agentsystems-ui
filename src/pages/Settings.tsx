@@ -74,11 +74,17 @@ export default function Settings() {
                   }
                 }}
                 className={`${styles.input} ${errors.gatewayUrl ? styles.inputError : ''}`}
+                aria-describedby="gateway-url-hint gateway-url-error"
+                aria-invalid={!!errors.gatewayUrl}
+                placeholder="http://localhost:18080"
+                required
               />
               {errors.gatewayUrl && (
-                <span className={styles.errorText}>{errors.gatewayUrl}</span>
+                <span className={styles.errorText} id="gateway-url-error" role="alert">
+                  {errors.gatewayUrl}
+                </span>
               )}
-              <span className={styles.hint}>
+              <span className={styles.hint} id="gateway-url-hint">
                 The URL of your AgentSystems gateway
               </span>
             </div>
@@ -96,18 +102,31 @@ export default function Settings() {
                   }
                 }}
                 className={`${styles.input} ${errors.token ? styles.inputError : ''}`}
+                aria-describedby="auth-token-hint auth-token-error"
+                aria-invalid={!!errors.token}
+                placeholder="demo"
+                required
               />
               {errors.token && (
-                <span className={styles.errorText}>{errors.token}</span>
+                <span className={styles.errorText} id="auth-token-error" role="alert">
+                  {errors.token}
+                </span>
               )}
-              <span className={styles.hint}>
+              <span className={styles.hint} id="auth-token-hint">
                 Bearer token for authentication
               </span>
             </div>
 
-            <button onClick={handleSave} className={styles.saveButton}>
+            <button 
+              onClick={handleSave} 
+              className={styles.saveButton}
+              aria-describedby="save-button-hint"
+            >
               Save Connection Settings
             </button>
+            <span className={styles.hint} id="save-button-hint">
+              Apply changes to gateway URL and authentication token
+            </span>
           </div>
         </Card>
 

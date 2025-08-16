@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, KeyboardEvent } from 'react'
 import clsx from 'clsx'
 import { useAudio } from '@hooks/useAudio'
 import styles from './Card.module.css'
@@ -12,6 +12,12 @@ interface CardProps {
   variant?: 'default' | 'bordered' | 'elevated'
   /** Callback when card is clicked - makes card interactive */
   onClick?: () => void
+  /** Accessible label for screen readers when card is interactive */
+  ariaLabel?: string
+  /** Description for assistive technology */
+  ariaDescription?: string
+  /** Whether this card represents a selected/active state */
+  isSelected?: boolean
 }
 
 /**
@@ -43,7 +49,10 @@ export default function Card({
   children, 
   className, 
   variant = 'default',
-  onClick 
+  onClick,
+  ariaLabel,
+  ariaDescription,
+  isSelected 
 }: CardProps) {
   const { playClickSound } = useAudio()
 
@@ -52,15 +61,30 @@ export default function Card({
     onClick?.()
   }
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault()
+      handleClick()
+    }
+  }
+
+  const isInteractive = !!onClick
+
   return (
     <div 
       className={clsx(
         styles.card,
         styles[variant],
-        onClick && styles.clickable,
+        isInteractive && styles.clickable,
         className
       )}
-      onClick={onClick ? handleClick : undefined}
+      onClick={isInteractive ? handleClick : undefined}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      role={isInteractive ? 'button' : 'region'}
+      aria-label={ariaLabel}
+      aria-description={ariaDescription}
+      aria-pressed={isSelected}
     >
       {children}
     </div>

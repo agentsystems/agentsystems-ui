@@ -69,6 +69,8 @@ export default function Agents() {
             key={agent.name}
             onClick={() => navigate(`/agents/${agent.name}`)}
             className={styles.agentCard}
+            ariaLabel={`View details for ${agent.name} agent`}
+            ariaDescription={`Agent is currently ${agent.state}. Click to view configuration and invoke options.`}
           >
             <div className={styles.agentHeader}>
               <div className={styles.agentInfo}>
@@ -82,7 +84,7 @@ export default function Agents() {
               </div>
             </div>
 
-            <div className={styles.agentActions}>
+            <div className={styles.agentActions} role="group" aria-label={`Actions for ${agent.name}`}>
               {agent.state === 'stopped' && (
                 <button 
                   className={styles.startBtn}
@@ -91,6 +93,8 @@ export default function Agents() {
                     playClickSound()
                     // TODO: Implement start functionality
                   }}
+                  aria-label={`Start ${agent.name} agent`}
+                  title={`Start the ${agent.name} agent container`}
                 >
                   Start
                 </button>
@@ -103,6 +107,8 @@ export default function Agents() {
                     playClickSound()
                     // TODO: Implement stop functionality
                   }}
+                  aria-label={`Stop ${agent.name} agent`}
+                  title={`Stop the ${agent.name} agent container`}
                 >
                   Stop
                 </button>
@@ -114,6 +120,8 @@ export default function Agents() {
                   playClickSound()
                   navigate(`/agents/${agent.name}`)
                 }}
+                aria-label={`Invoke ${agent.name} agent`}
+                title={`Open invocation interface for ${agent.name}`}
               >
                 Invoke
               </button>

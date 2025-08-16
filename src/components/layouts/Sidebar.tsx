@@ -30,17 +30,17 @@ export default function Sidebar() {
   const { playClickSound } = useAudio()
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logo}>
-        <div className={styles.logoGradient}>AS</div>
+    <aside className={styles.sidebar} id="navigation" role="navigation" aria-label="Main navigation">
+      <div className={styles.logo} role="banner">
+        <div className={styles.logoGradient} aria-hidden="true">AS</div>
         <span className={styles.logoText}>{APP_NAME}</span>
-        <div className={styles.logoBadge}>{APP_VERSION}</div>
+        <div className={styles.logoBadge} aria-label={`Version ${APP_VERSION}`}>{APP_VERSION}</div>
       </div>
       
-      <nav className={styles.nav}>
+      <nav className={styles.nav} aria-label="Application sections">
         {navigationSections.map((section) => (
-          <div key={section.title} className={styles.navSection}>
-            <div className={styles.navTitle}>{section.title}</div>
+          <div key={section.title} className={styles.navSection} role="group" aria-labelledby={`nav-${section.title.toLowerCase()}`}>
+            <div className={styles.navTitle} id={`nav-${section.title.toLowerCase()}`}>{section.title}</div>
             {section.items.map((item) => (
               <NavLink
                 key={item.name}
@@ -49,6 +49,8 @@ export default function Sidebar() {
                   `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
                 }
                 onClick={playClickSound}
+                aria-label={`Navigate to ${item.name} page`}
+                aria-current={({ isActive }) => isActive ? 'page' : undefined}
               >
                 <item.icon className={styles.navIcon} aria-hidden="true" />
                 <span>{item.name}</span>

@@ -1,0 +1,30 @@
+.skipLinks {
+  position: fixed;
+  top: -100px;
+  left: 0;
+  z-index: 9999;
+}
+
+.skipLink {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--accent);
+  color: white;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius) 0;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: top 0.2s;
+}
+
+.skipLink:focus {
+  top: 0;
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.skipLink:hover {
+  background: var(--accent-2);
+}
