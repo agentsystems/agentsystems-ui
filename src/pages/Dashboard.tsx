@@ -1,9 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
+import { useAudio } from '@hooks/useAudio'
 import styles from './Dashboard.module.css'
 
 export default function Dashboard() {
+  const navigate = useNavigate()
+  const { playClickSound } = useAudio()
+  
   const { data: agentsData } = useQuery({
     queryKey: ['agents'],
     queryFn: agentsApi.list,
@@ -25,41 +30,52 @@ export default function Dashboard() {
       </div>
 
       <div className={styles.stats}>
-        <Card>
+        <Card 
+          onClick={() => {
+            playClickSound()
+            navigate('/agents')
+          }}
+          className={styles.clickableCard}
+          ariaLabel="View all agents"
+        >
           <div className={styles.stat}>
             <div className={styles.statLabel}>Total Agents</div>
             <div className={styles.statValue}>{stats.totalAgents}</div>
-            <div className={styles.statChange}>+0 from last hour</div>
+            <div className={styles.statChange}>View all agents</div>
           </div>
         </Card>
         
-        <Card>
+        <Card 
+          onClick={() => {
+            playClickSound()
+            navigate('/agents?filter=running')
+          }}
+          className={styles.clickableCard}
+          ariaLabel="View running agents"
+        >
           <div className={styles.stat}>
             <div className={styles.statLabel}>Running</div>
             <div className={styles.statValue} style={{ color: 'var(--success)' }}>
               {stats.runningAgents}
             </div>
-            <div className={styles.statChange}>+{stats.runningAgents} active</div>
+            <div className={styles.statChange}>Click to view running agents</div>
           </div>
         </Card>
         
-        <Card>
+        <Card 
+          onClick={() => {
+            playClickSound()
+            navigate('/agents?filter=idle')
+          }}
+          className={styles.clickableCard}
+          ariaLabel="View stopped agents"
+        >
           <div className={styles.stat}>
             <div className={styles.statLabel}>Stopped</div>
             <div className={styles.statValue} style={{ color: 'var(--warning)' }}>
-              {stats.stoppedAgents}
+              {stats.stoppedAgents + stats.notCreated}
             </div>
-            <div className={styles.statChange}>-{stats.stoppedAgents} idle</div>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className={styles.stat}>
-            <div className={styles.statLabel}>Not Created</div>
-            <div className={styles.statValue} style={{ color: 'var(--text-muted)' }}>
-              {stats.notCreated}
-            </div>
-            <div className={styles.statChange}>Configured but not deployed</div>
+            <div className={styles.statChange}>Click to view stopped agents</div>
           </div>
         </Card>
       </div>

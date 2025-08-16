@@ -29,6 +29,15 @@
   margin-bottom: 24px;
 }
 
+.clickableCard {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clickableCard:hover {
+  transform: translateY(-2px);
+}
+
 .stat {
   text-align: left;
   padding: 0;
@@ -53,8 +62,17 @@
 
 .statChange {
   font-size: 12px;
-  color: var(--success);
+  color: var(--text-muted);
   font-family: var(--font-mono);
+}
+
+.clickableCard {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clickableCard:hover .statChange {
+  color: var(--accent);
 }
 
 .statChange.negative {

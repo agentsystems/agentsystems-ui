@@ -10,12 +10,17 @@ export interface AgentsResponse {
 }
 
 export interface AgentMetadata {
+  namespace: string
   name: string
   version: string
-  description?: string
+  description: string
+  model_dependencies: string[]
+  // Optional fields that might be present
   author?: string
   tags?: string[]
   capabilities?: string[]
+  created_at?: string
+  last_updated?: string
 }
 
 export interface AgentHealth {
@@ -38,9 +43,10 @@ export interface InvokeResponse {
 }
 
 export interface InvocationStatus {
-  state: 'pending' | 'running' | 'completed' | 'failed'
+  thread_id: string
+  state: 'queued' | 'running' | 'completed' | 'failed'
   progress?: {
-    percent: number
+    percent?: number
     message?: string
     current?: string
     steps?: Array<{
@@ -49,12 +55,21 @@ export interface InvocationStatus {
       state: 'pending' | 'running' | 'completed' | 'failed'
     }>
   }
+  error?: {
+    message: string
+    status?: number
+    body?: string
+  }
 }
 
 export interface InvocationResult {
+  thread_id: string
   result?: unknown
-  error?: string
-  metadata?: Record<string, unknown>
+  error?: {
+    message: string
+    status?: number
+    body?: string
+  }
 }
 
 export interface ApiError {

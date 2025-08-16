@@ -23,12 +23,20 @@ export const agentsApi = {
   list: () => api.get<AgentsResponse>('/agents'),
 
   /**
+   * List agents filtered by state
+   * @param state - Filter by 'running', 'idle', or 'all'
+   * @returns Promise<{agents: string[]}> List of agent names matching the filter
+   */
+  listFiltered: (state: 'running' | 'idle' | 'all') => 
+    api.post<{agents: string[]}>('/agents', { state }),
+
+  /**
    * Get detailed metadata for a specific agent
    * @param agentName - Name of the agent to query
-   * @returns Promise<AgentMetadata> Agent details including version, description, capabilities
+   * @returns Promise<AgentMetadata> Agent details including version, description, model dependencies
    */
   getMetadata: (agentName: string) => 
-    api.get<AgentMetadata>(`/${agentName}/metadata`),
+    api.get<AgentMetadata>(`/agents/${agentName}`),
 
   /**
    * Check the health status of a specific agent
