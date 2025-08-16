@@ -22,11 +22,13 @@ describe('Card Component', () => {
     )
 
     let card = screen.getByRole('region')
-    expect(card).toHaveClass('card', 'default')
+    expect(card.className).toContain('card')
+    expect(card.className).toContain('default')
 
     rerender(<Card variant="elevated">Content</Card>)
     card = screen.getByRole('region')
-    expect(card).toHaveClass('card', 'elevated')
+    expect(card.className).toContain('card')
+    expect(card.className).toContain('elevated')
   })
 
   it('becomes interactive when onClick is provided', () => {

@@ -27,16 +27,16 @@ describe('Agents Page', () => {
   it('renders agents list successfully', async () => {
     renderWithProviders(<Agents />)
 
-    // Check page title and subtitle
-    expect(screen.getByText('Agents')).toBeInTheDocument()
-    expect(screen.getByText('Manage and monitor your deployed agents')).toBeInTheDocument()
-
-    // Wait for agents to load
+    // Wait for agents to load first
     await waitFor(() => {
       expect(screen.getByText('hello-world-agent')).toBeInTheDocument()
-      expect(screen.getByText('test-agent')).toBeInTheDocument()
-      expect(screen.getByText('config-agent')).toBeInTheDocument()
     })
+
+    // Then check page structure
+    expect(screen.getByText('Agents')).toBeInTheDocument()
+    expect(screen.getByText('Manage and monitor your deployed agents')).toBeInTheDocument()
+    expect(screen.getByText('test-agent')).toBeInTheDocument()
+    expect(screen.getByText('config-agent')).toBeInTheDocument()
   })
 
   it('displays correct agent states', async () => {

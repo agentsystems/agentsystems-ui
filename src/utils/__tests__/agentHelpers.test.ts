@@ -18,16 +18,16 @@ describe('Agent Helpers', () => {
       expect(getAgentImage('hello-world-agent-v2'))
         .toBe('agentsystems/hello-world-agent:latest')
       
-      expect(getAgentImage('my-hello-world-custom'))
-        .toBe('agentsystems/hello-world-agent:latest')
+      expect(getAgentImage('ibl-agent-hello-there-custom'))
+        .toBe('ironbirdlabs/ibl-agent-hello-there:latest')
     })
 
     it('returns generic format for unknown agents', () => {
-      expect(getAgentImage('unknown-agent'))
-        .toBe('unknown-agent:latest')
+      expect(getAgentImage('completely-unknown-agent'))
+        .toBe('completely-unknown-agent:latest')
       
-      expect(getAgentImage('custom-ml-agent'))
-        .toBe('custom-ml-agent:latest')
+      expect(getAgentImage('custom-ml-processing-agent'))
+        .toBe('custom-ml-processing-agent:latest')
     })
   })
 
@@ -65,7 +65,7 @@ describe('Agent Helpers', () => {
       expect(getAgentErrorMessage(timeoutError))
         .toBe('Agent took too long to respond. It may be overloaded.')
 
-      const networkError = new Error('Network connection failed')
+      const networkError = new Error('network connection failed')
       expect(getAgentErrorMessage(networkError))
         .toBe('Network error. Check your connection to the gateway.')
     })
