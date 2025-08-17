@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, LinkIcon } from '@heroicons/react/24/outline'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -343,6 +343,7 @@ export default function Executions() {
                     }}
                     disabled={retryMutation.isPending}
                   >
+                    <ArrowPathIcon />
                     {retryMutation.isPending ? 'Retrying...' : 'Retry'}
                   </button>
                 )}
@@ -503,6 +504,7 @@ export default function Executions() {
                       playClickSound()
                     }}
                   >
+                    {showAuditTrail ? <ChevronUpIcon /> : <ChevronDownIcon />}
                     {showAuditTrail ? 'Hide' : 'Show'} Details
                   </button>
                 </div>

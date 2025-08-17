@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
-import { ChartBarIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, ListBulletIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
@@ -208,6 +208,7 @@ export default function AgentDetail() {
                   }}
                   disabled={startMutation.isPending}
                 >
+                  <PowerIcon />
                   {startMutation.isPending || invokeMutation.isPending ? 'Turning On...' : getAgentButtonText(currentAgent.state)}
                 </button>
               ) : (
@@ -219,6 +220,7 @@ export default function AgentDetail() {
                   }}
                   disabled={stopMutation.isPending}
                 >
+                  <PowerIcon />
                   {stopMutation.isPending ? 'Turning Off...' : getAgentButtonText(currentAgent.state)}
                 </button>
               )}
@@ -424,6 +426,7 @@ export default function AgentDetail() {
               onClick={handleInvoke}
               disabled={invokeMutation.isPending || !!pollingStatus}
             >
+              <BoltIcon className={styles.executeIcon} />
               {invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Running...' : 'Execute'}
             </button>
 
@@ -494,6 +497,7 @@ export default function AgentDetail() {
                 window.open(`/executions?agent=${agentName}`, '_blank')
               }}
             >
+              <ListBulletIcon />
               View All
             </button>
           </div>

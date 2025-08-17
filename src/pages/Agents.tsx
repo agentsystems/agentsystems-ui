@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import ErrorMessage from '@components/ErrorMessage'
+import { PowerIcon, EyeIcon } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
 import { getAgentImage, getStatusVariant, getAgentVersion, getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import { API_DEFAULTS } from '@constants/app'
@@ -227,6 +228,7 @@ export default function Agents() {
                   aria-label={`Start ${agent.name} agent`}
                   title={`Start the ${agent.name} agent container`}
                 >
+                  <PowerIcon />
                   {operatingAgent === agent.name ? 'Turning On...' : getAgentButtonText(agent.state)}
                 </button>
               )}
@@ -242,6 +244,7 @@ export default function Agents() {
                   aria-label={`Stop ${agent.name} agent`}
                   title={`Stop the ${agent.name} agent container`}
                 >
+                  <PowerIcon />
                   {operatingAgent === agent.name ? 'Turning Off...' : getAgentButtonText(agent.state)}
                 </button>
               )}
@@ -255,6 +258,7 @@ export default function Agents() {
                 aria-label={`View ${agent.name} agent`}
                 title={`Open ${agent.name} agent page`}
               >
+                <EyeIcon />
                 View
               </button>
             </div>

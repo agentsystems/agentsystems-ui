@@ -422,28 +422,15 @@
   border-top: 1px solid var(--border);
 }
 
-.docLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: var(--surface-3);
-  color: var(--accent);
-  text-decoration: none;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  font-size: 0.875rem;
-  transition: all 0.2s;
-}
-
-.docLink:hover {
-  background-color: var(--accent);
-  color: var(--bg);
-}
 
 .docIcon {
   width: 16px;
   height: 16px;
+}
+
+.executeIcon {
+  width: 18px;
+  height: 18px;
 }
 
 .metadataGrid {
