@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CheckIcon } from '@heroicons/react/24/outline'
 import { useAuthStore } from '@stores/authStore'
 import { useThemeStore } from '@stores/themeStore'
 import { isAudioEnabled, setAudioEnabled } from '@utils/audioFx'
@@ -142,9 +143,10 @@ export default function Settings() {
 
             <button 
               onClick={handleSave} 
-              className={styles.saveButton}
+              className="btn btn-lg btn-subtle"
               aria-describedby="save-button-hint"
             >
+              <CheckIcon />
               Save Connection Settings
             </button>
             <span className={styles.hint} id="save-button-hint">

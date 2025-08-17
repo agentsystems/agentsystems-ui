@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -60,12 +61,15 @@ const mockExecutions: Execution[] = [
 export default function Executions() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
   const [showAuditTrail, setShowAuditTrail] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [stateFilter, setStateFilter] = useState<'all' | 'completed' | 'failed' | 'running'>('all')
+  const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'compromised'>('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [copiedThreadId, setCopiedThreadId] = useState<string | null>(null)
 
   const retryMutation = useMutation({
     mutationFn: (execution: Execution) => {
@@ -95,12 +99,45 @@ export default function Executions() {
 
   const executions = executionsResponse?.executions || []
 
+  // Bulk audit verification
+  const { data: auditVerification } = useQuery({
+    queryKey: ['audit-verification'],
+    queryFn: agentsApi.verifyAuditIntegrity,
+    refetchInterval: 30000, // Check every 30 seconds
+  })
+
+  // Get unique thread IDs that are compromised
+  const compromisedThreadIds = new Set(
+    auditVerification?.compromised_entries?.map((entry: any) => entry.thread_id) || []
+  )
+  const compromisedExecutionCount = compromisedThreadIds.size
+
   // Audit trail query for selected execution
   const { data: auditData } = useQuery({
     queryKey: ['execution-audit', selectedExecution?.thread_id],
     queryFn: () => agentsApi.getExecutionAudit(selectedExecution!.thread_id),
     enabled: !!selectedExecution && showAuditTrail,
   })
+
+
+  // Initialize from URL parameters (one time only)
+  useEffect(() => {
+    const threadParam = searchParams.get('thread')
+    const agentParam = searchParams.get('agent')
+    
+    // Auto-select execution from thread parameter
+    if (threadParam && executions.length > 0) {
+      const execution = executions.find(e => e.thread_id === threadParam)
+      if (execution) {
+        setSelectedExecution(execution)
+      }
+    }
+    
+    // Set initial search query from agent parameter (only if search is empty)
+    if (agentParam && searchQuery === '') {
+      setSearchQuery(agentParam)
+    }
+  }, [executions]) // Removed searchParams and searchQuery from dependencies
 
   // Filter executions
   const filteredExecutions = executions.filter(execution => {
@@ -122,7 +159,15 @@ export default function Executions() {
       }
     }
     
-    return matchesSearch && matchesState && matchesDate
+    // Verification filter
+    let matchesVerification = true
+    if (verificationFilter === 'compromised') {
+      matchesVerification = compromisedThreadIds.has(execution.thread_id)
+    } else if (verificationFilter === 'verified') {
+      matchesVerification = !compromisedThreadIds.has(execution.thread_id)
+    }
+    
+    return matchesSearch && matchesState && matchesDate && matchesVerification
   })
 
   const getStatusColor = (state: string) => {
@@ -177,7 +222,34 @@ export default function Executions() {
   return (
     <div className={styles.executions}>
       <div className={styles.header}>
-        <h1>Executions</h1>
+        <div className={styles.titleRow}>
+          <h1>Executions</h1>
+          {auditVerification && (
+            <button
+              className={`${styles.auditStatus} ${auditVerification.verified ? styles.auditValid : styles.auditInvalid}`}
+              onClick={() => {
+                if (!auditVerification.verified) {
+                  setVerificationFilter('compromised')
+                  playClickSound()
+                }
+              }}
+              disabled={auditVerification.verified}
+              title={auditVerification.verified ? 'All executions verified' : 'Click to filter compromised executions'}
+            >
+              {auditVerification.verified ? (
+                <ShieldCheckIcon className={styles.auditStatusIcon} />
+              ) : (
+                <ShieldExclamationIcon className={styles.auditStatusIcon} />
+              )}
+              <span>
+                {auditVerification.verified 
+                  ? `All ${auditVerification.total_entries} entries verified` 
+                  : `${compromisedExecutionCount} compromised execution${compromisedExecutionCount !== 1 ? 's' : ''}`
+                }
+              </span>
+            </button>
+          )}
+        </div>
         <p className={styles.subtitle}>Track agent invocations and results</p>
         
         <div className={styles.controlsContainer}>
@@ -204,6 +276,19 @@ export default function Executions() {
               <option value="completed">Completed ({executions.filter(e => e.state === 'completed').length})</option>
               <option value="failed">Failed ({executions.filter(e => e.state === 'failed').length})</option>
               <option value="running">Running ({executions.filter(e => e.state === 'running').length})</option>
+            </select>
+            
+            <select
+              className={styles.filterSelect}
+              value={verificationFilter}
+              onChange={(e) => {
+                setVerificationFilter(e.target.value as 'all' | 'verified' | 'compromised')
+                e.target.blur()
+              }}
+            >
+              <option value="all">All Verification ({executions.length})</option>
+              <option value="verified">Verified ({executions.length - compromisedExecutionCount})</option>
+              <option value="compromised">Compromised ({compromisedExecutionCount})</option>
             </select>
             
             <span className={styles.resultCount}>
@@ -271,7 +356,11 @@ export default function Executions() {
                   }}
                 >
                   <span className={styles.agentName}>
-                    <span className={styles.verifiedIcon} title="Cryptographically verified execution">✓</span>
+                    {compromisedThreadIds.has(execution.thread_id) ? (
+                      <ShieldExclamationIcon className={styles.tamperedIcon} title="Chain compromised - execution tampered" />
+                    ) : (
+                      <ShieldCheckIcon className={styles.verifiedIcon} title="Cryptographically verified execution" />
+                    )}
                     {execution.agent}
                   </span>
                   <span 
@@ -312,15 +401,16 @@ export default function Executions() {
             <Card>
               <div className={styles.detailHeader}>
                 <h2>Execution Details</h2>
-                {selectedExecution.payload && (selectedExecution.state === 'completed' || selectedExecution.state === 'failed') && (
+                {selectedExecution.payload && selectedExecution.state === 'failed' && (
                   <button
-                    className={styles.retryBtn}
+                    className="btn btn-sm btn-subtle"
                     onClick={() => {
                       playClickSound()
                       retryMutation.mutate(selectedExecution)
                     }}
                     disabled={retryMutation.isPending}
                   >
+                    <ArrowPathIcon />
                     {retryMutation.isPending ? 'Retrying...' : 'Retry'}
                   </button>
                 )}
@@ -328,12 +418,42 @@ export default function Executions() {
               <div className={styles.detailGrid}>
                 <div className={styles.detailItem}>
                   <label>Thread ID</label>
-                  <span className={styles.detailValue}>{selectedExecution.thread_id}</span>
+                  <div className={styles.detailValueWithAction}>
+                    <span className={styles.detailValue}>{selectedExecution.thread_id}</span>
+                    <button
+                      className="btn btn-icon btn-subtle"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedExecution.thread_id)
+                        playClickSound()
+                        setCopiedThreadId(selectedExecution.thread_id)
+                        setTimeout(() => setCopiedThreadId(null), 2000)
+                      }}
+                      title="Copy thread ID to clipboard"
+                    >
+                      {copiedThreadId === selectedExecution.thread_id ? (
+                        <CheckIcon />
+                      ) : (
+                        <DocumentDuplicateIcon />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 
                 <div className={styles.detailItem}>
                   <label>Agent</label>
-                  <span className={styles.detailValue}>{selectedExecution.agent}</span>
+                  <div className={styles.detailValueWithAction}>
+                    <span className={styles.detailValue}>{selectedExecution.agent}</span>
+                    <button
+                      className="btn btn-icon btn-subtle"
+                      onClick={() => {
+                        navigate(`/agents/${selectedExecution.agent}`)
+                        playClickSound()
+                      }}
+                      title="Go to agent details"
+                    >
+                      <ArrowTopRightOnSquareIcon />
+                    </button>
+                  </div>
                 </div>
                 
                 <div className={styles.detailItem}>
@@ -445,16 +565,28 @@ export default function Executions() {
                 <div className={styles.auditHeader}>
                   <h3>Hash Chain Verification</h3>
                   <button
-                    className={styles.toggleAuditBtn}
+                    className="btn btn-sm btn-subtle"
                     onClick={() => {
                       setShowAuditTrail(!showAuditTrail)
                       playClickSound()
                     }}
                   >
+                    {showAuditTrail ? <ChevronUpIcon /> : <ChevronDownIcon />}
                     {showAuditTrail ? 'Hide' : 'Show'} Details
                   </button>
                 </div>
                 
+                {/* Show tampering status for this execution */}
+                {compromisedThreadIds.has(selectedExecution.thread_id) && (
+                  <div className={styles.tamperingAlert}>
+                    <ShieldExclamationIcon className={styles.alertIcon} />
+                    <div>
+                      <strong>This execution has been tampered with</strong>
+                      <p>The audit trail shows evidence of data modification or hash chain compromise.</p>
+                    </div>
+                  </div>
+                )}
+
                 {showAuditTrail && auditData && (
                   <div className={styles.auditContent}>
                     {/* Execution-level hash summary */}
@@ -471,10 +603,6 @@ export default function Executions() {
                           <code className={styles.hashValue}>
                             {auditData.audit_trail?.[auditData.audit_trail.length - 1]?.entry_hash || 'N/A'}
                           </code>
-                        </div>
-                        <div className={styles.chainStatus}>
-                          <span className={styles.chainStatusIcon}>🔗</span>
-                          <span>Chain integrity maintained</span>
                         </div>
                       </div>
                     </div>

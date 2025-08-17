@@ -4,8 +4,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import ErrorMessage from '@components/ErrorMessage'
+import { PowerIcon, EyeIcon } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
-import { getAgentImage, getStatusVariant, getAgentVersion } from '@utils/agentHelpers'
+import { getAgentImage, getStatusVariant, getAgentVersion, getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import { API_DEFAULTS } from '@constants/app'
 import styles from './Agents.module.css'
 
@@ -163,8 +164,8 @@ export default function Agents() {
               className={styles.filterSelect}
             >
               <option value="all">All ({data?.agents.length || 0})</option>
-              <option value="running">Running ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
-              <option value="stopped">Stopped ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
+              <option value="running">On ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
+              <option value="stopped">Off ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
             </select>
           </div>
           
@@ -174,7 +175,7 @@ export default function Agents() {
           
           {(data?.agents || []).some(a => a.state === 'running') && (
             <button
-              className={styles.stopAllBtn}
+              className="btn btn-sm btn-subtle"
               onClick={() => {
                 playClickSound()
                 const runningAgents = (data?.agents || []).filter(a => a.state === 'running')
@@ -182,7 +183,7 @@ export default function Agents() {
               }}
               disabled={stopMutation.isPending}
             >
-              Stop All Running
+              Turn Off All
             </button>
           )}
         </div>
@@ -210,14 +211,14 @@ export default function Agents() {
                 </div>
               </div>
               <div className={`${styles.status} ${styles[getStatusVariant(agent.state)]}`}>
-                {agent.state}
+                {getAgentDisplayState(agent.state)}
               </div>
             </div>
 
             <div className={styles.agentActions} role="group" aria-label={`Actions for ${agent.name}`}>
               {agent.state === 'stopped' && (
                 <button 
-                  className={styles.startBtn}
+                  className="btn btn-sm btn-subtle"
                   onClick={(e) => {
                     e.stopPropagation()
                     playClickSound()
@@ -227,12 +228,13 @@ export default function Agents() {
                   aria-label={`Start ${agent.name} agent`}
                   title={`Start the ${agent.name} agent container`}
                 >
-                  {operatingAgent === agent.name ? 'Starting...' : 'Start'}
+                  <PowerIcon />
+                  {operatingAgent === agent.name ? 'Turning On...' : getAgentButtonText(agent.state)}
                 </button>
               )}
               {agent.state === 'running' && (
                 <button 
-                  className={styles.stopBtn}
+                  className="btn btn-sm btn-subtle"
                   onClick={(e) => {
                     e.stopPropagation()
                     playClickSound()
@@ -242,20 +244,22 @@ export default function Agents() {
                   aria-label={`Stop ${agent.name} agent`}
                   title={`Stop the ${agent.name} agent container`}
                 >
-                  {operatingAgent === agent.name ? 'Stopping...' : 'Stop'}
+                  <PowerIcon />
+                  {operatingAgent === agent.name ? 'Turning Off...' : getAgentButtonText(agent.state)}
                 </button>
               )}
               <button 
-                className={styles.invokeBtn}
+                className="btn btn-sm btn-subtle"
                 onClick={(e) => {
                   e.stopPropagation()
                   playClickSound()
                   navigate(`/agents/${agent.name}`)
                 }}
-                aria-label={`Invoke ${agent.name} agent`}
-                title={`Open invocation interface for ${agent.name}`}
+                aria-label={`View ${agent.name} agent`}
+                title={`Open ${agent.name} agent page`}
               >
-                Invoke
+                <EyeIcon />
+                View
               </button>
             </div>
           </Card>

@@ -54,11 +54,11 @@ export default function Dashboard() {
           ariaLabel="View running agents"
         >
           <div className={styles.stat}>
-            <div className={styles.statLabel}>Running</div>
+            <div className={styles.statLabel}>On</div>
             <div className={styles.statValue} style={{ color: 'var(--success)' }}>
               {stats.runningAgents}
             </div>
-            <div className={styles.statChange}>Click to view running agents</div>
+            <div className={styles.statChange}>Click to view agents that are on</div>
           </div>
         </Card>
         
@@ -71,11 +71,11 @@ export default function Dashboard() {
           ariaLabel="View stopped agents"
         >
           <div className={styles.stat}>
-            <div className={styles.statLabel}>Stopped</div>
+            <div className={styles.statLabel}>Off</div>
             <div className={styles.statValue} style={{ color: 'var(--warning)' }}>
               {stats.stoppedAgents + stats.notCreated}
             </div>
-            <div className={styles.statChange}>Click to view stopped agents</div>
+            <div className={styles.statChange}>Click to view agents that are off</div>
           </div>
         </Card>
       </div>

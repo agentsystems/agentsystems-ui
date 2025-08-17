@@ -115,4 +115,11 @@ export const agentsApi = {
    */
   getExecutionAudit: (threadId: string) =>
     api.get(`/executions/${threadId}/audit`),
+
+  /**
+   * Verify integrity of the entire audit log chain
+   * @returns Promise with verification summary and compromised entries
+   */
+  verifyAuditIntegrity: () =>
+    api.get('/audit/integrity-check'),
 }

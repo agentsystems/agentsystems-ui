@@ -320,13 +320,13 @@
   cursor: not-allowed;
 }
 
-.invokeBtn {
+.viewBtn {
   background: var(--accent);
   color: var(--bg);
   border: none;
 }
 
-.invokeBtn:hover {
+.viewBtn:hover {
   opacity: 0.9;
 }
 
@@ -427,10 +427,6 @@
   background: var(--surface-3);
 }
 
-:global(.theme-cyber) .agentActions button::before {
-  content: '> ';
-  opacity: 0.5;
-}
 
 /* Cyber theme - show cursor when hovering anywhere on the card */
 :global(.theme-cyber) .agentCard:hover .agentName::after {
