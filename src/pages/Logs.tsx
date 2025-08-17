@@ -1,19 +1,26 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
+import { API_DEFAULTS } from '@constants/app'
 import styles from './Logs.module.css'
 
-// Mock log data - replace with real WebSocket connection
-const mockLogs = [
-  { timestamp: new Date().toISOString(), level: 'info', message: 'Gateway started successfully', source: 'gateway' },
-  { timestamp: new Date().toISOString(), level: 'info', message: 'Agent hello-world-agent discovered', source: 'discovery' },
-  { timestamp: new Date().toISOString(), level: 'warning', message: 'Agent slow-agent took 5s to respond', source: 'gateway' },
-  { timestamp: new Date().toISOString(), level: 'error', message: 'Failed to connect to agent broken-agent', source: 'gateway' },
-]
-
 export default function Logs() {
-  const [logs] = useState(mockLogs)
   const [filter, setFilter] = useState('')
   const [levelFilter, setLevelFilter] = useState('all')
+
+  // Get real logs from gateway (simple approach)
+  const { data: logsData, isLoading, error } = useQuery({
+    queryKey: ['logs'],
+    queryFn: () => agentsApi.getLogs(150), // Get last 150 logs
+    refetchInterval: 15000, // Every 15 seconds
+    refetchOnWindowFocus: false, // Don't spam on tab switch
+    refetchIntervalInBackground: false, // Stop when tab inactive
+    staleTime: 0, // Always consider data stale to ensure fresh fetches
+    cacheTime: 0, // Don't cache log data
+  })
+
+  const logs = logsData?.logs || []
 
   const filteredLogs = logs.filter(log => {
     const matchesText = log.message.toLowerCase().includes(filter.toLowerCase()) ||
@@ -21,6 +28,35 @@ export default function Logs() {
     const matchesLevel = levelFilter === 'all' || log.level === levelFilter
     return matchesText && matchesLevel
   })
+
+  if (isLoading) {
+    return (
+      <div className={styles.logs}>
+        <div className={styles.header}>
+          <h1>Logs</h1>
+          <p className={styles.subtitle}>Real-time system logs and events</p>
+        </div>
+        <div className={styles.loading}>Loading logs...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className={styles.logs}>
+        <div className={styles.header}>
+          <h1>Logs</h1>
+          <p className={styles.subtitle}>Real-time system logs and events</p>
+        </div>
+        <Card>
+          <div className={styles.errorState}>
+            <p>Failed to load logs</p>
+            <p>Check your connection to the AgentSystems gateway</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.logs}>
@@ -65,6 +101,7 @@ export default function Logs() {
               <span className={styles.message}>{log.message}</span>
             </div>
           ))}
+          
         </div>
       </Card>
     </div>
