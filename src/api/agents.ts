@@ -122,4 +122,12 @@ export const agentsApi = {
    */
   verifyAuditIntegrity: () =>
     api.get('/audit/integrity-check'),
+
+  /**
+   * Get recent gateway logs
+   * @param limit - Maximum number of log entries to return
+   * @returns Promise with recent log entries
+   */
+  getLogs: (limit: number = 100) =>
+    api.get('/logs', { limit }),
 }
