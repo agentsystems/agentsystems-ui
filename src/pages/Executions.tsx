@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -66,6 +66,7 @@ export default function Executions() {
   const [showAuditTrail, setShowAuditTrail] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [stateFilter, setStateFilter] = useState<'all' | 'completed' | 'failed' | 'running'>('all')
+  const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'compromised'>('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [copiedThreadId, setCopiedThreadId] = useState<string | null>(null)
@@ -98,6 +99,27 @@ export default function Executions() {
 
   const executions = executionsResponse?.executions || []
 
+  // Bulk audit verification
+  const { data: auditVerification } = useQuery({
+    queryKey: ['audit-verification'],
+    queryFn: agentsApi.verifyAuditIntegrity,
+    refetchInterval: 30000, // Check every 30 seconds
+  })
+
+  // Get unique thread IDs that are compromised
+  const compromisedThreadIds = new Set(
+    auditVerification?.compromised_entries?.map((entry: any) => entry.thread_id) || []
+  )
+  const compromisedExecutionCount = compromisedThreadIds.size
+
+  // Audit trail query for selected execution
+  const { data: auditData } = useQuery({
+    queryKey: ['execution-audit', selectedExecution?.thread_id],
+    queryFn: () => agentsApi.getExecutionAudit(selectedExecution!.thread_id),
+    enabled: !!selectedExecution && showAuditTrail,
+  })
+
+
   // Initialize from URL parameters (one time only)
   useEffect(() => {
     const threadParam = searchParams.get('thread')
@@ -116,13 +138,6 @@ export default function Executions() {
       setSearchQuery(agentParam)
     }
   }, [executions]) // Removed searchParams and searchQuery from dependencies
-
-  // Audit trail query for selected execution
-  const { data: auditData } = useQuery({
-    queryKey: ['execution-audit', selectedExecution?.thread_id],
-    queryFn: () => agentsApi.getExecutionAudit(selectedExecution!.thread_id),
-    enabled: !!selectedExecution && showAuditTrail,
-  })
 
   // Filter executions
   const filteredExecutions = executions.filter(execution => {
@@ -144,7 +159,15 @@ export default function Executions() {
       }
     }
     
-    return matchesSearch && matchesState && matchesDate
+    // Verification filter
+    let matchesVerification = true
+    if (verificationFilter === 'compromised') {
+      matchesVerification = compromisedThreadIds.has(execution.thread_id)
+    } else if (verificationFilter === 'verified') {
+      matchesVerification = !compromisedThreadIds.has(execution.thread_id)
+    }
+    
+    return matchesSearch && matchesState && matchesDate && matchesVerification
   })
 
   const getStatusColor = (state: string) => {
@@ -199,7 +222,34 @@ export default function Executions() {
   return (
     <div className={styles.executions}>
       <div className={styles.header}>
-        <h1>Executions</h1>
+        <div className={styles.titleRow}>
+          <h1>Executions</h1>
+          {auditVerification && (
+            <button
+              className={`${styles.auditStatus} ${auditVerification.verified ? styles.auditValid : styles.auditInvalid}`}
+              onClick={() => {
+                if (!auditVerification.verified) {
+                  setVerificationFilter('compromised')
+                  playClickSound()
+                }
+              }}
+              disabled={auditVerification.verified}
+              title={auditVerification.verified ? 'All executions verified' : 'Click to filter compromised executions'}
+            >
+              {auditVerification.verified ? (
+                <ShieldCheckIcon className={styles.auditStatusIcon} />
+              ) : (
+                <ShieldExclamationIcon className={styles.auditStatusIcon} />
+              )}
+              <span>
+                {auditVerification.verified 
+                  ? `All ${auditVerification.total_entries} entries verified` 
+                  : `${compromisedExecutionCount} compromised execution${compromisedExecutionCount !== 1 ? 's' : ''}`
+                }
+              </span>
+            </button>
+          )}
+        </div>
         <p className={styles.subtitle}>Track agent invocations and results</p>
         
         <div className={styles.controlsContainer}>
@@ -226,6 +276,19 @@ export default function Executions() {
               <option value="completed">Completed ({executions.filter(e => e.state === 'completed').length})</option>
               <option value="failed">Failed ({executions.filter(e => e.state === 'failed').length})</option>
               <option value="running">Running ({executions.filter(e => e.state === 'running').length})</option>
+            </select>
+            
+            <select
+              className={styles.filterSelect}
+              value={verificationFilter}
+              onChange={(e) => {
+                setVerificationFilter(e.target.value as 'all' | 'verified' | 'compromised')
+                e.target.blur()
+              }}
+            >
+              <option value="all">All Verification ({executions.length})</option>
+              <option value="verified">Verified ({executions.length - compromisedExecutionCount})</option>
+              <option value="compromised">Compromised ({compromisedExecutionCount})</option>
             </select>
             
             <span className={styles.resultCount}>
@@ -293,7 +356,11 @@ export default function Executions() {
                   }}
                 >
                   <span className={styles.agentName}>
-                    <ShieldCheckIcon className={styles.verifiedIcon} title="Cryptographically verified execution" />
+                    {compromisedThreadIds.has(execution.thread_id) ? (
+                      <ShieldExclamationIcon className={styles.tamperedIcon} title="Chain compromised - execution tampered" />
+                    ) : (
+                      <ShieldCheckIcon className={styles.verifiedIcon} title="Cryptographically verified execution" />
+                    )}
                     {execution.agent}
                   </span>
                   <span 
@@ -509,6 +576,17 @@ export default function Executions() {
                   </button>
                 </div>
                 
+                {/* Show tampering status for this execution */}
+                {compromisedThreadIds.has(selectedExecution.thread_id) && (
+                  <div className={styles.tamperingAlert}>
+                    <ShieldExclamationIcon className={styles.alertIcon} />
+                    <div>
+                      <strong>This execution has been tampered with</strong>
+                      <p>The audit trail shows evidence of data modification or hash chain compromise.</p>
+                    </div>
+                  </div>
+                )}
+
                 {showAuditTrail && auditData && (
                   <div className={styles.auditContent}>
                     {/* Execution-level hash summary */}
@@ -525,10 +603,6 @@ export default function Executions() {
                           <code className={styles.hashValue}>
                             {auditData.audit_trail?.[auditData.audit_trail.length - 1]?.entry_hash || 'N/A'}
                           </code>
-                        </div>
-                        <div className={styles.chainStatus}>
-                          <LinkIcon className={styles.chainStatusIcon} />
-                          <span>Chain integrity maintained</span>
                         </div>
                       </div>
                     </div>

@@ -11,12 +11,63 @@
   gap: 1rem;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
 .header h1 {
   font-size: 20px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 8px;
+  margin: 0;
   letter-spacing: -0.5px;
+}
+
+.auditStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auditStatus:disabled {
+  cursor: default;
+}
+
+.auditStatus:not(:disabled):hover {
+  opacity: 0.8;
+}
+
+.auditValid {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.auditInvalid {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.auditStatusIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.filterActiveIndicator {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .subtitle {
@@ -208,6 +259,12 @@
   width: 14px;
   height: 14px;
   color: var(--success);
+}
+
+.tamperedIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--error);
 }
 
 .status {
@@ -402,6 +459,37 @@
   border-top: 1px solid var(--border);
 }
 
+.tamperingAlert {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid var(--error);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.alertIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--error);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tamperingAlert strong {
+  color: var(--error);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.tamperingAlert p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
 .auditHeader {
   display: flex;
   align-items: center;
@@ -551,10 +639,19 @@
   padding: 0.75rem;
   background-color: var(--surface);
   border-radius: var(--radius);
-  border-left: 4px solid var(--success);
-  color: var(--success);
   font-weight: 500;
   font-size: 0.875rem;
+}
+
+.chainValid {
+  border-left: 4px solid var(--success);
+  color: var(--success);
+}
+
+.chainInvalid {
+  border-left: 4px solid var(--error);
+  color: var(--error);
+  background-color: rgba(239, 68, 68, 0.05);
 }
 
 .chainStatusIcon {
