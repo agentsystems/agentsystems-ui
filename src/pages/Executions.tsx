@@ -77,7 +77,6 @@ export default function Executions() {
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'compromised'>('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
-  const [showFilesOnly, setShowFilesOnly] = useState(false)
   const [previewFile, setPreviewFile] = useState<ArtifactFile | null>(null)
   const [previewContent, setPreviewContent] = useState<string | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -188,15 +187,7 @@ export default function Executions() {
       matchesVerification = !compromisedThreadIds.has(execution.thread_id)
     }
     
-    // Show files only filter (simplified - could be enhanced with full artifacts data)
-    let matchesFiles = true
-    if (showFilesOnly) {
-      // For now, just assume completed executions might have files
-      // This could be enhanced by fetching artifacts for all executions
-      matchesFiles = execution.state === 'completed'
-    }
-
-    return matchesSearch && matchesState && matchesDate && matchesVerification && matchesFiles
+    return matchesSearch && matchesState && matchesDate && matchesVerification
   })
 
   const getStatusColor = (state: string) => {
@@ -416,15 +407,6 @@ export default function Executions() {
               </button>
             )}
 
-            <label className={styles.checkboxGroup}>
-              <input
-                type="checkbox"
-                checked={showFilesOnly}
-                onChange={(e) => setShowFilesOnly(e.target.checked)}
-                className={styles.checkbox}
-              />
-              <span className={styles.checkboxLabel}>Show files only</span>
-            </label>
           </div>
         </div>
       </div>

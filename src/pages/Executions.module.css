@@ -596,7 +596,7 @@
   padding: 0.5rem;
   background-color: var(--surface-2);
   border-radius: var(--radius);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--info);
   word-break: break-all;
   flex: 1;
 }
@@ -674,7 +674,7 @@
 }
 
 .resultContent {
-  border-left: 4px solid var(--success);
+  border-left: 4px solid var(--info);
 }
 
 .errorContent {
@@ -1167,7 +1167,7 @@
 }
 
 .detailItem[data-content-type="result"] .detailValue {
-  border-left-color: var(--success);
+  border-left-color: var(--info);
 }
 
 .detailItem[data-content-type="error"] .detailValue {

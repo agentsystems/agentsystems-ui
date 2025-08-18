@@ -130,7 +130,7 @@
   padding: 0.75rem;
   background-color: var(--surface-2);
   border-radius: var(--radius);
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--info);
 }
 
 .settingsLink {
@@ -312,7 +312,7 @@
   padding: 0.75rem;
   background-color: var(--surface-2);
   border-radius: var(--radius);
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--info);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.875rem;
@@ -357,7 +357,7 @@
   padding: 0.75rem;
   background-color: var(--surface-2);
   border-radius: var(--radius);
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--info);
 }
 
 .fileList h4 {
@@ -473,7 +473,7 @@
   padding: 0.5rem;
   background-color: var(--surface-2);
   border-radius: var(--radius);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--info);
 }
 
 .modelDependencies,
