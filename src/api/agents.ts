@@ -130,4 +130,12 @@ export const agentsApi = {
    */
   getLogs: (limit: number = 100) =>
     api.get('/logs', { limit }),
+
+  /**
+   * List artifact files for a specific thread
+   * @param threadId - Thread ID to get artifacts for
+   * @returns Promise with input_files and output_files arrays
+   */
+  getArtifacts: (threadId: string) =>
+    api.get(`/artifacts/${threadId}`),
 }
