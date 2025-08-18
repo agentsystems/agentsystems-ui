@@ -21,29 +21,10 @@
   gap: 12px;
 }
 
-.logoGradient {
-  width: 36px;
+.logoImage {
   height: 36px;
-  background: var(--gradient);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 16px;
-  color: white;
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
-}
-
-.theme-light .logoGradient {
-  box-shadow: var(--shadow-md);
-}
-
-.logoText {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--text);
+  width: auto;
+  object-fit: contain;
 }
 
 .logoBadge {

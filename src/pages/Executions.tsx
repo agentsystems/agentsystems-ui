@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon, FolderIcon, CalendarIcon } from '@heroicons/react/24/outline'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon, FolderIcon, CalendarIcon, DocumentIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
+import { apiClient } from '@api/client'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
 import { API_DEFAULTS } from '@constants/app'
@@ -21,6 +22,14 @@ interface Execution {
   error?: unknown
   progress?: unknown
   payload?: unknown
+}
+
+interface ArtifactFile {
+  name: string
+  path: string
+  size: number
+  modified: string
+  type: 'in' | 'out'
 }
 
 // Mock data for now - will be replaced with real API
@@ -63,12 +72,16 @@ export default function Executions() {
   const { playClickSound } = useAudio()
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
-  const [showAuditTrail, setShowAuditTrail] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [stateFilter, setStateFilter] = useState<'all' | 'completed' | 'failed' | 'running'>('all')
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'compromised'>('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [showFilesOnly, setShowFilesOnly] = useState(false)
+  const [previewFile, setPreviewFile] = useState<ArtifactFile | null>(null)
+  const [previewContent, setPreviewContent] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<'overview' | 'artifacts' | 'data' | 'audit'>('overview')
   const [copiedThreadId, setCopiedThreadId] = useState<string | null>(null)
 
   const retryMutation = useMutation({
@@ -117,7 +130,14 @@ export default function Executions() {
   const { data: auditData } = useQuery({
     queryKey: ['execution-audit', selectedExecution?.thread_id],
     queryFn: () => agentsApi.getExecutionAudit(selectedExecution!.thread_id),
-    enabled: !!selectedExecution && showAuditTrail,
+    enabled: !!selectedExecution,
+  })
+
+  // Fetch artifacts for selected execution
+  const { data: artifactsData } = useQuery({
+    queryKey: ['execution-artifacts', selectedExecution?.thread_id],
+    queryFn: () => agentsApi.getArtifacts(selectedExecution!.thread_id),
+    enabled: !!selectedExecution,
   })
 
 
@@ -168,7 +188,15 @@ export default function Executions() {
       matchesVerification = !compromisedThreadIds.has(execution.thread_id)
     }
     
-    return matchesSearch && matchesState && matchesDate && matchesVerification
+    // Show files only filter (simplified - could be enhanced with full artifacts data)
+    let matchesFiles = true
+    if (showFilesOnly) {
+      // For now, just assume completed executions might have files
+      // This could be enhanced by fetching artifacts for all executions
+      matchesFiles = execution.state === 'completed'
+    }
+
+    return matchesSearch && matchesState && matchesDate && matchesVerification && matchesFiles
   })
 
   const getStatusColor = (state: string) => {
@@ -187,6 +215,74 @@ export default function Executions() {
     const end = execution.ended_at ? new Date(execution.ended_at) : new Date()
     const duration = Math.round((end.getTime() - start.getTime()) / 1000)
     return duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}m ${duration % 60}s`
+  }
+
+  // File utility functions
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  }
+
+  const getFileIcon = (filename: string) => {
+    const ext = filename.split('.').pop()?.toLowerCase()
+    return <DocumentIcon className={styles.fileIcon} />
+  }
+
+  const openPreview = async (file: ArtifactFile) => {
+    try {
+      playClickSound()
+      setPreviewFile(file)
+      setPreviewLoading(true)
+      setPreviewContent(null)
+      
+      // Check if file type is previewable
+      const ext = file.name.split('.').pop()?.toLowerCase()
+      const previewableTypes = ['txt', 'md', 'json', 'csv', 'log', 'yaml', 'yml', 'py', 'js', 'ts', 'html', 'css']
+      
+      if (!previewableTypes.includes(ext || '')) {
+        setPreviewContent(`Preview not available for .${ext} files`)
+        setPreviewLoading(false)
+        return
+      }
+      
+      // Fetch file content as text
+      const response = await apiClient.get(file.path, {
+        responseType: 'text'
+      })
+      
+      setPreviewContent(response.data)
+    } catch (error) {
+      console.error('Preview failed:', error)
+      setPreviewContent(`Failed to load preview: ${error.response?.status || 'Network error'}`)
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
+
+  const downloadFile = async (file: ArtifactFile) => {
+    try {
+      playClickSound()
+      // Download from the artifact endpoint using the API client
+      const response = await apiClient.get(file.path, {
+        responseType: 'blob'
+      })
+      
+      const blob = response.data
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.name
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Download failed:', error)
+      alert(`Download failed: ${error.response?.status || 'Network error'}`)
+    }
   }
 
   if (isLoading) {
@@ -319,6 +415,16 @@ export default function Executions() {
                 Clear Dates
               </button>
             )}
+
+            <label className={styles.checkboxGroup}>
+              <input
+                type="checkbox"
+                checked={showFilesOnly}
+                onChange={(e) => setShowFilesOnly(e.target.checked)}
+                className={styles.checkbox}
+              />
+              <span className={styles.checkboxLabel}>Show files only</span>
+            </label>
           </div>
         </div>
       </div>
@@ -326,7 +432,7 @@ export default function Executions() {
       <div className={`${styles.layout} ${!selectedExecution ? styles.layoutFullWidth : ''}`}>
         <div className={styles.executionsList}>
           <Card>
-            <h2>Execution History</h2>
+            <h2 className={styles.alignedHeading}>Execution History</h2>
             <div className={styles.executionsTable}>
               <div className={styles.tableHeader}>
                 <span>Agent</span>
@@ -343,6 +449,7 @@ export default function Executions() {
                   onClick={() => {
                     playClickSound()
                     setSelectedExecution(execution)
+                    setActiveTab('overview') // Reset to overview when selecting new execution
                   }}
                 >
                   <span className={styles.agentName}>
@@ -390,7 +497,7 @@ export default function Executions() {
           <div className={styles.executionDetail}>
             <Card>
               <div className={styles.detailHeader}>
-                <h2>Execution Details</h2>
+                <h2 className={styles.alignedHeading}>Execution Details</h2>
                 <div className={styles.detailActions}>
                   {selectedExecution.payload && selectedExecution.state === 'failed' && (
                     <button
@@ -409,16 +516,6 @@ export default function Executions() {
                     className="btn btn-sm btn-subtle"
                     onClick={() => {
                       playClickSound()
-                      navigate(`/artifacts?thread=${selectedExecution.thread_id}`)
-                    }}
-                    title="View artifacts for this execution"
-                  >
-                    <FolderIcon />
-                  </button>
-                  <button
-                    className="btn btn-sm btn-subtle"
-                    onClick={() => {
-                      playClickSound()
                       setSelectedExecution(null)
                     }}
                     title="Close details"
@@ -427,234 +524,419 @@ export default function Executions() {
                   </button>
                 </div>
               </div>
-              <div className={styles.detailGrid}>
-                <div className={styles.detailItem}>
-                  <label>Thread ID</label>
-                  <div className={styles.detailValueWithAction}>
-                    <span className={styles.detailValue}>{selectedExecution.thread_id}</span>
-                    <button
-                      className="btn btn-icon btn-subtle"
-                      onClick={() => {
-                        navigator.clipboard.writeText(selectedExecution.thread_id)
-                        playClickSound()
-                        setCopiedThreadId(selectedExecution.thread_id)
-                        setTimeout(() => setCopiedThreadId(null), 2000)
-                      }}
-                      title="Copy thread ID to clipboard"
-                    >
-                      {copiedThreadId === selectedExecution.thread_id ? (
-                        <CheckIcon />
-                      ) : (
-                        <DocumentDuplicateIcon />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                
-                <div className={styles.detailItem}>
-                  <label>Agent</label>
-                  <div className={styles.detailValueWithAction}>
-                    <span className={styles.detailValue}>{selectedExecution.agent}</span>
-                    <button
-                      className="btn btn-icon btn-subtle"
-                      onClick={() => {
-                        navigate(`/agents/${selectedExecution.agent}`)
-                        playClickSound()
-                      }}
-                      title="Go to agent details"
-                    >
-                      <ArrowTopRightOnSquareIcon />
-                    </button>
-                  </div>
-                </div>
-                
-                <div className={styles.detailItem}>
-                  <label>State</label>
-                  <span 
-                    className={styles.detailValue}
-                    style={{ color: getStatusColor(selectedExecution.state) }}
-                  >
-                    {selectedExecution.state}
-                  </span>
-                </div>
-                
-                <div className={styles.detailItem}>
-                  <label>Created</label>
-                  <span className={styles.detailValue}>
-                    {format(new Date(selectedExecution.created_at), 'PPpp')}
-                  </span>
-                </div>
-                
-                {selectedExecution.started_at && (
-                  <div className={styles.detailItem}>
-                    <label>Started</label>
-                    <span className={styles.detailValue}>
-                      {format(new Date(selectedExecution.started_at), 'PPpp')}
-                    </span>
-                  </div>
-                )}
-                
-                {selectedExecution.ended_at && (
-                  <div className={styles.detailItem}>
-                    <label>Ended</label>
-                    <span className={styles.detailValue}>
-                      {format(new Date(selectedExecution.ended_at), 'PPpp')}
-                    </span>
-                  </div>
-                )}
-                
-                <div className={styles.detailItem}>
-                  <label>Duration</label>
-                  <span className={styles.detailValue}>{getDuration(selectedExecution)}</span>
-                </div>
+              
+              {/* Tab Navigation */}
+              <div className={styles.tabsContainer}>
+                <button
+                  className={`${styles.tab} ${activeTab === 'overview' ? styles.activeTab : ''}`}
+                  onClick={() => {
+                    setActiveTab('overview')
+                    playClickSound()
+                  }}
+                >
+                  Overview
+                </button>
+                <button
+                  className={`${styles.tab} ${activeTab === 'artifacts' ? styles.activeTab : ''}`}
+                  onClick={() => {
+                    setActiveTab('artifacts')
+                    playClickSound()
+                  }}
+                >
+                  Artifacts
+                </button>
+                <button
+                  className={`${styles.tab} ${activeTab === 'data' ? styles.activeTab : ''}`}
+                  onClick={() => {
+                    setActiveTab('data')
+                    playClickSound()
+                  }}
+                >
+                  Data
+                </button>
+                <button
+                  className={`${styles.tab} ${activeTab === 'audit' ? styles.activeTab : ''}`}
+                  onClick={() => {
+                    setActiveTab('audit')
+                    playClickSound()
+                  }}
+                >
+                  Audit
+                </button>
               </div>
 
-              {selectedExecution.payload && (
-                <div className={styles.payloadSection}>
-                  <h3>Request Payload</h3>
-                  <pre className={styles.payloadContent}>
-                    {(() => {
-                      try {
-                        // Handle both string and object payloads
-                        const payload = typeof selectedExecution.payload === 'string' 
-                          ? JSON.parse(selectedExecution.payload)
-                          : selectedExecution.payload
-                        return JSON.stringify(payload, null, 2)
-                      } catch {
-                        return selectedExecution.payload as string
-                      }
-                    })()}
-                  </pre>
-                </div>
-              )}
-
-              {selectedExecution.result && (
-                <div className={styles.resultSection}>
-                  <h3>Result</h3>
-                  <pre className={styles.resultContent}>
-                    {(() => {
-                      try {
-                        // If result is a string, parse and beautify it
-                        if (typeof selectedExecution.result === 'string') {
-                          const parsed = JSON.parse(selectedExecution.result)
-                          return JSON.stringify(parsed, null, 2)
-                        }
-                        // If it's already an object, stringify it
-                        return JSON.stringify(selectedExecution.result, null, 2)
-                      } catch {
-                        // If parsing fails, display the raw string
-                        return selectedExecution.result as string
-                      }
-                    })()}
-                  </pre>
-                </div>
-              )}
-
-              {selectedExecution.error && (
-                <div className={styles.errorSection}>
-                  <h3>Error</h3>
-                  <pre className={styles.errorContent}>
-                    {(() => {
-                      try {
-                        // If error is a string, parse and beautify it
-                        if (typeof selectedExecution.error === 'string') {
-                          const parsed = JSON.parse(selectedExecution.error)
-                          return JSON.stringify(parsed, null, 2)
-                        }
-                        // If it's already an object, stringify it
-                        return JSON.stringify(selectedExecution.error, null, 2)
-                      } catch {
-                        // If parsing fails, display the raw string
-                        return selectedExecution.error as string
-                      }
-                    })()}
-                  </pre>
-                </div>
-              )}
-
-              {/* Hash Chain Verification */}
-              <div className={styles.auditSection}>
-                <div className={styles.auditHeader}>
-                  <div className={styles.auditTitleRow}>
-                    {auditVerification && (
-                      <span className={`${styles.statusBadge} ${auditVerification.verified ? styles.verified : styles.compromised}`}>
-                        {auditVerification.verified ? (
-                          <ShieldCheckIcon />
-                        ) : (
-                          <ShieldExclamationIcon />
-                        )}
+              {/* Tab Content */}
+              {activeTab === 'overview' && (
+                <div className={styles.tabContent}>
+                  <h3 className={styles.tabHeading}>Execution Overview</h3>
+                  <div className={styles.detailGrid}>
+                    <div className={styles.detailItem}>
+                      <label>Thread ID</label>
+                      <div className={styles.detailValueWithAction}>
+                        <span className={styles.detailValue}>{selectedExecution.thread_id}</span>
+                        <button
+                          className="btn btn-icon btn-subtle"
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedExecution.thread_id)
+                            playClickSound()
+                            setCopiedThreadId(selectedExecution.thread_id)
+                            setTimeout(() => setCopiedThreadId(null), 2000)
+                          }}
+                          title="Copy thread ID to clipboard"
+                        >
+                          {copiedThreadId === selectedExecution.thread_id ? (
+                            <CheckIcon />
+                          ) : (
+                            <DocumentDuplicateIcon />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className={styles.detailItem}>
+                      <label>Agent</label>
+                      <div className={styles.detailValueWithAction}>
+                        <span className={styles.detailValue}>{selectedExecution.agent}</span>
+                        <button
+                          className="btn btn-icon btn-subtle"
+                          onClick={() => {
+                            navigate(`/agents/${selectedExecution.agent}`)
+                            playClickSound()
+                          }}
+                          title="Go to agent details"
+                        >
+                          <ArrowTopRightOnSquareIcon />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className={styles.detailItem}>
+                      <label>State</label>
+                      <span 
+                        className={styles.detailValue}
+                        style={{ color: getStatusColor(selectedExecution.state) }}
+                      >
+                        {selectedExecution.state}
                       </span>
+                    </div>
+                    
+                    <div className={styles.detailItem}>
+                      <label>Created</label>
+                      <span className={styles.detailValue}>
+                        {format(new Date(selectedExecution.created_at), 'PPpp')}
+                      </span>
+                    </div>
+                    
+                    {selectedExecution.started_at && (
+                      <div className={styles.detailItem}>
+                        <label>Started</label>
+                        <span className={styles.detailValue}>
+                          {format(new Date(selectedExecution.started_at), 'PPpp')}
+                        </span>
+                      </div>
                     )}
-                    <h3>Hash Chain</h3>
+                    
+                    {selectedExecution.ended_at && (
+                      <div className={styles.detailItem}>
+                        <label>Ended</label>
+                        <span className={styles.detailValue}>
+                          {format(new Date(selectedExecution.ended_at), 'PPpp')}
+                        </span>
+                      </div>
+                    )}
+                    
+                    <div className={styles.detailItem}>
+                      <label>Duration</label>
+                      <span className={styles.detailValue}>{getDuration(selectedExecution)}</span>
+                    </div>
                   </div>
-                  <button
-                    className="btn btn-sm btn-subtle"
-                    onClick={() => {
-                      setShowAuditTrail(!showAuditTrail)
-                      playClickSound()
-                    }}
-                  >
-                    {showAuditTrail ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                    {showAuditTrail ? 'Hide' : 'Show'} Details
-                  </button>
                 </div>
-                
-                {/* Show tampering status for this execution */}
-                {compromisedThreadIds.has(selectedExecution.thread_id) && (
-                  <div className={styles.tamperingAlert}>
-                    <ShieldExclamationIcon className={styles.alertIcon} />
-                    <div>
-                      <strong>This execution has been tampered with</strong>
-                      <p>The audit trail shows evidence of data modification or hash chain compromise.</p>
-                    </div>
-                  </div>
-                )}
+              )}
 
-                {showAuditTrail && auditData && (
-                  <div className={styles.auditContent}>
-                    {/* Execution-level hash summary */}
-                    <div className={styles.executionHashSummary}>
-                      <div className={styles.hashChainInfo}>
-                        <div className={styles.hashItem}>
-                          <label>Previous Execution Hash:</label>
-                          <code className={styles.hashValue}>
-                            {auditData.audit_trail?.[0]?.prev_hash || 'Genesis'}
-                          </code>
+              {activeTab === 'artifacts' && (
+                <div className={styles.tabContent}>
+                  <h3 className={styles.tabHeading}>Execution Artifacts</h3>
+                  {artifactsData && (artifactsData.input_files.length > 0 || artifactsData.output_files.length > 0) ? (
+                    <div className={styles.detailGrid}>
+                      <div className={styles.detailItem}>
+                        <label>Input Files ({artifactsData.input_files.length})</label>
+                        <div className={styles.detailValue}>
+                          {artifactsData.input_files.length > 0 ? (
+                            <div className={styles.filesList}>
+                              {artifactsData.input_files.map(file => (
+                                <div key={file.path} className={styles.fileItem}>
+                                  {getFileIcon(file.name)}
+                                  <div className={styles.fileInfo}>
+                                    <span className={styles.fileName}>{file.name}</span>
+                                    <span className={styles.fileSize}>{formatFileSize(file.size)}</span>
+                                  </div>
+                                  <div className={styles.fileActions}>
+                                    <button
+                                      className="btn btn-sm btn-subtle"
+                                      onClick={() => openPreview(file)}
+                                      title="Preview file"
+                                    >
+                                      <EyeIcon />
+                                    </button>
+                                    <button
+                                      className="btn btn-sm btn-subtle"
+                                      onClick={() => downloadFile(file)}
+                                      title="Download file"
+                                    >
+                                      <ArrowDownTrayIcon />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span>—</span>
+                          )}
                         </div>
-                        <div className={styles.hashItem}>
-                          <label>This Execution Hash:</label>
-                          <code className={styles.hashValue}>
-                            {auditData.audit_trail?.[auditData.audit_trail.length - 1]?.entry_hash || 'N/A'}
-                          </code>
+                      </div>
+
+                      <div className={styles.detailItem}>
+                        <label>Output Files ({artifactsData.output_files.length})</label>
+                        <div className={styles.detailValue}>
+                          {artifactsData.output_files.length > 0 ? (
+                            <div className={styles.filesList}>
+                              {artifactsData.output_files.map(file => (
+                                <div key={file.path} className={styles.fileItem}>
+                                  {getFileIcon(file.name)}
+                                  <div className={styles.fileInfo}>
+                                    <span className={styles.fileName}>{file.name}</span>
+                                    <span className={styles.fileSize}>{formatFileSize(file.size)}</span>
+                                  </div>
+                                  <div className={styles.fileActions}>
+                                    <button
+                                      className="btn btn-sm btn-subtle"
+                                      onClick={() => openPreview(file)}
+                                      title="Preview file"
+                                    >
+                                      <EyeIcon />
+                                    </button>
+                                    <button
+                                      className="btn btn-sm btn-subtle"
+                                      onClick={() => downloadFile(file)}
+                                      title="Download file"
+                                    >
+                                      <ArrowDownTrayIcon />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span>—</span>
+                          )}
                         </div>
                       </div>
                     </div>
+                  ) : (
+                    <div className={styles.emptyState}>
+                      <p>No artifacts available for this execution</p>
+                      <p className={styles.emptyHint}>
+                        Artifacts include input and output files generated during execution
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
-                    {/* Detailed audit events (collapsible) */}
-                    <details className={styles.auditDetails}>
-                      <summary className={styles.auditDetailsSummary}>
-                        View detailed audit events ({auditData.audit_trail?.length || 0} entries)
-                      </summary>
-                      <div className={styles.auditEvents}>
-                        {auditData.audit_trail?.map((entry: any, index: number) => (
-                          <div key={entry.id} className={styles.simpleAuditEntry}>
-                            <span className={styles.auditAction}>{entry.action}</span>
-                            <span className={styles.auditActor}>{entry.actor}</span>
-                            <span className={styles.auditTime}>
-                              {entry.timestamp ? format(new Date(entry.timestamp), 'HH:mm:ss.SSS') : ''}
-                            </span>
-                            <code className={styles.simpleHashValue}>{entry.entry_hash}</code>
+              {activeTab === 'data' && (
+                <div className={styles.tabContent}>
+                  <h3 className={styles.tabHeading}>Execution Data</h3>
+                  <div className={styles.detailGrid}>
+                    {selectedExecution.payload && (
+                      <div className={styles.detailItem} data-content-type="payload">
+                        <label>Request Payload</label>
+                        <pre className={styles.detailValue}>
+                          {(() => {
+                            try {
+                              // Handle both string and object payloads
+                              const payload = typeof selectedExecution.payload === 'string' 
+                                ? JSON.parse(selectedExecution.payload)
+                                : selectedExecution.payload
+                              return JSON.stringify(payload, null, 2)
+                            } catch {
+                              return selectedExecution.payload as string
+                            }
+                          })()}
+                        </pre>
+                      </div>
+                    )}
+
+                    {selectedExecution.result && (
+                      <div className={styles.detailItem} data-content-type="result">
+                        <label>Result</label>
+                        <pre className={styles.detailValue}>
+                          {(() => {
+                            try {
+                              // If result is a string, parse and beautify it
+                              if (typeof selectedExecution.result === 'string') {
+                                const parsed = JSON.parse(selectedExecution.result)
+                                return JSON.stringify(parsed, null, 2)
+                              }
+                              // If it's already an object, stringify it
+                              return JSON.stringify(selectedExecution.result, null, 2)
+                            } catch {
+                              // If parsing fails, display the raw string
+                              return selectedExecution.result as string
+                            }
+                          })()}
+                        </pre>
+                      </div>
+                    )}
+
+                    {selectedExecution.error && (
+                      <div className={styles.detailItem} data-content-type="error">
+                        <label>Error</label>
+                        <pre className={styles.detailValue}>
+                          {(() => {
+                            try {
+                              // If error is a string, parse and beautify it
+                              if (typeof selectedExecution.error === 'string') {
+                                const parsed = JSON.parse(selectedExecution.error)
+                                return JSON.stringify(parsed, null, 2)
+                              }
+                              // If it's already an object, stringify it
+                              return JSON.stringify(selectedExecution.error, null, 2)
+                            } catch {
+                              // If parsing fails, display the raw string
+                              return selectedExecution.error as string
+                            }
+                          })()}
+                        </pre>
+                      </div>
+                    )}
+                    {!selectedExecution.payload && !selectedExecution.result && !selectedExecution.error && (
+                      <div className={styles.emptyState}>
+                        <p>No execution data available</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'audit' && (
+                <div className={styles.tabContent}>
+                  <h3 className={styles.tabHeading}>Audit Trail</h3>
+                  <div className={styles.auditSection}>
+                    {/* All detail items in a single detailGrid for consistent spacing */}
+                    <div className={styles.detailGrid}>
+                      <div className={styles.detailItem}>
+                        <label>Verification Status</label>
+                        <span className={styles.detailValue}>
+                          {auditVerification?.verified ? (
+                            <>
+                              <ShieldCheckIcon className={styles.verifiedIcon} />
+                              Verified
+                            </>
+                          ) : (
+                            <>
+                              <ShieldExclamationIcon className={styles.compromisedIcon} />
+                              Compromised
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      
+                      {/* Show tampering alert as text between detail items if this execution is compromised */}
+                      {compromisedThreadIds.has(selectedExecution.thread_id) && (
+                        <div className={styles.tamperingAlert}>
+                          <ShieldExclamationIcon className={styles.alertIcon} />
+                          <div>
+                            <strong>This execution has been tampered with</strong>
+                            <p>The audit trail shows evidence of data modification or hash chain compromise.</p>
                           </div>
-                        ))}
+                        </div>
+                      )}
+
+                      {auditData && (
+                        <>
+                          <div className={styles.detailItem}>
+                            <label>Previous Execution Hash</label>
+                            <span className={styles.detailValue}>
+                              {auditData.audit_trail?.[0]?.prev_hash || 'Genesis'}
+                            </span>
+                          </div>
+                          <div className={styles.detailItem}>
+                            <label>This Execution Hash</label>
+                            <span className={styles.detailValue}>
+                              {auditData.audit_trail?.[auditData.audit_trail.length - 1]?.entry_hash || 'N/A'}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {auditData && (
+                      <div className={styles.auditDetails}>
+                        <h4 className={styles.auditSubheading}>
+                          Detailed audit events ({auditData.audit_trail?.length || 0} entries)
+                        </h4>
+                        <div className={styles.auditEvents}>
+                          {auditData.audit_trail?.map((entry: any, index: number) => (
+                            <div key={entry.id} className={styles.simpleAuditEntry}>
+                              <span className={styles.auditAction}>{entry.action}</span>
+                              <span className={styles.auditActor}>{entry.actor}</span>
+                              <span className={styles.auditTime}>
+                                {entry.timestamp ? format(new Date(entry.timestamp), 'HH:mm:ss.SSS') : ''}
+                              </span>
+                              <code className={styles.simpleHashValue}>{entry.entry_hash}</code>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </details>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </Card>
           </div>
         )}
       </div>
+
+      {/* Preview Modal */}
+      {previewFile && (
+        <div className={styles.modalOverlay} onClick={() => setPreviewFile(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitle}>
+                <span className={styles.previewFileName}>{previewFile.name}</span>
+                <span className={styles.previewFileInfo}>
+                  {formatFileSize(previewFile.size)} • {previewFile.type}
+                </span>
+              </div>
+              <button
+                className="btn btn-sm btn-subtle"
+                onClick={() => setPreviewFile(null)}
+                title="Close preview"
+              >
+                <XMarkIcon />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              {previewLoading ? (
+                <div className={styles.previewLoading}>Loading preview...</div>
+              ) : (
+                <pre className={styles.previewContent}>
+                  {previewContent}
+                </pre>
+              )}
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                className="btn btn-sm"
+                onClick={() => downloadFile(previewFile)}
+              >
+                <ArrowDownTrayIcon />
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )
