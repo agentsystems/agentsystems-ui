@@ -3,7 +3,6 @@ import {
   HomeIcon, 
   CpuChipIcon,
   BoltIcon,
-  FolderIcon,
   DocumentTextIcon, 
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline'
@@ -18,7 +17,6 @@ const navigationSections = [
       { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: HomeIcon },
       { name: 'Agents', href: ROUTES.AGENTS, icon: CpuChipIcon },
       { name: 'Executions', href: ROUTES.EXECUTIONS, icon: BoltIcon },
-      { name: 'Artifacts', href: '/artifacts', icon: FolderIcon },
     ]
   },
   {
