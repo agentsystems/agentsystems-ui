@@ -125,6 +125,75 @@
   flex: 1;
 }
 
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 0.25rem;
+  border-radius: 50%;
+  padding: 0.25rem;
+}
+
+.statusBadge.verified {
+  background-color: var(--success-bg);
+  color: var(--success);
+}
+
+.statusBadge.compromised {
+  background-color: var(--error-bg);
+  color: var(--error);
+}
+
+.statusBadge svg {
+  width: 20px;
+  height: 20px;
+}
+
+.auditTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.auditTitleRow h3 {
+  margin: 0;
+}
+
+.dateInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dateIcon {
+  position: absolute;
+  right: 0.5rem;
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.dateInput {
+  padding-right: 2.25rem;
+}
+
+/* Hide native date picker icon and show our custom one */
+.dateInput::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.dateInput::-moz-calendar-picker-indicator {
+  opacity: 0;
+}
+
 .controlsContainer {
   display: flex;
   flex-direction: column;
