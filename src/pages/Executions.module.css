@@ -193,6 +193,10 @@
   height: calc(100vh - 200px);
 }
 
+.layoutFullWidth {
+  grid-template-columns: 1fr;
+}
+
 .executionsList {
   overflow: hidden;
 }
@@ -303,6 +307,12 @@
   justify-content: space-between;
   margin-bottom: 16px;
   min-height: 40px; /* Reserve space for button */
+}
+
+.detailActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .executionDetail h2 {

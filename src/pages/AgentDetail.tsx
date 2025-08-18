@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { formatDistanceToNow } from 'date-fns'
-import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, ListBulletIcon } from '@heroicons/react/24/outline'
+import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
+import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, ListBulletIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
@@ -35,10 +35,57 @@ export default function AgentDetail() {
   // Get execution history for this agent
   const { data: executionHistory } = useQuery({
     queryKey: ['agent-executions', agentName],
-    queryFn: () => agentsApi.listExecutions({ agent: agentName, limit: 10 }),
+    queryFn: () => agentsApi.listExecutions({ agent: agentName, limit: 100 }),
     enabled: !!agentName,
     refetchInterval: 10000, // Refresh every 10 seconds
   })
+
+  // Calculate agent-specific performance metrics
+  const performanceMetrics = (() => {
+    if (!executionHistory?.executions) {
+      return {
+        totalExecutions: 0,
+        successRate: 0,
+        avgResponseTime: 0,
+        recentExecutions: 0,
+        failureRate: 0
+      }
+    }
+
+    const executions = executionHistory.executions
+    const total = executions.length
+    const completed = executions.filter((e: any) => e.state === 'completed').length
+    const failed = executions.filter((e: any) => e.state === 'failed').length
+
+    // Calculate executions in last 24 hours
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const recentExecutions = executions.filter((e: any) => 
+      new Date(e.created_at) > oneDayAgo
+    ).length
+
+    // Calculate average response time for completed executions
+    const responseTimes = executions
+      .filter((e: any) => e.state === 'completed' && e.started_at && e.ended_at)
+      .map((e: any) => differenceInMilliseconds(new Date(e.ended_at), new Date(e.started_at)))
+
+    const avgResponseTime = responseTimes.length > 0
+      ? responseTimes.reduce((a: number, b: number) => a + b, 0) / responseTimes.length
+      : 0
+
+    return {
+      totalExecutions: total,
+      successRate: total > 0 ? (completed / (completed + failed)) * 100 : 0,
+      avgResponseTime,
+      recentExecutions,
+      failureRate: total > 0 ? (failed / (completed + failed)) * 100 : 0
+    }
+  })()
+
+  const formatDuration = (ms: number): string => {
+    if (ms < 1000) return `${Math.round(ms)}ms`
+    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
+    return `${(ms / 60000).toFixed(1)}m`
+  }
 
   const { data: metadata, isLoading: metadataLoading, error: metadataError } = useQuery({
     queryKey: ['agent-metadata', agentName, currentAgent?.state],
@@ -487,7 +534,7 @@ export default function AgentDetail() {
 
       {/* Recent Executions */}
       {executionHistory?.executions && executionHistory.executions.length > 0 && (
-        <Card>
+        <Card className={styles.sectionCard}>
           <div className={styles.executionHistoryHeader}>
             <h2>Recent Executions</h2>
             <button 
@@ -545,6 +592,60 @@ export default function AgentDetail() {
                 </span>
               </div>
             ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Performance Metrics Card - placed after executions */}
+      {performanceMetrics.totalExecutions > 0 && (
+        <Card className={styles.sectionCard}>
+          <h2>Performance Metrics</h2>
+          <div className={styles.performanceGrid}>
+            <div className={styles.performanceMetric}>
+              <BoltIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div className={styles.performanceValue}>{performanceMetrics.totalExecutions}</div>
+                <div className={styles.performanceLabel}>Total Executions</div>
+                <div className={styles.performanceSubtext}>
+                  {performanceMetrics.recentExecutions} in last 24h
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.performanceMetric}>
+              <CheckCircleIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div 
+                  className={styles.performanceValue}
+                  style={{ 
+                    color: performanceMetrics.successRate >= 95 ? 'var(--success)' :
+                           performanceMetrics.successRate >= 80 ? 'var(--warning)' :
+                           'var(--error)'
+                  }}
+                >
+                  {performanceMetrics.successRate.toFixed(1)}%
+                </div>
+                <div className={styles.performanceLabel}>Success Rate</div>
+                <div className={styles.performanceSubtext}>
+                  {performanceMetrics.failureRate > 0 && 
+                    `${performanceMetrics.failureRate.toFixed(1)}% failures`
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.performanceMetric}>
+              <ClockIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div className={styles.performanceValue}>
+                  {formatDuration(performanceMetrics.avgResponseTime)}
+                </div>
+                <div className={styles.performanceLabel}>Avg Response Time</div>
+                <div className={styles.performanceSubtext}>
+                  Per execution
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       )}

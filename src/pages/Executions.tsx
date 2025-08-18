@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -333,7 +333,7 @@ export default function Executions() {
         </div>
       </div>
 
-      <div className={styles.layout}>
+      <div className={`${styles.layout} ${!selectedExecution ? styles.layoutFullWidth : ''}`}>
         <div className={styles.executionsList}>
           <Card>
             <h2>Execution History</h2>
@@ -401,19 +401,31 @@ export default function Executions() {
             <Card>
               <div className={styles.detailHeader}>
                 <h2>Execution Details</h2>
-                {selectedExecution.payload && selectedExecution.state === 'failed' && (
+                <div className={styles.detailActions}>
+                  {selectedExecution.payload && selectedExecution.state === 'failed' && (
+                    <button
+                      className="btn btn-sm btn-subtle"
+                      onClick={() => {
+                        playClickSound()
+                        retryMutation.mutate(selectedExecution)
+                      }}
+                      disabled={retryMutation.isPending}
+                    >
+                      <ArrowPathIcon />
+                      {retryMutation.isPending ? 'Retrying...' : 'Retry'}
+                    </button>
+                  )}
                   <button
                     className="btn btn-sm btn-subtle"
                     onClick={() => {
                       playClickSound()
-                      retryMutation.mutate(selectedExecution)
+                      setSelectedExecution(null)
                     }}
-                    disabled={retryMutation.isPending}
+                    title="Close details"
                   >
-                    <ArrowPathIcon />
-                    {retryMutation.isPending ? 'Retrying...' : 'Retry'}
+                    <XMarkIcon />
                   </button>
-                )}
+                </div>
               </div>
               <div className={styles.detailGrid}>
                 <div className={styles.detailItem}>
