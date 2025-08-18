@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon, FolderIcon } from '@heroicons/react/24/outline'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon, FolderIcon, CalendarIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -283,22 +283,28 @@ export default function Executions() {
           <div className={styles.secondaryControls}>
             <div className={styles.dateGroup}>
               <label>From:</label>
-              <input
-                type="date"
-                className={styles.dateInput}
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
+              <div className={styles.dateInputWrapper}>
+                <CalendarIcon className={styles.dateIcon} />
+                <input
+                  type="date"
+                  className={styles.dateInput}
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+              </div>
             </div>
             
             <div className={styles.dateGroup}>
               <label>To:</label>
-              <input
-                type="date"
-                className={styles.dateInput}
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-              />
+              <div className={styles.dateInputWrapper}>
+                <CalendarIcon className={styles.dateIcon} />
+                <input
+                  type="date"
+                  className={styles.dateInput}
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+              </div>
             </div>
             
             {(dateFrom || dateTo) && (
@@ -569,7 +575,18 @@ export default function Executions() {
               {/* Hash Chain Verification */}
               <div className={styles.auditSection}>
                 <div className={styles.auditHeader}>
-                  <h3>Hash Chain Verification</h3>
+                  <div className={styles.auditTitleRow}>
+                    {auditVerification && (
+                      <span className={`${styles.statusBadge} ${auditVerification.verified ? styles.verified : styles.compromised}`}>
+                        {auditVerification.verified ? (
+                          <ShieldCheckIcon />
+                        ) : (
+                          <ShieldExclamationIcon />
+                        )}
+                      </span>
+                    )}
+                    <h3>Hash Chain</h3>
+                  </div>
                   <button
                     className="btn btn-sm btn-subtle"
                     onClick={() => {

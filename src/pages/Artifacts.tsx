@@ -128,7 +128,10 @@ export default function Artifacts() {
       (fileTypeFilter === 'input-only' && execution.input_files.length > 0) ||
       (fileTypeFilter === 'output-only' && execution.output_files.length > 0)
 
-    return matchesSearch && matchesAgent && matchesFileType
+    // Always require files to be present (hide executions with no artifacts)
+    const hasAnyFiles = execution.input_files.length > 0 || execution.output_files.length > 0
+
+    return matchesSearch && matchesAgent && matchesFileType && hasAnyFiles
   })
 
   const formatFileSize = (bytes: number): string => {
@@ -405,11 +408,6 @@ export default function Artifacts() {
                   </div>
                 )}
 
-                {execution.input_files.length === 0 && execution.output_files.length === 0 && (
-                  <div className={styles.noFiles}>
-                    <p>No files associated with this execution</p>
-                  </div>
-                )}
               </div>
             </Card>
           ))
