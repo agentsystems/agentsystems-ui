@@ -112,6 +112,7 @@ export default function Executions() {
   )
   const compromisedExecutionCount = compromisedThreadIds.size
 
+
   // Audit trail query for selected execution
   const { data: auditData } = useQuery({
     queryKey: ['execution-audit', selectedExecution?.thread_id],
@@ -192,25 +193,7 @@ export default function Executions() {
     return (
       <div className={styles.executions}>
         <div className={styles.header}>
-          <div className={styles.titleRow}>
-            <h1>Executions</h1>
-            {auditVerification && (
-              <button
-                className="btn btn-sm btn-subtle"
-                onClick={() => {
-                  playClickSound()
-                  // You can add navigation to audit verification details here if needed
-                }}
-                title={auditVerification.is_valid ? 'All executions cryptographically verified' : `${compromisedExecutionCount} execution${compromisedExecutionCount !== 1 ? 's' : ''} compromised`}
-              >
-                {auditVerification.is_valid ? (
-                  <ShieldCheckIcon className={styles.verifiedIcon} />
-                ) : (
-                  <ShieldExclamationIcon className={styles.tamperedIcon} />
-                )}
-              </button>
-            )}
-          </div>
+          <h1>Executions</h1>
           <p className={styles.subtitle}>Track agent invocations and results</p>
         </div>
         <div className={styles.loading}>Loading executions...</div>
@@ -222,25 +205,7 @@ export default function Executions() {
     return (
       <div className={styles.executions}>
         <div className={styles.header}>
-          <div className={styles.titleRow}>
-            <h1>Executions</h1>
-            {auditVerification && (
-              <button
-                className="btn btn-sm btn-subtle"
-                onClick={() => {
-                  playClickSound()
-                  // You can add navigation to audit verification details here if needed
-                }}
-                title={auditVerification.is_valid ? 'All executions cryptographically verified' : `${compromisedExecutionCount} execution${compromisedExecutionCount !== 1 ? 's' : ''} compromised`}
-              >
-                {auditVerification.is_valid ? (
-                  <ShieldCheckIcon className={styles.verifiedIcon} />
-                ) : (
-                  <ShieldExclamationIcon className={styles.tamperedIcon} />
-                )}
-              </button>
-            )}
-          </div>
+          <h1>Executions</h1>
           <p className={styles.subtitle}>Track agent invocations and results</p>
         </div>
         <Card>
@@ -258,33 +223,17 @@ export default function Executions() {
   return (
     <div className={styles.executions}>
       <div className={styles.header}>
-        <div className={styles.titleRow}>
-          <h1>
-            Executions
-            {auditVerification && (
-              <span className={`${styles.verifiedBadge} ${auditVerification.verified ? styles.verified : styles.compromised}`}>
-                {auditVerification.verified ? 'Verified' : 'Compromised'}
-              </span>
-            )}
-          </h1>
-          {auditVerification && (
-            <button
-              className="btn btn-sm btn-subtle"
-              onClick={() => {
-                playClickSound()
-                // You can add navigation to audit verification details here if needed
-              }}
-              title={auditVerification.is_valid ? 'All executions cryptographically verified' : `${compromisedExecutionCount} execution${compromisedExecutionCount !== 1 ? 's' : ''} compromised`}
-            >
-              {auditVerification.is_valid ? (
-                <ShieldCheckIcon className={styles.verifiedIcon} />
-              ) : (
-                <ShieldExclamationIcon className={styles.tamperedIcon} />
-              )}
-            </button>
-          )}
-        </div>
+        <h1>Executions</h1>
         <p className={styles.subtitle}>Track agent invocations and results</p>
+        
+        {auditVerification && !auditVerification.verified && (
+          <div className={styles.auditWarning}>
+            <ShieldExclamationIcon className={styles.warningIcon} />
+            <span className={styles.warningText}>
+              {compromisedExecutionCount} execution{compromisedExecutionCount !== 1 ? 's' : ''} detected with compromised audit trail
+            </span>
+          </div>
+        )}
         
         <div className={styles.controlsContainer}>
           <div className={styles.primaryControls}>
@@ -689,6 +638,7 @@ export default function Executions() {
           </div>
         )}
       </div>
+
     </div>
   )
 }
