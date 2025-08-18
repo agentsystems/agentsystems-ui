@@ -9,7 +9,8 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   EyeIcon,
-  ClockIcon
+  ClockIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { apiClient } from '@api/client'
@@ -43,13 +44,15 @@ export default function Artifacts() {
   const [searchQuery, setSearchQuery] = useState('')
   const [agentFilter, setAgentFilter] = useState<string>('all')
   const [fileTypeFilter, setFileTypeFilter] = useState<string>('all')
-  const [selectedExecution, setSelectedExecution] = useState<string | null>(null)
+  const [previewFile, setPreviewFile] = useState<ArtifactFile | null>(null)
+  const [previewContent, setPreviewContent] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   // Get filter from URL params
   useEffect(() => {
     const thread = searchParams.get('thread')
     const agent = searchParams.get('agent')
-    if (thread) setSelectedExecution(thread)
+    if (thread) setSearchQuery(thread)
     if (agent) setAgentFilter(agent)
   }, [searchParams])
 
@@ -153,6 +156,37 @@ export default function Artifacts() {
     }
   }
 
+  const openPreview = async (file: ArtifactFile) => {
+    try {
+      playClickSound()
+      setPreviewFile(file)
+      setPreviewLoading(true)
+      setPreviewContent(null)
+      
+      // Check if file type is previewable
+      const ext = file.name.split('.').pop()?.toLowerCase()
+      const previewableTypes = ['txt', 'md', 'json', 'csv', 'log', 'yaml', 'yml', 'py', 'js', 'ts', 'html', 'css']
+      
+      if (!previewableTypes.includes(ext || '')) {
+        setPreviewContent(`Preview not available for .${ext} files`)
+        setPreviewLoading(false)
+        return
+      }
+      
+      // Fetch file content as text
+      const response = await apiClient.get(file.path, {
+        responseType: 'text'
+      })
+      
+      setPreviewContent(response.data)
+    } catch (error) {
+      console.error('Preview failed:', error)
+      setPreviewContent(`Failed to load preview: ${error.response?.status || 'Network error'}`)
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
+
   const downloadFile = async (file: ArtifactFile) => {
     try {
       playClickSound()
@@ -206,18 +240,15 @@ export default function Artifacts() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Artifacts</h1>
-          <p className={styles.subtitle}>Browse and download execution files</p>
-        </div>
-      </header>
+      <div className={styles.header}>
+        <h1>Artifacts</h1>
+        <p className={styles.subtitle}>Browse and download execution files</p>
+      </div>
 
       {/* Filters and Search */}
-      <Card className={styles.controlsCard}>
-        <div className={styles.controls}>
+      <div className={styles.controlsContainer}>
+        <div className={styles.primaryControls}>
           <div className={styles.searchGroup}>
-            <MagnifyingGlassIcon className={styles.searchIcon} />
             <input
               type="text"
               placeholder="Search by execution, agent, or filename..."
@@ -225,40 +256,50 @@ export default function Artifacts() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  playClickSound()
+                }}
+                className={styles.clearSearch}
+                aria-label="Clear search"
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
           </div>
+          
+          <select
+            className={styles.filterSelect}
+            value={agentFilter}
+            onChange={(e) => setAgentFilter(e.target.value)}
+          >
+            <option value="all">All Agents ({filteredExecutions.length})</option>
+            {agentsData?.agents.map(agent => (
+              <option key={agent.name} value={agent.name}>
+                {agent.name} ({executionsWithArtifacts.filter(e => e.agent === agent.name).length})
+              </option>
+            ))}
+          </select>
+          
+          <select
+            className={styles.filterSelect}
+            value={fileTypeFilter}
+            onChange={(e) => setFileTypeFilter(e.target.value)}
+          >
+            <option value="all">All Types</option>
+            <option value="with-files">With Files</option>
+            <option value="input-only">Input Files Only</option>
+            <option value="output-only">Output Files Only</option>
+          </select>
 
-          <div className={styles.filterGroup}>
-            <FunnelIcon className={styles.filterIcon} />
-            <select
-              className={styles.filterSelect}
-              value={agentFilter}
-              onChange={(e) => setAgentFilter(e.target.value)}
-            >
-              <option value="all">All Agents ({filteredExecutions.length})</option>
-              {agentsData?.agents.map(agent => (
-                <option key={agent.name} value={agent.name}>
-                  {agent.name} ({executionsWithArtifacts.filter(e => e.agent === agent.name).length})
-                </option>
-              ))}
-            </select>
-
-            <select
-              className={styles.filterSelect}
-              value={fileTypeFilter}
-              onChange={(e) => setFileTypeFilter(e.target.value)}
-            >
-              <option value="all">All Types</option>
-              <option value="with-files">With Files</option>
-              <option value="input-only">Input Files Only</option>
-              <option value="output-only">Output Files Only</option>
-            </select>
-          </div>
-
-          <div className={styles.resultCount}>
+          <span className={styles.resultCount}>
             {filteredExecutions.length} execution{filteredExecutions.length !== 1 ? 's' : ''}
-          </div>
+          </span>
         </div>
-      </Card>
+      </div>
 
       {/* Artifacts List */}
       <div className={styles.artifactsList}>
@@ -280,7 +321,7 @@ export default function Artifacts() {
                   </h3>
                   <div className={styles.executionMeta}>
                     <span className={styles.threadId}>
-                      {execution.thread_id.substring(0, 8)}...
+                      {execution.thread_id}
                     </span>
                     <span className={`${styles.state} ${styles[execution.state]}`}>
                       {execution.state}
@@ -308,6 +349,13 @@ export default function Artifacts() {
                             <span className={styles.fileSize}>{formatFileSize(file.size)}</span>
                           </div>
                           <div className={styles.fileActions}>
+                            <button
+                              className="btn btn-sm btn-subtle"
+                              onClick={() => openPreview(file)}
+                              title="Preview file"
+                            >
+                              <EyeIcon />
+                            </button>
                             <button
                               className="btn btn-sm btn-subtle"
                               onClick={() => downloadFile(file)}
@@ -338,6 +386,13 @@ export default function Artifacts() {
                           <div className={styles.fileActions}>
                             <button
                               className="btn btn-sm btn-subtle"
+                              onClick={() => openPreview(file)}
+                              title="Preview file"
+                            >
+                              <EyeIcon />
+                            </button>
+                            <button
+                              className="btn btn-sm btn-subtle"
                               onClick={() => downloadFile(file)}
                               title="Download file"
                             >
@@ -360,6 +415,47 @@ export default function Artifacts() {
           ))
         )}
       </div>
+
+      {/* Preview Modal */}
+      {previewFile && (
+        <div className={styles.modalOverlay} onClick={() => setPreviewFile(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitle}>
+                <span className={styles.previewFileName}>{previewFile.name}</span>
+                <span className={styles.previewFileInfo}>
+                  {formatFileSize(previewFile.size)} • {previewFile.type}
+                </span>
+              </div>
+              <button
+                className="btn btn-sm btn-subtle"
+                onClick={() => setPreviewFile(null)}
+                title="Close preview"
+              >
+                <XMarkIcon />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              {previewLoading ? (
+                <div className={styles.previewLoading}>Loading preview...</div>
+              ) : (
+                <pre className={styles.previewContent}>
+                  {previewContent}
+                </pre>
+              )}
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                className="btn btn-sm"
+                onClick={() => downloadFile(previewFile)}
+              >
+                <ArrowDownTrayIcon />
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

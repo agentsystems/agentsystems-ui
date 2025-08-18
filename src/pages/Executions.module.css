@@ -6,9 +6,6 @@
 
 .header {
   margin-bottom: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
 }
 
 .titleRow {
@@ -16,14 +13,37 @@
   align-items: center;
   gap: 1rem;
   justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .header h1 {
   font-size: 20px;
   font-weight: 700;
   color: var(--text);
-  margin: 0;
+  margin-bottom: 8px;
   letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.verifiedBadge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.verifiedBadge.verified {
+  background-color: var(--success-bg);
+  color: var(--success);
+}
+
+.verifiedBadge.compromised {
+  background-color: var(--error-bg);
+  color: var(--error);
 }
 
 .auditStatus {
@@ -74,6 +94,7 @@
   color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.5;
+  margin: 0 0 24px 0;
 }
 
 .controlsContainer {
@@ -84,6 +105,7 @@
   background-color: var(--surface-2);
   border-radius: var(--radius);
   border-left: 4px solid var(--accent);
+  margin-bottom: 1rem;
 }
 
 .primaryControls {

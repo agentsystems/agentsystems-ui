@@ -125,49 +125,41 @@ export default function Agents() {
         
         <div className={styles.filterControls}>
           <div className={styles.searchGroup}>
-            <label htmlFor="agent-search">Search agents:</label>
-            <div className={styles.searchInputWrapper}>
-              <input
-                id="agent-search"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Type agent name..."
-                className={styles.searchInput}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => {
-                    setSearchQuery('')
-                    playClickSound()
-                  }}
-                  className={styles.clearSearch}
-                  aria-label="Clear search"
-                  title="Clear search"
-                >
-                  ×
-                </button>
-              )}
-            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by agent name..."
+              className={styles.searchInput}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  playClickSound()
+                }}
+                className={styles.clearSearch}
+                aria-label="Clear search"
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
           </div>
           
-          <div className={styles.filterGroup}>
-            <label htmlFor="agent-filter">Filter by state:</label>
-            <select 
-              id="agent-filter"
-              value={selectedFilter}
-              onChange={(e) => {
-                setSelectedFilter(e.target.value as 'all' | 'running' | 'stopped')
-                playClickSound()
-                e.target.blur() // Remove focus after selection
-              }}
-              className={styles.filterSelect}
-            >
-              <option value="all">All ({data?.agents.length || 0})</option>
-              <option value="running">On ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
-              <option value="stopped">Off ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
-            </select>
-          </div>
+          <select 
+            value={selectedFilter}
+            onChange={(e) => {
+              setSelectedFilter(e.target.value as 'all' | 'running' | 'stopped')
+              playClickSound()
+              e.target.blur() // Remove focus after selection
+            }}
+            className={styles.filterSelect}
+          >
+            <option value="all">All ({data?.agents.length || 0})</option>
+            <option value="running">On ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
+            <option value="stopped">Off ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
+          </select>
           
           <span className={styles.resultCount}>
             Showing {filteredAgents.length} agent{filteredAgents.length !== 1 ? 's' : ''}
