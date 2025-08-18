@@ -72,7 +72,6 @@ export default function Executions() {
   const { playClickSound } = useAudio()
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
-  const [showAuditTrail, setShowAuditTrail] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [stateFilter, setStateFilter] = useState<'all' | 'completed' | 'failed' | 'running'>('all')
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'compromised'>('all')
@@ -131,7 +130,7 @@ export default function Executions() {
   const { data: auditData } = useQuery({
     queryKey: ['execution-audit', selectedExecution?.thread_id],
     queryFn: () => agentsApi.getExecutionAudit(selectedExecution!.thread_id),
-    enabled: !!selectedExecution && showAuditTrail,
+    enabled: !!selectedExecution,
   })
 
   // Fetch artifacts for selected execution
@@ -433,7 +432,7 @@ export default function Executions() {
       <div className={`${styles.layout} ${!selectedExecution ? styles.layoutFullWidth : ''}`}>
         <div className={styles.executionsList}>
           <Card>
-            <h2>Execution History</h2>
+            <h2 className={styles.alignedHeading}>Execution History</h2>
             <div className={styles.executionsTable}>
               <div className={styles.tableHeader}>
                 <span>Agent</span>
@@ -498,7 +497,7 @@ export default function Executions() {
           <div className={styles.executionDetail}>
             <Card>
               <div className={styles.detailHeader}>
-                <h2>Execution Details</h2>
+                <h2 className={styles.alignedHeading}>Execution Details</h2>
                 <div className={styles.detailActions}>
                   {selectedExecution.payload && selectedExecution.state === 'failed' && (
                     <button
@@ -569,6 +568,7 @@ export default function Executions() {
               {/* Tab Content */}
               {activeTab === 'overview' && (
                 <div className={styles.tabContent}>
+                  <h3 className={styles.tabHeading}>Execution Overview</h3>
                   <div className={styles.detailGrid}>
                     <div className={styles.detailItem}>
                       <label>Thread ID</label>
@@ -655,12 +655,13 @@ export default function Executions() {
 
               {activeTab === 'artifacts' && (
                 <div className={styles.tabContent}>
+                  <h3 className={styles.tabHeading}>Execution Artifacts</h3>
                   {artifactsData && (artifactsData.input_files.length > 0 || artifactsData.output_files.length > 0) ? (
-                    <div className={styles.artifactsSection}>
-                      <div className={styles.filesGrid}>
-                        {artifactsData.input_files.length > 0 && (
-                          <div className={styles.fileSection}>
-                            <h4 className={styles.sectionTitle}>Input Files ({artifactsData.input_files.length})</h4>
+                    <div className={styles.detailGrid}>
+                      <div className={styles.detailItem}>
+                        <label>Input Files ({artifactsData.input_files.length})</label>
+                        <div className={styles.detailValue}>
+                          {artifactsData.input_files.length > 0 ? (
                             <div className={styles.filesList}>
                               {artifactsData.input_files.map(file => (
                                 <div key={file.path} className={styles.fileItem}>
@@ -688,12 +689,16 @@ export default function Executions() {
                                 </div>
                               ))}
                             </div>
-                          </div>
-                        )}
+                          ) : (
+                            <span>—</span>
+                          )}
+                        </div>
+                      </div>
 
-                        {artifactsData.output_files.length > 0 && (
-                          <div className={styles.fileSection}>
-                            <h4 className={styles.sectionTitle}>Output Files ({artifactsData.output_files.length})</h4>
+                      <div className={styles.detailItem}>
+                        <label>Output Files ({artifactsData.output_files.length})</label>
+                        <div className={styles.detailValue}>
+                          {artifactsData.output_files.length > 0 ? (
                             <div className={styles.filesList}>
                               {artifactsData.output_files.map(file => (
                                 <div key={file.path} className={styles.fileItem}>
@@ -721,8 +726,10 @@ export default function Executions() {
                                 </div>
                               ))}
                             </div>
-                          </div>
-                        )}
+                          ) : (
+                            <span>—</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -738,154 +745,148 @@ export default function Executions() {
 
               {activeTab === 'data' && (
                 <div className={styles.tabContent}>
-                  {selectedExecution.payload && (
-                    <div className={styles.payloadSection}>
-                      <h3>Request Payload</h3>
-                      <pre className={styles.payloadContent}>
-                        {(() => {
-                          try {
-                            // Handle both string and object payloads
-                            const payload = typeof selectedExecution.payload === 'string' 
-                              ? JSON.parse(selectedExecution.payload)
-                              : selectedExecution.payload
-                            return JSON.stringify(payload, null, 2)
-                          } catch {
-                            return selectedExecution.payload as string
-                          }
-                        })()}
-                      </pre>
-                    </div>
-                  )}
-
-                  {selectedExecution.result && (
-                    <div className={styles.resultSection}>
-                      <h3>Result</h3>
-                      <pre className={styles.resultContent}>
-                        {(() => {
-                          try {
-                            // If result is a string, parse and beautify it
-                            if (typeof selectedExecution.result === 'string') {
-                              const parsed = JSON.parse(selectedExecution.result)
-                              return JSON.stringify(parsed, null, 2)
+                  <h3 className={styles.tabHeading}>Execution Data</h3>
+                  <div className={styles.detailGrid}>
+                    {selectedExecution.payload && (
+                      <div className={styles.detailItem} data-content-type="payload">
+                        <label>Request Payload</label>
+                        <pre className={styles.detailValue}>
+                          {(() => {
+                            try {
+                              // Handle both string and object payloads
+                              const payload = typeof selectedExecution.payload === 'string' 
+                                ? JSON.parse(selectedExecution.payload)
+                                : selectedExecution.payload
+                              return JSON.stringify(payload, null, 2)
+                            } catch {
+                              return selectedExecution.payload as string
                             }
-                            // If it's already an object, stringify it
-                            return JSON.stringify(selectedExecution.result, null, 2)
-                          } catch {
-                            // If parsing fails, display the raw string
-                            return selectedExecution.result as string
-                          }
-                        })()}
-                      </pre>
-                    </div>
-                  )}
+                          })()}
+                        </pre>
+                      </div>
+                    )}
 
-                  {selectedExecution.error && (
-                    <div className={styles.errorSection}>
-                      <h3>Error</h3>
-                      <pre className={styles.errorContent}>
-                        {(() => {
-                          try {
-                            // If error is a string, parse and beautify it
-                            if (typeof selectedExecution.error === 'string') {
-                              const parsed = JSON.parse(selectedExecution.error)
-                              return JSON.stringify(parsed, null, 2)
+                    {selectedExecution.result && (
+                      <div className={styles.detailItem} data-content-type="result">
+                        <label>Result</label>
+                        <pre className={styles.detailValue}>
+                          {(() => {
+                            try {
+                              // If result is a string, parse and beautify it
+                              if (typeof selectedExecution.result === 'string') {
+                                const parsed = JSON.parse(selectedExecution.result)
+                                return JSON.stringify(parsed, null, 2)
+                              }
+                              // If it's already an object, stringify it
+                              return JSON.stringify(selectedExecution.result, null, 2)
+                            } catch {
+                              // If parsing fails, display the raw string
+                              return selectedExecution.result as string
                             }
-                            // If it's already an object, stringify it
-                            return JSON.stringify(selectedExecution.error, null, 2)
-                          } catch {
-                            // If parsing fails, display the raw string
-                            return selectedExecution.error as string
-                          }
-                        })()}
-                      </pre>
-                    </div>
-                  )}
+                          })()}
+                        </pre>
+                      </div>
+                    )}
 
-                  {!selectedExecution.payload && !selectedExecution.result && !selectedExecution.error && (
-                    <div className={styles.emptyState}>
-                      <p>No execution data available</p>
-                    </div>
-                  )}
+                    {selectedExecution.error && (
+                      <div className={styles.detailItem} data-content-type="error">
+                        <label>Error</label>
+                        <pre className={styles.detailValue}>
+                          {(() => {
+                            try {
+                              // If error is a string, parse and beautify it
+                              if (typeof selectedExecution.error === 'string') {
+                                const parsed = JSON.parse(selectedExecution.error)
+                                return JSON.stringify(parsed, null, 2)
+                              }
+                              // If it's already an object, stringify it
+                              return JSON.stringify(selectedExecution.error, null, 2)
+                            } catch {
+                              // If parsing fails, display the raw string
+                              return selectedExecution.error as string
+                            }
+                          })()}
+                        </pre>
+                      </div>
+                    )}
+                    {!selectedExecution.payload && !selectedExecution.result && !selectedExecution.error && (
+                      <div className={styles.emptyState}>
+                        <p>No execution data available</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
               {activeTab === 'audit' && (
                 <div className={styles.tabContent}>
+                  <h3 className={styles.tabHeading}>Audit Trail</h3>
                   <div className={styles.auditSection}>
-                    <div className={styles.auditHeader}>
-                      <div className={styles.auditTitleRow}>
-                        {auditVerification && (
-                          <span className={`${styles.statusBadge} ${auditVerification.verified ? styles.verified : styles.compromised}`}>
-                            {auditVerification.verified ? (
-                              <ShieldCheckIcon />
-                            ) : (
-                              <ShieldExclamationIcon />
-                            )}
-                          </span>
-                        )}
-                        <h3>Hash Chain Verification</h3>
+                    {/* All detail items in a single detailGrid for consistent spacing */}
+                    <div className={styles.detailGrid}>
+                      <div className={styles.detailItem}>
+                        <label>Verification Status</label>
+                        <span className={styles.detailValue}>
+                          {auditVerification?.verified ? (
+                            <>
+                              <ShieldCheckIcon className={styles.verifiedIcon} />
+                              Verified
+                            </>
+                          ) : (
+                            <>
+                              <ShieldExclamationIcon className={styles.compromisedIcon} />
+                              Compromised
+                            </>
+                          )}
+                        </span>
                       </div>
-                      <button
-                        className="btn btn-sm btn-subtle"
-                        onClick={() => {
-                          setShowAuditTrail(!showAuditTrail)
-                          playClickSound()
-                        }}
-                      >
-                        {showAuditTrail ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                        {showAuditTrail ? 'Hide' : 'Show'} Details
-                      </button>
+                      
+                      {/* Show tampering alert as text between detail items if this execution is compromised */}
+                      {compromisedThreadIds.has(selectedExecution.thread_id) && (
+                        <div className={styles.tamperingAlert}>
+                          <ShieldExclamationIcon className={styles.alertIcon} />
+                          <div>
+                            <strong>This execution has been tampered with</strong>
+                            <p>The audit trail shows evidence of data modification or hash chain compromise.</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {auditData && (
+                        <>
+                          <div className={styles.detailItem}>
+                            <label>Previous Execution Hash</label>
+                            <span className={styles.detailValue}>
+                              {auditData.audit_trail?.[0]?.prev_hash || 'Genesis'}
+                            </span>
+                          </div>
+                          <div className={styles.detailItem}>
+                            <label>This Execution Hash</label>
+                            <span className={styles.detailValue}>
+                              {auditData.audit_trail?.[auditData.audit_trail.length - 1]?.entry_hash || 'N/A'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    
-                    {/* Show tampering status for this execution */}
-                    {compromisedThreadIds.has(selectedExecution.thread_id) && (
-                      <div className={styles.tamperingAlert}>
-                        <ShieldExclamationIcon className={styles.alertIcon} />
-                        <div>
-                          <strong>This execution has been tampered with</strong>
-                          <p>The audit trail shows evidence of data modification or hash chain compromise.</p>
-                        </div>
-                      </div>
-                    )}
 
-                    {showAuditTrail && auditData && (
-                      <div className={styles.auditContent}>
-                        {/* Execution-level hash summary */}
-                        <div className={styles.executionHashSummary}>
-                          <div className={styles.hashChainInfo}>
-                            <div className={styles.hashItem}>
-                              <label>Previous Execution Hash:</label>
-                              <code className={styles.hashValue}>
-                                {auditData.audit_trail?.[0]?.prev_hash || 'Genesis'}
-                              </code>
+                    {auditData && (
+                      <div className={styles.auditDetails}>
+                        <h4 className={styles.auditSubheading}>
+                          Detailed audit events ({auditData.audit_trail?.length || 0} entries)
+                        </h4>
+                        <div className={styles.auditEvents}>
+                          {auditData.audit_trail?.map((entry: any, index: number) => (
+                            <div key={entry.id} className={styles.simpleAuditEntry}>
+                              <span className={styles.auditAction}>{entry.action}</span>
+                              <span className={styles.auditActor}>{entry.actor}</span>
+                              <span className={styles.auditTime}>
+                                {entry.timestamp ? format(new Date(entry.timestamp), 'HH:mm:ss.SSS') : ''}
+                              </span>
+                              <code className={styles.simpleHashValue}>{entry.entry_hash}</code>
                             </div>
-                            <div className={styles.hashItem}>
-                              <label>This Execution Hash:</label>
-                              <code className={styles.hashValue}>
-                                {auditData.audit_trail?.[auditData.audit_trail.length - 1]?.entry_hash || 'N/A'}
-                              </code>
-                            </div>
-                          </div>
+                          ))}
                         </div>
-
-                        {/* Detailed audit events (collapsible) */}
-                        <details className={styles.auditDetails}>
-                          <summary className={styles.auditDetailsSummary}>
-                            View detailed audit events ({auditData.audit_trail?.length || 0} entries)
-                          </summary>
-                          <div className={styles.auditEvents}>
-                            {auditData.audit_trail?.map((entry: any, index: number) => (
-                              <div key={entry.id} className={styles.simpleAuditEntry}>
-                                <span className={styles.auditAction}>{entry.action}</span>
-                                <span className={styles.auditActor}>{entry.actor}</span>
-                                <span className={styles.auditTime}>
-                                  {entry.timestamp ? format(new Date(entry.timestamp), 'HH:mm:ss.SSS') : ''}
-                                </span>
-                                <code className={styles.simpleHashValue}>{entry.entry_hash}</code>
-                              </div>
-                            ))}
-                          </div>
-                        </details>
                       </div>
                     )}
                   </div>

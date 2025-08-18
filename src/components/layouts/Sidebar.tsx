@@ -7,6 +7,7 @@ import {
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
+import { useThemeStore } from '@stores/themeStore'
 import { APP_VERSION, APP_NAME, ROUTES } from '@constants/app'
 import styles from './Sidebar.module.css'
 
@@ -30,13 +31,16 @@ const navigationSections = [
 
 export default function Sidebar() {
   const { playClickSound } = useAudio()
+  const { theme } = useThemeStore()
 
   return (
     <aside className={styles.sidebar} id="navigation" role="navigation" aria-label="Main navigation">
       <div className={styles.logo} role="banner">
-        <div className={styles.logoGradient} aria-hidden="true">AS</div>
-        <span className={styles.logoText}>{APP_NAME}</span>
-        <div className={styles.logoBadge} aria-label={`Version ${APP_VERSION}`}>{APP_VERSION}</div>
+        <img 
+          src={theme === 'light' ? '/fitted-logo-light-bg.png' : '/fitted-logo-dark-bg.png'}
+          alt={APP_NAME}
+          className={styles.logoImage}
+        />
       </div>
       
       <nav className={styles.nav} aria-label="Application sections">
