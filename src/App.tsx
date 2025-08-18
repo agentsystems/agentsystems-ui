@@ -4,6 +4,7 @@ import MainLayout from '@components/layouts/MainLayout'
 import Dashboard from '@pages/Dashboard'
 import Agents from '@pages/Agents'
 import Executions from '@pages/Executions'
+import Artifacts from '@pages/Artifacts'
 import Logs from '@pages/Logs'
 import Settings from '@pages/Settings'
 import AgentDetail from '@pages/AgentDetail'
@@ -44,6 +45,7 @@ function App() {
           <Route path="agents" element={<Agents />} />
           <Route path="agents/:agentName" element={<AgentDetail />} />
           <Route path="executions" element={<Executions />} />
+          <Route path="artifacts" element={<Artifacts />} />
           <Route path="logs" element={<Logs />} />
           <Route path="settings" element={<Settings />} />
         </Route>

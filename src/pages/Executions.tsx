@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, LinkIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon, FolderIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
@@ -192,7 +192,25 @@ export default function Executions() {
     return (
       <div className={styles.executions}>
         <div className={styles.header}>
-          <h1>Executions</h1>
+          <div className={styles.titleRow}>
+            <h1>Executions</h1>
+            {auditVerification && (
+              <button
+                className="btn btn-sm btn-subtle"
+                onClick={() => {
+                  playClickSound()
+                  // You can add navigation to audit verification details here if needed
+                }}
+                title={auditVerification.is_valid ? 'All executions cryptographically verified' : `${compromisedExecutionCount} execution${compromisedExecutionCount !== 1 ? 's' : ''} compromised`}
+              >
+                {auditVerification.is_valid ? (
+                  <ShieldCheckIcon className={styles.verifiedIcon} />
+                ) : (
+                  <ShieldExclamationIcon className={styles.tamperedIcon} />
+                )}
+              </button>
+            )}
+          </div>
           <p className={styles.subtitle}>Track agent invocations and results</p>
         </div>
         <div className={styles.loading}>Loading executions...</div>
@@ -204,7 +222,25 @@ export default function Executions() {
     return (
       <div className={styles.executions}>
         <div className={styles.header}>
-          <h1>Executions</h1>
+          <div className={styles.titleRow}>
+            <h1>Executions</h1>
+            {auditVerification && (
+              <button
+                className="btn btn-sm btn-subtle"
+                onClick={() => {
+                  playClickSound()
+                  // You can add navigation to audit verification details here if needed
+                }}
+                title={auditVerification.is_valid ? 'All executions cryptographically verified' : `${compromisedExecutionCount} execution${compromisedExecutionCount !== 1 ? 's' : ''} compromised`}
+              >
+                {auditVerification.is_valid ? (
+                  <ShieldCheckIcon className={styles.verifiedIcon} />
+                ) : (
+                  <ShieldExclamationIcon className={styles.tamperedIcon} />
+                )}
+              </button>
+            )}
+          </div>
           <p className={styles.subtitle}>Track agent invocations and results</p>
         </div>
         <Card>
@@ -223,30 +259,28 @@ export default function Executions() {
     <div className={styles.executions}>
       <div className={styles.header}>
         <div className={styles.titleRow}>
-          <h1>Executions</h1>
+          <h1>
+            Executions
+            {auditVerification && (
+              <span className={`${styles.verifiedBadge} ${auditVerification.verified ? styles.verified : styles.compromised}`}>
+                {auditVerification.verified ? 'Verified' : 'Compromised'}
+              </span>
+            )}
+          </h1>
           {auditVerification && (
             <button
-              className={`${styles.auditStatus} ${auditVerification.verified ? styles.auditValid : styles.auditInvalid}`}
+              className="btn btn-sm btn-subtle"
               onClick={() => {
-                if (!auditVerification.verified) {
-                  setVerificationFilter('compromised')
-                  playClickSound()
-                }
+                playClickSound()
+                // You can add navigation to audit verification details here if needed
               }}
-              disabled={auditVerification.verified}
-              title={auditVerification.verified ? 'All executions verified' : 'Click to filter compromised executions'}
+              title={auditVerification.is_valid ? 'All executions cryptographically verified' : `${compromisedExecutionCount} execution${compromisedExecutionCount !== 1 ? 's' : ''} compromised`}
             >
-              {auditVerification.verified ? (
-                <ShieldCheckIcon className={styles.auditStatusIcon} />
+              {auditVerification.is_valid ? (
+                <ShieldCheckIcon className={styles.verifiedIcon} />
               ) : (
-                <ShieldExclamationIcon className={styles.auditStatusIcon} />
+                <ShieldExclamationIcon className={styles.tamperedIcon} />
               )}
-              <span>
-                {auditVerification.verified 
-                  ? `All ${auditVerification.total_entries} entries verified` 
-                  : `${compromisedExecutionCount} compromised execution${compromisedExecutionCount !== 1 ? 's' : ''}`
-                }
-              </span>
             </button>
           )}
         </div>
@@ -294,6 +328,7 @@ export default function Executions() {
             <span className={styles.resultCount}>
               {filteredExecutions.length} execution{filteredExecutions.length !== 1 ? 's' : ''}
             </span>
+
           </div>
           
           <div className={styles.secondaryControls}>
@@ -410,11 +445,21 @@ export default function Executions() {
                         retryMutation.mutate(selectedExecution)
                       }}
                       disabled={retryMutation.isPending}
+                      title={retryMutation.isPending ? 'Retrying...' : 'Retry execution'}
                     >
                       <ArrowPathIcon />
-                      {retryMutation.isPending ? 'Retrying...' : 'Retry'}
                     </button>
                   )}
+                  <button
+                    className="btn btn-sm btn-subtle"
+                    onClick={() => {
+                      playClickSound()
+                      navigate(`/artifacts?thread=${selectedExecution.thread_id}`)
+                    }}
+                    title="View artifacts for this execution"
+                  >
+                    <FolderIcon />
+                  </button>
                   <button
                     className="btn btn-sm btn-subtle"
                     onClick={() => {
