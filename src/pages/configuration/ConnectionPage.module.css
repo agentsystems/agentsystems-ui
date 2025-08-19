@@ -1,0 +1,227 @@
+.connectionPage {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+}
+
+.breadcrumbLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumbLink:hover {
+  color: var(--color-primary-hover);
+}
+
+.backIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.breadcrumbSeparator {
+  color: var(--color-text-tertiary);
+}
+
+.breadcrumbCurrent {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.header p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.form h2 svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-primary);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.input {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-bg);
+}
+
+.inputError {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 2px var(--color-error-bg);
+}
+
+.errorText {
+  font-size: 0.75rem;
+  color: var(--color-error);
+  margin-top: 0.25rem;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+.formActions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.statusItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statusLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+}
+
+.statusValue {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+}
+
+.statusValue.statusHealthy {
+  color: var(--color-success);
+}
+
+.statusValue.statusWarning {
+  color: var(--color-warning);
+}
+
+.warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: var(--color-warning-text);
+}
+
+.warning svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .connectionPage {
+    padding: 1rem;
+  }
+
+  .statusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+}
+
+/* Theme-specific styles */
+.theme-cyber .breadcrumbLink {
+  color: var(--color-accent);
+}
+
+.theme-cyber .form h2 svg {
+  color: var(--color-accent);
+}
+
+.theme-cyber .statusValue {
+  color: var(--color-accent);
+}
+
+.theme-cyber .statusValue.statusHealthy {
+  color: #00ff00;
+  text-shadow: 0 0 4px #00ff00;
+}
+
+.theme-cyber .statusValue.statusWarning {
+  color: #ffff00;
+  text-shadow: 0 0 4px #ffff00;
+}
+
+.theme-cyber .warning {
+  background: rgba(255, 255, 0, 0.1);
+  border-color: rgba(255, 255, 0, 0.3);
+  color: #ffff00;
+}

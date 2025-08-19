@@ -22,10 +22,16 @@ export default defineConfig({
   server: {
     port: 3001,
     proxy: {
+      '/api/config': {
+        target: 'http://localhost:18080',
+        changeOrigin: true,
+        // Keep /api prefix for config endpoints
+      },
       '/api': {
         target: 'http://localhost:18080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
+        // Strip /api prefix for regular endpoints like /agents
       },
     },
   },

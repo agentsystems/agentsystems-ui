@@ -22,6 +22,7 @@ export const ROUTES = {
   AGENTS: '/agents',
   EXECUTIONS: '/executions',
   LOGS: '/logs',
+  CONFIGURATION: '/configuration',
   SETTINGS: '/settings',
 } as const
 
