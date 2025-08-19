@@ -1,0 +1,406 @@
+.configurationOverview {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.headerContent h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+.lastSaved {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading p {
+  margin-top: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-border);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.statusBanner {
+  margin-bottom: 2rem;
+  border-left: 4px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.statusBanner.healthy {
+  border-left-color: var(--color-success);
+  background: var(--color-success-bg);
+}
+
+.statusBanner.warning {
+  border-left-color: var(--color-warning);
+  background: var(--color-warning-bg);
+}
+
+.statusBanner.error {
+  border-left-color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.statusContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.statusInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.statusBannerIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
+.statusBanner.healthy .statusBannerIcon {
+  color: var(--color-success);
+}
+
+.statusBanner.warning .statusBannerIcon {
+  color: var(--color-warning);
+}
+
+.statusBanner.error .statusBannerIcon {
+  color: var(--color-error);
+}
+
+.statusInfo h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.statusInfo p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.errorCard {
+  margin-bottom: 2rem;
+  border-color: var(--color-error-border);
+  background: var(--color-error-bg);
+}
+
+.error {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.error svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-error-text);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.error h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--color-error-text);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.error p {
+  margin: 0;
+  color: var(--color-error-text);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.configCard {
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-border);
+  position: relative;
+}
+
+.configCard:hover {
+  border-color: var(--color-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.configCard.healthy {
+  border-left: 4px solid var(--color-success);
+}
+
+.configCard.warning {
+  border-left: 4px solid var(--color-warning);
+}
+
+.configCard.error {
+  border-left: 4px solid var(--color-error);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cardIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-primary);
+}
+
+.cardTitle span {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+}
+
+.statusIndicator.healthy {
+  background: var(--color-success-bg);
+}
+
+.statusIndicator.warning {
+  background: var(--color-warning-bg);
+}
+
+.statusIndicator.error {
+  background: var(--color-error-bg);
+}
+
+.statusIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.statusIndicator.healthy .statusIcon {
+  color: var(--color-success);
+}
+
+.statusIndicator.warning .statusIcon {
+  color: var(--color-warning);
+}
+
+.statusIndicator.error .statusIcon {
+  color: var(--color-error);
+}
+
+.cardContent {
+  margin-bottom: 1rem;
+}
+
+.statusText {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.cardAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.chevron {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.configCard:hover .chevron {
+  transform: translateX(2px);
+}
+
+.recentActivity {
+  margin-top: 2rem;
+}
+
+.recentActivity h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.setupSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.step:hover {
+  background: var(--color-bg-secondary);
+}
+
+.stepIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.step.completed .stepIcon {
+  color: var(--color-success);
+}
+
+.step span {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.step.completed span {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .configurationOverview {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .statusIndicator {
+    align-self: flex-end;
+  }
+}
+
+/* Theme-specific styles */
+.theme-cyber .configCard {
+  border-color: var(--color-accent);
+  background: rgba(0, 255, 255, 0.02);
+}
+
+.theme-cyber .configCard:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+  background: rgba(0, 255, 255, 0.05);
+}
+
+.theme-cyber .cardIcon {
+  color: var(--color-accent);
+}
+
+.theme-cyber .cardAction {
+  color: var(--color-accent);
+  border-top-color: var(--color-accent);
+}
+
+.theme-cyber .statusBanner.healthy {
+  border-left-color: #00ff00;
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.theme-cyber .statusBanner.warning {
+  border-left-color: #ffff00;
+  background: rgba(255, 255, 0, 0.1);
+}
+
+.theme-cyber .statusBanner.error {
+  border-left-color: #ff0000;
+  background: rgba(255, 0, 0, 0.1);
+}

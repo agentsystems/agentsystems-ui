@@ -3,7 +3,8 @@ import {
   HomeIcon, 
   CpuChipIcon,
   BoltIcon,
-  DocumentTextIcon, 
+  DocumentTextIcon,
+  WrenchScrewdriverIcon,
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
@@ -24,6 +25,7 @@ const navigationSections = [
     title: 'Platform',
     items: [
       { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
+      { name: 'Configuration', href: ROUTES.CONFIGURATION, icon: WrenchScrewdriverIcon },
       { name: 'Settings', href: ROUTES.SETTINGS, icon: Cog6ToothIcon },
     ]
   }

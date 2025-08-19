@@ -6,6 +6,10 @@ import Agents from '@pages/Agents'
 import Executions from '@pages/Executions'
 import Logs from '@pages/Logs'
 import Settings from '@pages/Settings'
+import ConfigurationOverview from '@pages/ConfigurationOverview'
+import CredentialsPage from '@pages/configuration/CredentialsPage'
+import RegistriesPage from '@pages/configuration/RegistriesPage'
+import ConnectionPage from '@pages/configuration/ConnectionPage'
 import AgentDetail from '@pages/AgentDetail'
 import ErrorBoundary from '@components/ErrorBoundary'
 import SkipLinks from '@components/SkipLinks'
@@ -45,6 +49,10 @@ function App() {
           <Route path="agents/:agentName" element={<AgentDetail />} />
           <Route path="executions" element={<Executions />} />
           <Route path="logs" element={<Logs />} />
+          <Route path="configuration" element={<ConfigurationOverview />} />
+          <Route path="configuration/credentials" element={<CredentialsPage />} />
+          <Route path="configuration/registries" element={<RegistriesPage />} />
+          <Route path="configuration/connection" element={<ConnectionPage />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>

@@ -1,0 +1,232 @@
+.configuration {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.headerContent h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.unsavedIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.unsavedIndicator svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.lastSaved {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading p {
+  margin-top: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-border);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorCard {
+  margin-bottom: 2rem;
+  border-color: var(--color-error-border);
+  background: var(--color-error-bg);
+}
+
+.error {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.error svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-error-text);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.error h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--color-error-text);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.error p {
+  margin: 0;
+  color: var(--color-error-text);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tabNav {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 2rem;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+}
+
+.tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  background: var(--color-bg-secondary);
+}
+
+.tab svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.tabContent {
+  position: relative;
+  min-height: 400px;
+}
+
+.tabPanel {
+  display: none;
+}
+
+.tabPanel.active {
+  display: block;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .configuration {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .headerActions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .tabNav {
+    flex-direction: column;
+    border-bottom: none;
+  }
+
+  .tab {
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    justify-content: flex-start;
+  }
+
+  .tab.active {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-primary-bg);
+  }
+}
+
+/* Theme-specific styles */
+.theme-cyber .tab.active {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-accent);
+  text-shadow: 0 0 4px var(--color-accent);
+}
+
+.theme-cyber .unsavedIndicator {
+  background: rgba(255, 255, 0, 0.1);
+  border-color: rgba(255, 255, 0, 0.3);
+  color: #ffff00;
+}
