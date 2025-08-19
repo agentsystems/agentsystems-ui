@@ -108,9 +108,7 @@ export default function ConfigurationOverview() {
   // Credentials Status  
   const credentialsStatus = (() => {
     if (credentials.length === 0) return { status: 'warning' as const, text: 'No credentials', description: 'Add environment variables for registry authentication' }
-    const unreferenced = credentials.filter(c => !referencedVars.has(c.key))
-    if (unreferenced.length > 0) return { status: 'warning' as const, text: `${credentials.length} variables`, description: `${unreferenced.length} unused credentials` }
-    return { status: 'healthy' as const, text: `${credentials.length} variables`, description: 'All credentials properly referenced' }
+    return { status: 'healthy' as const, text: `${credentials.length} variables`, description: 'Environment variables configured' }
   })()
 
   // Models Status (placeholder - will be implemented)

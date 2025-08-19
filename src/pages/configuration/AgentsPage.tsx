@@ -374,7 +374,7 @@ export default function AgentsPage() {
           )}
 
           <div className={styles.formActions}>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-lg btn-bright">
               <CheckIcon />
               {editingId ? 'Update' : 'Add'} Agent
             </button>
@@ -383,7 +383,7 @@ export default function AgentsPage() {
               <button 
                 type="button" 
                 onClick={handleCancel}
-                className="btn btn-subtle"
+                className="btn btn-lg btn-subtle"
               >
                 <XMarkIcon />
                 Cancel

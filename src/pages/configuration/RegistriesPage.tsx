@@ -12,7 +12,8 @@ import {
   TrashIcon,
   CheckIcon,
   XMarkIcon,
-  ChevronLeftIcon
+  ChevronLeftIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 import styles from './RegistriesPage.module.css'
 
@@ -37,12 +38,14 @@ export default function RegistriesPage() {
     updateRegistryConnection,
     deleteRegistryConnection,
     getEnvVars,
+    getReferencedRegistries,
     saveConfig
   } = useConfigStore()
 
   const registries = getRegistryConnections()
   const envVars = getEnvVars()
   const availableEnvVars = envVars.map(env => env.key)
+  const referencedRegistries = getReferencedRegistries()
 
   const validateForm = (data: Omit<RegistryConnectionForm, 'id'>): boolean => {
     const newErrors: Record<string, string> = {}
@@ -120,12 +123,18 @@ export default function RegistriesPage() {
     setErrors({})
   }
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     playClickSound()
     
-    if (confirm(`Are you sure you want to delete registry "${name}"? This will also remove any agents using this registry.`)) {
+    if (referencedRegistries.has(id)) {
+      showError(`Cannot delete ${name} - it is referenced by agents`)
+      return
+    }
+    
+    if (confirm(`Are you sure you want to delete registry "${name}"?`)) {
       try {
         deleteRegistryConnection(id)
+        await saveConfig()
         showSuccess(`Deleted registry ${name}`)
       } catch (error) {
         showError(error instanceof Error ? error.message : 'Failed to delete registry')
@@ -339,7 +348,7 @@ export default function RegistriesPage() {
           )}
 
           <div className={styles.formActions}>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-lg btn-bright">
               <CheckIcon />
               {editingId ? 'Update' : 'Add'} Registry
             </button>
@@ -348,7 +357,7 @@ export default function RegistriesPage() {
               <button 
                 type="button" 
                 onClick={handleCancel}
-                className="btn btn-subtle"
+                className="btn btn-lg btn-subtle"
               >
                 <XMarkIcon />
                 Cancel
@@ -372,16 +381,24 @@ export default function RegistriesPage() {
           </div>
         ) : (
           <div className={styles.list}>
-            {registries.map((registry) => (
-              <div key={registry.id} className={styles.listItem}>
-                <div className={styles.itemHeader}>
-                  <div className={styles.itemName}>
-                    <ServerIcon />
-                    <span className={styles.registryName}>{registry.name}</span>
-                    <span className={`${styles.statusBadge} ${registry.enabled ? styles.enabled : styles.disabled}`}>
-                      {registry.enabled ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
+            {registries.map((registry) => {
+              const isReferenced = referencedRegistries.has(registry.id)
+              
+              return (
+                <div key={registry.id} className={styles.listItem}>
+                  <div className={styles.itemHeader}>
+                    <div className={styles.itemName}>
+                      <ServerIcon />
+                      <span className={styles.registryName}>{registry.name}</span>
+                      <span className={`${styles.statusBadge} ${registry.enabled ? styles.enabled : styles.disabled}`}>
+                        {registry.enabled ? 'Enabled' : 'Disabled'}
+                      </span>
+                      {isReferenced && (
+                        <span className={styles.referencedBadge}>
+                          Referenced
+                        </span>
+                      )}
+                    </div>
                   
                   <div className={styles.itemActions}>
                     <button
@@ -395,7 +412,8 @@ export default function RegistriesPage() {
                     <button
                       onClick={() => handleDelete(registry.id, registry.name)}
                       className={`btn btn-sm btn-ghost ${styles.deleteBtn}`}
-                      title="Delete registry"
+                      title={isReferenced ? 'Cannot delete - referenced by agents' : 'Delete registry'}
+                      disabled={isReferenced}
                     >
                       <TrashIcon />
                     </button>
@@ -416,8 +434,16 @@ export default function RegistriesPage() {
                     </span>
                   </div>
                 </div>
+
+                {isReferenced && (
+                  <div className={styles.referencedWarning}>
+                    <ExclamationTriangleIcon />
+                    <span>This registry is referenced by agents and cannot be deleted</span>
+                  </div>
+                )}
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </Card>
