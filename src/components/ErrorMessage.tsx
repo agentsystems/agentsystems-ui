@@ -5,6 +5,7 @@
 import { useEffect } from 'react'
 import { AppError, ErrorType, getUserFriendlyMessage } from '@utils/errorHandling'
 import { XCircleIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
+import styles from './ErrorMessage.module.css'
 
 interface ErrorMessageProps {
   /** Error object or simple message string */
@@ -27,16 +28,14 @@ interface ErrorMessageProps {
  * Get appropriate icon for error type
  */
 function getErrorIcon(errorType: ErrorType) {
-  const iconStyle = { width: '1.5rem', height: '1.5rem', marginRight: '0.75rem', flexShrink: 0 }
-  
   switch (errorType) {
     case ErrorType.VALIDATION:
-      return <InformationCircleIcon style={{ ...iconStyle, color: 'var(--warning)' }} aria-hidden="true" />
+      return <InformationCircleIcon className={`${styles.icon} ${styles.iconWarning}`} aria-hidden="true" />
     case ErrorType.NETWORK:
     case ErrorType.SERVER_ERROR:
-      return <ExclamationTriangleIcon style={{ ...iconStyle, color: 'var(--error)' }} aria-hidden="true" />
+      return <ExclamationTriangleIcon className={`${styles.icon} ${styles.iconError}`} aria-hidden="true" />
     default:
-      return <XCircleIcon style={{ ...iconStyle, color: 'var(--error)' }} aria-hidden="true" />
+      return <XCircleIcon className={`${styles.icon} ${styles.iconError}`} aria-hidden="true" />
   }
 }
 
@@ -93,31 +92,21 @@ export default function ErrorMessage({
       />
       
       <div 
-        style={{
-          padding: '1rem',
-          background: isValidationError ? 'var(--warning-bg)' : 'var(--error-bg)',
-          border: `1px solid ${isValidationError ? 'var(--warning)' : 'var(--error)'}`,
-          borderRadius: 'var(--radius)',
-          margin: '1rem 0',
-          display: 'flex',
-          alignItems: 'flex-start',
-        }}
-        className={className}
+        className={`${styles.errorMessage} ${
+          isValidationError ? styles.errorMessageValidation : styles.errorMessageDefault
+        } ${className}`}
         role="alert"
         aria-labelledby="error-title"
         aria-describedby="error-description"
       >
         {getErrorIcon(displayError.type)}
         
-        <div style={{ flex: 1 }}>
+        <div className={styles.content}>
           <h4 
             id="error-title" 
-            style={{ 
-              margin: '0 0 0.5rem 0',
-              color: isValidationError ? 'var(--warning)' : 'var(--error)',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-            }}
+            className={`${styles.title} ${
+              isValidationError ? styles.titleWarning : styles.titleError
+            }`}
           >
             {isValidationError ? 'Input Error' :
              displayError.type === ErrorType.NETWORK ? 'Connection Error' :
@@ -130,12 +119,7 @@ export default function ErrorMessage({
           
           <p 
             id="error-description" 
-            style={{ 
-              margin: '0',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-              lineHeight: '1.4',
-            }}
+            className={styles.description}
           >
             {userMessage}
           </p>
@@ -143,16 +127,7 @@ export default function ErrorMessage({
           {(showRetry && onRetry) && (
             <button 
               onClick={onRetry}
-              style={{
-                marginTop: '0.75rem',
-                padding: '0.5rem 1rem',
-                background: 'var(--accent)',
-                color: 'white',
-                border: 'none',
-                borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-              }}
+              className={styles.retryButton}
               aria-label="Retry the failed operation"
             >
               Try Again
@@ -160,30 +135,11 @@ export default function ErrorMessage({
           )}
           
           {showDetails && displayError.originalError && (
-            <details style={{ marginTop: '0.75rem' }}>
-              <summary 
-                style={{ 
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  color: 'var(--text-secondary)',
-                  userSelect: 'none',
-                }}
-              >
+            <details className={styles.details}>
+              <summary className={styles.detailsSummary}>
                 Technical Details
               </summary>
-              <pre 
-                style={{
-                  marginTop: '0.5rem',
-                  padding: '0.5rem',
-                  background: 'var(--surface-2)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius)',
-                  fontSize: '0.75rem',
-                  color: 'var(--text-secondary)',
-                  overflow: 'auto',
-                  maxHeight: '200px',
-                }}
-              >
+              <pre className={styles.technicalDetails}>
                 {displayError.originalError.message}
                 {displayError.originalError.stack && `\n\nStack:\n${displayError.originalError.stack.split('\n').slice(0, 5).join('\n')}`}
               </pre>

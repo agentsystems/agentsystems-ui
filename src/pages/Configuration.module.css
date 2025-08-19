@@ -16,12 +16,12 @@
   margin: 0 0 0.5rem 0;
   font-size: 2rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--text);
 }
 
 .subtitle {
   margin: 0;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 
@@ -37,9 +37,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-  border: 1px solid var(--color-warning-border);
+  background: var(--warning-bg);
+  color: var(--warning);
+  border: 1px solid var(--warning);
   border-radius: 6px;
   font-size: 0.875rem;
 }
@@ -51,7 +51,7 @@
 
 .lastSaved {
   font-size: 0.875rem;
-  color: var(--color-text-tertiary);
+  color: var(--text-muted);
 }
 
 .loading {
@@ -65,14 +65,14 @@
 
 .loading p {
   margin-top: 1rem;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 1.5rem;
   height: 1.5rem;
-  border: 2px solid var(--color-border);
-  border-top: 2px solid var(--color-primary);
+  border: 2px solid var(--border);
+  border-top: 2px solid var(--accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -84,8 +84,8 @@
 
 .errorCard {
   margin-bottom: 2rem;
-  border-color: var(--color-error-border);
-  background: var(--color-error-bg);
+  border-color: var(--error);
+  background: var(--error-bg);
 }
 
 .error {
@@ -97,21 +97,21 @@
 .error svg {
   width: 1.5rem;
   height: 1.5rem;
-  color: var(--color-error-text);
+  color: var(--error);
   flex-shrink: 0;
   margin-top: 0.125rem;
 }
 
 .error h3 {
   margin: 0 0 0.5rem 0;
-  color: var(--color-error-text);
+  color: var(--error);
   font-size: 1.125rem;
   font-weight: 600;
 }
 
 .error p {
   margin: 0;
-  color: var(--color-error-text);
+  color: var(--error);
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -124,7 +124,7 @@
 
 .tabNav {
   display: flex;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   margin-bottom: 2rem;
 }
 
@@ -136,7 +136,7 @@
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -145,14 +145,14 @@
 }
 
 .tab:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
+  color: var(--text);
+  background: var(--surface-2);
 }
 
 .tab.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  background: var(--color-bg-secondary);
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--surface-2);
 }
 
 .tab svg {
@@ -207,22 +207,22 @@
   }
 
   .tab {
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--border);
     border-radius: 0;
     justify-content: flex-start;
   }
 
   .tab.active {
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-primary-bg);
+    border-bottom: 1px solid var(--border);
+    background: var(--accent);
   }
 }
 
 /* Theme-specific styles */
 .theme-cyber .tab.active {
-  border-bottom-color: var(--color-accent);
-  color: var(--color-accent);
-  text-shadow: 0 0 4px var(--color-accent);
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+  text-shadow: 0 0 4px var(--accent);
 }
 
 .theme-cyber .unsavedIndicator {

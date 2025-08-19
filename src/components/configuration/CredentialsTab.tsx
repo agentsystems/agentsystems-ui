@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useConfigStore } from '../../stores/configStore'
-import { useAudio } from '../../hooks/useAudio'
-import { useToast } from '../../hooks/useToast'
-import Card from '../common/Card'
+import { useConfigStore } from '@stores/configStore'
+import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
+import Card from '@components/common/Card'
 import {
   PlusIcon,
   EyeIcon,
@@ -293,7 +293,7 @@ export default function CredentialsTab() {
                       
                       <button
                         onClick={() => handleDelete(envVar.key)}
-                        className={`btn btn-sm btn-ghost ${styles.deleteBtn}`}
+                        className="btn btn-sm btn-ghost btn-danger-color"
                         title={isReferenced ? 'Cannot delete - referenced by registries' : 'Delete variable'}
                         disabled={isReferenced}
                       >

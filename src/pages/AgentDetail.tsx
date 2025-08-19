@@ -6,10 +6,11 @@ import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ArrowPathIcon, Che
 import { agentsApi } from '@api/agents'
 import { getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
+import StatusBadge from '@components/common/StatusBadge'
 import { useAudio } from '@hooks/useAudio'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
-import type { InvocationResult } from '../types/api'
+import type { InvocationResult } from '@types/api'
 import styles from './AgentDetail.module.css'
 
 export default function AgentDetail() {
@@ -278,7 +279,7 @@ export default function AgentDetail() {
           Agent details and invocation
           {currentAgent && (
             <span className={styles.statusIndicator}>
-              • Status: <span className={styles.statusText}>{getAgentDisplayState(currentAgent.state)}</span>
+              • Status: <StatusBadge type="agent" status={currentAgent.state as 'running' | 'stopped' | 'not-created'} />
             </span>
           )}
         </p>
@@ -567,8 +568,11 @@ export default function AgentDetail() {
                 }}
               >
                 <span 
-                  className={styles.status}
-                  style={{ color: execution.state === 'completed' ? 'var(--success)' : execution.state === 'failed' ? 'var(--error)' : 'var(--info)' }}
+                  className={`${styles.status} ${
+                    execution.state === 'completed' ? styles.statusCompleted :
+                    execution.state === 'failed' ? styles.statusFailed :
+                    execution.state === 'running' ? styles.statusRunning : styles.statusQueued
+                  }`}
                 >
                   {execution.state}
                 </span>
@@ -616,12 +620,10 @@ export default function AgentDetail() {
               <CheckCircleIcon className={styles.performanceIcon} />
               <div className={styles.performanceData}>
                 <div 
-                  className={styles.performanceValue}
-                  style={{ 
-                    color: performanceMetrics.successRate >= 95 ? 'var(--success)' :
-                           performanceMetrics.successRate >= 80 ? 'var(--warning)' :
-                           'var(--error)'
-                  }}
+                  className={`${styles.performanceValue} ${
+                    performanceMetrics.successRate >= 95 ? styles.performanceSuccess :
+                    performanceMetrics.successRate >= 80 ? styles.performanceWarning : styles.performanceError
+                  }`}
                 >
                   {performanceMetrics.successRate.toFixed(1)}%
                 </div>

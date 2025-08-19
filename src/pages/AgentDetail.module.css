@@ -57,53 +57,6 @@
   gap: 0.75rem;
 }
 
-.startBtn {
-  padding: 4px 10px;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.startBtn:hover:not(:disabled) {
-  background: rgba(16, 185, 129, 0.2);
-  color: var(--success);
-}
-
-.startBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.stopBtn {
-  padding: 4px 10px;
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--error);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.stopBtn:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--error);
-}
-
-.stopBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .subtitle {
   color: var(--text-secondary);
@@ -211,26 +164,6 @@
   outline-offset: 2px;
 }
 
-.executeButton {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--accent);
-  color: var(--bg);
-  border: none;
-  border-radius: var(--radius);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.executeButton:hover {
-  opacity: 0.9;
-}
-
-.executeButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .result {
   margin-top: 1rem;
@@ -614,26 +547,40 @@
   color: var(--text);
 }
 
-.viewAllBtn {
-  padding: 0.5rem 1rem;
-  background: var(--surface-3);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.viewAllBtn:hover {
-  background: var(--accent);
-  color: var(--bg);
-  border-color: var(--accent);
-}
 
 .executionsTable {
   display: flex;
   flex-direction: column;
+}
+
+/* Status color classes for execution states */
+.statusCompleted {
+  color: var(--success);
+}
+
+.statusFailed {
+  color: var(--error);
+}
+
+.statusRunning {
+  color: var(--info);
+}
+
+.statusQueued {
+  color: var(--warning);
+}
+
+/* Performance value color classes */
+.performanceSuccess {
+  color: var(--success);
+}
+
+.performanceWarning {
+  color: var(--warning);
+}
+
+.performanceError {
+  color: var(--error);
 }
 
 .tableHeader {

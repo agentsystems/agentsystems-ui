@@ -1,0 +1,35 @@
+.errorContainer {
+  padding: 2rem;
+  text-align: center;
+  color: var(--error);
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin: 2rem;
+}
+
+.errorTitle {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.errorMessage {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary);
+}
+
+.reloadButton {
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: opacity 0.2s;
+}
+
+.reloadButton:hover {
+  opacity: 0.9;
+}

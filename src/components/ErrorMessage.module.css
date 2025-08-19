@@ -1,0 +1,91 @@
+.errorMessage {
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.errorMessageValidation {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+}
+
+.errorMessageDefault {
+  background: var(--error-bg);
+  border: 1px solid var(--error);
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.iconWarning {
+  color: var(--warning);
+}
+
+.iconError {
+  color: var(--error);
+}
+
+.content {
+  flex: 1;
+}
+
+.title {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.titleWarning {
+  color: var(--warning);
+}
+
+.titleError {
+  color: var(--error);
+}
+
+.description {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.retryButton {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.details {
+  margin-top: 0.75rem;
+}
+
+.detailsSummary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.technicalDetails {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  overflow: auto;
+  max-height: 200px;
+}

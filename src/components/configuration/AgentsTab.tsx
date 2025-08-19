@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useConfigStore } from '../../stores/configStore'
-import { useAudio } from '../../hooks/useAudio'
-import { useToast } from '../../hooks/useToast'
-import Card from '../common/Card'
-import { AgentConfigForm } from '../../types/config'
+import { useConfigStore } from '@stores/configStore'
+import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
+import Card from '@components/common/Card'
+import { AgentConfigForm } from '@types/config'
 import {
   PlusIcon,
   RocketLaunchIcon,
@@ -408,7 +408,7 @@ export default function AgentsTab() {
                     
                     <button
                       onClick={() => handleDelete(agent.id, agent.name)}
-                      className={`btn btn-sm btn-ghost ${styles.deleteBtn}`}
+                      className="btn btn-sm btn-ghost btn-danger-color"
                       title="Delete agent"
                     >
                       <TrashIcon />

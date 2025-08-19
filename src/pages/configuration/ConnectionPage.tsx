@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuthStore } from '../../stores/authStore'
-import { useAudio } from '../../hooks/useAudio'
-import { useToast } from '../../hooks/useToast'
-import { validateSettings } from '../../utils/validation'
-import { sanitizeUrl, sanitizeToken, rateLimiter } from '../../utils/security'
-import Card from '../../components/common/Card'
-import Toast from '../../components/Toast'
+import { useAuthStore } from '@stores/authStore'
+import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
+import { validateSettings } from '@utils/validation'
+import { sanitizeUrl, sanitizeToken, rateLimiter } from '@utils/security'
+import Card from '@components/common/Card'
+import Toast from '@components/Toast'
 import {
   CheckIcon,
   LinkIcon,

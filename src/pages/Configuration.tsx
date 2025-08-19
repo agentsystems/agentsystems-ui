@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useConfigStore } from '../stores/configStore'
-import { useAudio } from '../hooks/useAudio'
-import { useToast } from '../hooks/useToast'
-import Card from '../components/common/Card'
-import Toast from '../components/Toast'
-import CredentialsTab from '../components/configuration/CredentialsTab'
-import RegistriesTab from '../components/configuration/RegistriesTab'
-import AgentsTab from '../components/configuration/AgentsTab'
+import { useConfigStore } from '@stores/configStore'
+import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
+import Card from '@components/common/Card'
+import Toast from '@components/Toast'
+import CredentialsTab from '@components/configuration/CredentialsTab'
+import RegistriesTab from '@components/configuration/RegistriesTab'
+import AgentsTab from '@components/configuration/AgentsTab'
 import {
   DocumentTextIcon,
   ServerIcon,

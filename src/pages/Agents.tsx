@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
-import Card from '@components/common/Card'
+import AgentFilters from '@components/agents/AgentFilters'
+import AgentGrid from '@components/agents/AgentGrid'
 import ErrorMessage from '@components/ErrorMessage'
-import { PowerIcon, EyeIcon } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
-import { getAgentImage, getStatusVariant, getAgentVersion, getAgentDisplayState, getAgentButtonText } from '@utils/agentHelpers'
 import { API_DEFAULTS } from '@constants/app'
+import { handleError } from '@utils/errorHandling'
 import styles from './Agents.module.css'
 
 /**
@@ -117,178 +117,52 @@ export default function Agents() {
       return agent.name.toLowerCase().includes(searchQuery.toLowerCase())
     })
 
+  // Calculate counts for filter component
+  const runningCount = (data?.agents || []).filter(a => a.state === 'running').length
+  const stoppedCount = (data?.agents || []).filter(a => a.state !== 'running').length
+
+  const handleStopAll = () => {
+    const runningAgents = (data?.agents || []).filter(a => a.state === 'running')
+    runningAgents.forEach(agent => stopMutation.mutate(agent.name))
+  }
+
   return (
     <div className={styles.agents}>
       <div className={styles.header}>
         <h1>Agents</h1>
         <p className={styles.subtitle}>Manage and monitor your deployed agents</p>
         
-        <div className={styles.filterControls}>
-          <div className={styles.searchGroup}>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by agent name..."
-              className={styles.searchInput}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => {
-                  setSearchQuery('')
-                  playClickSound()
-                }}
-                className={styles.clearSearch}
-                aria-label="Clear search"
-                title="Clear search"
-              >
-                ×
-              </button>
-            )}
-          </div>
-          
-          <select 
-            value={selectedFilter}
-            onChange={(e) => {
-              setSelectedFilter(e.target.value as 'all' | 'running' | 'stopped')
-              playClickSound()
-              e.target.blur() // Remove focus after selection
-            }}
-            className={styles.filterSelect}
-          >
-            <option value="all">All ({data?.agents.length || 0})</option>
-            <option value="running">On ({(data?.agents || []).filter(a => a.state === 'running').length})</option>
-            <option value="stopped">Off ({(data?.agents || []).filter(a => a.state !== 'running').length})</option>
-          </select>
-          
-          <span className={styles.resultCount}>
-            Showing {filteredAgents.length} agent{filteredAgents.length !== 1 ? 's' : ''}
-          </span>
-          
-          {(data?.agents || []).some(a => a.state === 'running') && (
-            <button
-              className="btn btn-sm btn-subtle"
-              onClick={() => {
-                playClickSound()
-                const runningAgents = (data?.agents || []).filter(a => a.state === 'running')
-                runningAgents.forEach(agent => stopMutation.mutate(agent.name))
-              }}
-              disabled={stopMutation.isPending}
-            >
-              Turn Off All
-            </button>
-          )}
-        </div>
+        <AgentFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedFilter={selectedFilter}
+          onFilterChange={setSelectedFilter}
+          filteredCount={filteredAgents.length}
+          totalCount={data?.agents.length || 0}
+          runningCount={runningCount}
+          stoppedCount={stoppedCount}
+          onStopAll={handleStopAll}
+          isStoppingAll={stopMutation.isPending}
+        />
       </div>
 
-      <div className={styles.grid}>
-        {filteredAgents.map((agent) => (
-          <Card
-            key={agent.name}
-            onClick={() => navigate(`/agents/${agent.name}`)}
-            className={styles.agentCard}
-            ariaLabel={`View details for ${agent.name} agent`}
-            ariaDescription={`Agent is currently ${agent.state}. Click to view configuration and invoke options.`}
-          >
-            <div className={styles.agentHeader}>
-              <div className={styles.agentInfo}>
-                <h3 className={styles.agentName} title={agent.name}>
-                  {agent.name.length > 18 ? `${agent.name.substring(0, 18)}...` : agent.name}
-                </h3>
-                <div className={styles.agentVersion}>
-                  {getAgentVersion(agent.name)}
-                </div>
-                <div className={styles.agentImage}>
-                  {getAgentImage(agent.name)}
-                </div>
-              </div>
-              <div className={`${styles.status} ${styles[getStatusVariant(agent.state)]}`}>
-                {getAgentDisplayState(agent.state)}
-              </div>
-            </div>
-
-            <div className={styles.agentActions} role="group" aria-label={`Actions for ${agent.name}`}>
-              {agent.state === 'stopped' && (
-                <button 
-                  className="btn btn-sm btn-subtle"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    playClickSound()
-                    startMutation.mutate(agent.name)
-                  }}
-                  disabled={operatingAgent === agent.name}
-                  aria-label={`Start ${agent.name} agent`}
-                  title={`Start the ${agent.name} agent container`}
-                >
-                  <PowerIcon />
-                  {operatingAgent === agent.name ? 'Turning On...' : getAgentButtonText(agent.state)}
-                </button>
-              )}
-              {agent.state === 'running' && (
-                <button 
-                  className="btn btn-sm btn-subtle"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    playClickSound()
-                    stopMutation.mutate(agent.name)
-                  }}
-                  disabled={operatingAgent === agent.name}
-                  aria-label={`Stop ${agent.name} agent`}
-                  title={`Stop the ${agent.name} agent container`}
-                >
-                  <PowerIcon />
-                  {operatingAgent === agent.name ? 'Turning Off...' : getAgentButtonText(agent.state)}
-                </button>
-              )}
-              <button 
-                className="btn btn-sm btn-subtle"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  playClickSound()
-                  navigate(`/agents/${agent.name}`)
-                }}
-                aria-label={`View ${agent.name} agent`}
-                title={`Open ${agent.name} agent page`}
-              >
-                <EyeIcon />
-                View
-              </button>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {filteredAgents.length === 0 && (data?.agents || []).length > 0 && (
-        <Card className={styles.emptyState}>
-          <p>No agents match the current {searchQuery ? 'search and filter' : 'filter'}</p>
-          <p className={styles.emptyHint}>
-            {searchQuery 
-              ? `Try clearing the search or changing the filter`
-              : `Try selecting "All Agents" to see all available agents`
-            }
-          </p>
-          {searchQuery && (
-            <button 
-              onClick={() => {
-                setSearchQuery('')
-                playClickSound()
-              }}
-              className={styles.clearFiltersBtn}
-            >
-              Clear Search
-            </button>
-          )}
-        </Card>
-      )}
-
-      {(data?.agents || []).length === 0 && (
-        <Card className={styles.emptyState}>
-          <p>No agents found</p>
-          <p className={styles.emptyHint}>
-            Deploy agents using the AgentSystems SDK
-          </p>
-        </Card>
-      )}
+      <AgentGrid
+        agents={filteredAgents}
+        onStartAgent={(agentName) => {
+          setOperatingAgent(agentName)
+          startMutation.mutate(agentName)
+        }}
+        onStopAgent={(agentName) => {
+          setOperatingAgent(agentName)
+          stopMutation.mutate(agentName)
+        }}
+        operatingAgent={operatingAgent}
+        searchQuery={searchQuery}
+        onClearSearch={() => setSearchQuery('')}
+        isLoading={isLoading}
+        error={error}
+        onRetry={() => refetch()}
+      />
     </div>
   )
 }

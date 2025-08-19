@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useConfigStore } from '../../stores/configStore'
-import { useAudio } from '../../hooks/useAudio'
-import { useToast } from '../../hooks/useToast'
-import Card from '../../components/common/Card'
-import Toast from '../../components/Toast'
-import { RegistryConnectionForm, AuthMethod } from '../../types/config'
+import { useConfigStore } from '@stores/configStore'
+import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
+import Card from '@components/common/Card'
+import Toast from '@components/Toast'
+import { RegistryConnectionForm, AuthMethod } from '@types/config'
 import {
   PlusIcon,
   ServerIcon,

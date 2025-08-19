@@ -1,0 +1,113 @@
+/* Shared executions table styling */
+.executionsTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: var(--grid-template);
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.executionRow {
+  display: grid;
+  grid-template-columns: var(--grid-template);
+  gap: 1rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.executionRow.clickable {
+  cursor: pointer;
+}
+
+.executionRow.clickable:hover {
+  background-color: var(--surface-2);
+}
+
+.executionRow:last-child {
+  border-bottom: none;
+}
+
+/* Cell content styling */
+.agentName {
+  font-weight: 500;
+  color: var(--text);
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.threadId {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.duration {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+/* States */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* Variant-specific adjustments */
+.minimal .tableHeader,
+.minimal .executionRow {
+  padding: 0.5rem;
+  gap: 0.75rem;
+}
+
+.compact .agentName {
+  font-size: 0.8rem;
+}
+
+.compact .timestamp,
+.compact .duration {
+  font-size: 0.7rem;
+}
+
+/* Cyber theme overrides */
+:global(.theme-cyber) .executionRow.clickable:hover {
+  background-color: rgba(0, 255, 65, 0.05);
+}
+
+:global(.theme-cyber) .agentName {
+  color: var(--text);
+}

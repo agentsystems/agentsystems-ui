@@ -5,8 +5,8 @@ import {
   RegistryConnectionForm, 
   AgentConfigForm, 
   EnvVariable
-} from '../types/config'
-import { configRepository, configUtils } from '../api/configRepository'
+} from '@types/config'
+import { configRepository, configUtils } from '@api/configRepository'
 
 interface ConfigState {
   // Core data

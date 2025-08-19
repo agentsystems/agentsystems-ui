@@ -3,6 +3,7 @@ import { useEffect, Suspense, lazy } from 'react'
 import MainLayout from '@components/layouts/MainLayout'
 import ErrorBoundary from '@components/ErrorBoundary'
 import SkipLinks from '@components/SkipLinks'
+import LoadingSpinner from '@components/LoadingSpinner'
 import { useThemeStore } from '@stores/themeStore'
 import { useScanline } from '@hooks/useScanline'
 
@@ -18,39 +19,6 @@ const RegistriesPage = lazy(() => import('@pages/configuration/RegistriesPage'))
 const AgentsPage = lazy(() => import('@pages/configuration/AgentsPage'))
 const ConnectionPage = lazy(() => import('@pages/configuration/ConnectionPage'))
 const AgentDetail = lazy(() => import('@pages/AgentDetail'))
-
-/**
- * Loading component displayed while lazy components are loading
- */
-function LoadingSpinner() {
-  return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '200px',
-      color: 'var(--text-primary)',
-      fontSize: '14px'
-    }}>
-      <div style={{
-        width: '20px',
-        height: '20px',
-        border: '2px solid var(--border)',
-        borderTop: '2px solid var(--primary)',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        marginRight: '12px'
-      }} />
-      Loading...
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
-  )
-}
 
 function App() {
   const { theme, scanlineEnabled, initTheme } = useThemeStore()

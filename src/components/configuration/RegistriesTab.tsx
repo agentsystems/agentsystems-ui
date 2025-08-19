@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useConfigStore } from '../../stores/configStore'
-import { useAudio } from '../../hooks/useAudio'
-import { useToast } from '../../hooks/useToast'
-import Card from '../common/Card'
-import { RegistryConnectionForm, AuthMethod } from '../../types/config'
+import { useConfigStore } from '@stores/configStore'
+import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
+import Card from '@components/common/Card'
+import { RegistryConnectionForm, AuthMethod } from '@types/config'
 import {
   PlusIcon,
   ServerIcon,
@@ -363,7 +363,7 @@ export default function RegistriesTab() {
                     
                     <button
                       onClick={() => handleDelete(registry.id, registry.name)}
-                      className={`btn btn-sm btn-ghost ${styles.deleteBtn}`}
+                      className="btn btn-sm btn-ghost btn-danger-color"
                       title="Delete registry"
                     >
                       <TrashIcon />

@@ -18,6 +18,10 @@ interface CardProps {
   ariaDescription?: string
   /** Whether this card represents a selected/active state */
   isSelected?: boolean
+  /** ARIA role for the card */
+  role?: string
+  /** Tab index for keyboard navigation */
+  tabIndex?: number
 }
 
 /**
@@ -52,7 +56,9 @@ export default function Card({
   onClick,
   ariaLabel,
   ariaDescription,
-  isSelected 
+  isSelected,
+  role,
+  tabIndex 
 }: CardProps) {
   const { playClickSound } = useAudio()
 
@@ -80,8 +86,8 @@ export default function Card({
       )}
       onClick={isInteractive ? handleClick : undefined}
       onKeyDown={isInteractive ? handleKeyDown : undefined}
-      tabIndex={isInteractive ? 0 : undefined}
-      role={isInteractive ? 'button' : 'region'}
+      tabIndex={tabIndex !== undefined ? tabIndex : (isInteractive ? 0 : undefined)}
+      role={role || (isInteractive ? 'button' : 'region')}
       aria-label={ariaLabel}
       aria-description={ariaDescription}
       aria-pressed={isSelected}

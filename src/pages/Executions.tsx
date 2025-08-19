@@ -190,13 +190,13 @@ export default function Executions() {
     return matchesSearch && matchesState && matchesDate && matchesVerification
   })
 
-  const getStatusColor = (state: string) => {
+  const getStatusClass = (state: string) => {
     switch (state) {
-      case 'completed': return 'var(--success)'
-      case 'failed': return 'var(--error)'
-      case 'running': return 'var(--info)'
-      case 'queued': return 'var(--warning)'
-      default: return 'var(--text-muted)'
+      case 'completed': return styles.statusCompleted
+      case 'failed': return styles.statusFailed
+      case 'running': return styles.statusRunning
+      case 'queued': return styles.statusQueued
+      default: return styles.statusQueued
     }
   }
 
@@ -443,8 +443,7 @@ export default function Executions() {
                     {execution.agent}
                   </span>
                   <span 
-                    className={styles.status}
-                    style={{ color: getStatusColor(execution.state) }}
+                    className={`${styles.status} ${getStatusClass(execution.state)}`}
                   >
                     {execution.state}
                   </span>
@@ -595,8 +594,7 @@ export default function Executions() {
                     <div className={styles.detailItem}>
                       <label>State</label>
                       <span 
-                        className={styles.detailValue}
-                        style={{ color: getStatusColor(selectedExecution.state) }}
+                        className={`${styles.detailValue} ${getStatusClass(selectedExecution.state)}`}
                       >
                         {selectedExecution.state}
                       </span>

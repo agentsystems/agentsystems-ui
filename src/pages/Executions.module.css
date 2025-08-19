@@ -499,6 +499,23 @@
   font-size: 0.75rem;
 }
 
+/* Status color classes */
+.statusCompleted {
+  color: var(--success);
+}
+
+.statusFailed {
+  color: var(--error);
+}
+
+.statusRunning {
+  color: var(--primary);
+}
+
+.statusQueued {
+  color: var(--warning);
+}
+
 .timestamp {
   color: var(--text-secondary);
   font-family: var(--font-mono);

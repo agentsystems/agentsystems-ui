@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useConfigStore } from '../stores/configStore'
-import { useAuthStore } from '../stores/authStore'
-import { useThemeStore } from '../stores/themeStore'
-import { useAudio } from '../hooks/useAudio'
-import Card from '../components/common/Card'
+import { useConfigStore } from '@stores/configStore'
+import { useAuthStore } from '@stores/authStore'
+import { useThemeStore } from '@stores/themeStore'
+import { useAudio } from '@hooks/useAudio'
+import Card from '@components/common/Card'
 import {
   KeyIcon,
   CpuChipIcon,

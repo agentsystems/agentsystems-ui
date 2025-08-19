@@ -1,5 +1,6 @@
 import { Component, ReactNode } from 'react'
 import { captureException, addSentryBreadcrumb } from '@config/sentry'
+import styles from './ErrorBoundary.module.css'
 
 interface Props {
   children: ReactNode
@@ -39,28 +40,12 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          padding: '2rem',
-          textAlign: 'center',
-          color: 'var(--error)',
-          background: 'var(--surface)',
-          borderRadius: 'var(--radius)',
-          border: '1px solid var(--border)',
-          margin: '2rem'
-        }}>
-          <h2>Something went wrong</h2>
-          <p>{this.state.error?.message}</p>
+        <div className={styles.errorContainer}>
+          <h2 className={styles.errorTitle}>Something went wrong</h2>
+          <p className={styles.errorMessage}>{this.state.error?.message}</p>
           <button 
             onClick={() => window.location.reload()}
-            style={{
-              padding: '0.5rem 1rem',
-              background: 'var(--accent)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 'var(--radius)',
-              cursor: 'pointer',
-              marginTop: '1rem'
-            }}
+            className={styles.reloadButton}
           >
             Reload Page
           </button>

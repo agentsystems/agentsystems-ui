@@ -1,0 +1,125 @@
+/* Base status badge styling */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+/* Agent status styling */
+.agentRunning {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.agentStopped {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.agentNotCreated {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-muted);
+  border-color: rgba(100, 116, 139, 0.2);
+}
+
+.agentDefault {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+/* Execution status styling */
+.executionCompleted {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.executionFailed {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.executionRunning {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--info);
+  border-color: rgba(6, 182, 212, 0.2);
+}
+
+.executionQueued {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.executionDefault {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+/* Cyber theme overrides */
+:global(.theme-cyber) .agentRunning {
+  background: rgba(0, 255, 65, 0.1);
+  color: var(--accent);
+  border-color: rgba(0, 255, 65, 0.2);
+}
+
+:global(.theme-cyber) .agentRunning::before {
+  content: '[';
+}
+
+:global(.theme-cyber) .agentRunning::after {
+  content: ']';
+}
+
+:global(.theme-cyber) .agentStopped {
+  background: rgba(255, 204, 0, 0.1);
+  color: var(--warning);
+  border-color: rgba(255, 204, 0, 0.2);
+}
+
+:global(.theme-cyber) .agentStopped::before {
+  content: '[';
+}
+
+:global(.theme-cyber) .agentStopped::after {
+  content: ']';
+}
+
+:global(.theme-cyber) .agentNotCreated::before {
+  content: '[';
+}
+
+:global(.theme-cyber) .agentNotCreated::after {
+  content: ']';
+}
+
+:global(.theme-cyber) .executionCompleted::before,
+:global(.theme-cyber) .executionFailed::before,
+:global(.theme-cyber) .executionRunning::before,
+:global(.theme-cyber) .executionQueued::before {
+  content: '[';
+}
+
+:global(.theme-cyber) .executionCompleted::after,
+:global(.theme-cyber) .executionFailed::after,
+:global(.theme-cyber) .executionRunning::after,
+:global(.theme-cyber) .executionQueued::after {
+  content: ']';
+}
+
+/* Hover effects for interactive badges */
+.statusBadge:hover {
+  opacity: 0.8;
+}
