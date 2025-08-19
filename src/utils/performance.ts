@@ -97,11 +97,11 @@ class PerformanceMonitor {
           this.recordMetric('TTFB', ttfb, 'ms', { type: 'navigation' })
 
           // DOM Content Loaded
-          const dcl = navigation.domContentLoadedEventEnd - navigation.navigationStart
+          const dcl = navigation.domContentLoadedEventEnd - navigation.fetchStart
           this.recordMetric('DCL', dcl, 'ms', { type: 'navigation' })
 
           // Page Load Complete
-          const loadComplete = navigation.loadEventEnd - navigation.navigationStart
+          const loadComplete = navigation.loadEventEnd - navigation.fetchStart
           this.recordMetric('Load', loadComplete, 'ms', { type: 'navigation' })
         }
       }, 0)

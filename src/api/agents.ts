@@ -7,6 +7,11 @@ import type {
   InvokeResponse,
   InvocationStatus,
   InvocationResult,
+  ExecutionsResponse,
+  HealthResponse,
+  ArtifactsResponse,
+  AuditResponse,
+  IntegrityCheckResponse,
 } from '../types/api'
 
 /**
@@ -106,7 +111,7 @@ export const agentsApi = {
     offset?: number
     agent?: string
     state?: string
-  }) => api.get(`/executions`, params),
+  }) => api.get<ExecutionsResponse>(`/executions`, params),
 
   /**
    * Get audit trail for a specific execution including hash chain data
@@ -114,14 +119,14 @@ export const agentsApi = {
    * @returns Promise with audit trail, input payload, and hash verification
    */
   getExecutionAudit: (threadId: string) =>
-    api.get(`/executions/${threadId}/audit`),
+    api.get<AuditResponse>(`/executions/${threadId}/audit`),
 
   /**
    * Verify integrity of the entire audit log chain
    * @returns Promise with verification summary and compromised entries
    */
   verifyAuditIntegrity: () =>
-    api.get('/audit/integrity-check'),
+    api.get<IntegrityCheckResponse>('/audit/integrity-check'),
 
   /**
    * Get recent gateway logs
@@ -129,7 +134,7 @@ export const agentsApi = {
    * @returns Promise with recent log entries
    */
   getLogs: (limit: number = 100) =>
-    api.get('/logs', { limit }),
+    api.get<LogsResponse>('/logs', { limit }),
 
   /**
    * List artifact files for a specific thread
@@ -137,5 +142,5 @@ export const agentsApi = {
    * @returns Promise with input_files and output_files arrays
    */
   getArtifacts: (threadId: string) =>
-    api.get(`/artifacts/${threadId}`),
+    api.get<ArtifactsResponse>(`/artifacts/${threadId}`),
 }

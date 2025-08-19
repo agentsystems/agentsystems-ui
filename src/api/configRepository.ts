@@ -1,4 +1,4 @@
-import { AgentSystemsConfig, ConfigRepository } from '@types/config'
+import { AgentSystemsConfig, ConfigRepository } from '../types/config'
 import { api } from './client'
 
 /**

@@ -3,7 +3,7 @@ import { useConfigStore } from '@stores/configStore'
 import { useAudio } from '@hooks/useAudio'
 import { useToast } from '@hooks/useToast'
 import Card from '@components/common/Card'
-import { AgentConfigForm } from '@types/config'
+import { AgentConfigForm } from '../../types/config'
 import {
   PlusIcon,
   RocketLaunchIcon,
@@ -110,7 +110,7 @@ export default function AgentsTab() {
     })
     setEditingId(agent.id)
     setErrors({})
-    setShowAdvanced(Object.keys(agent.envVariables).length > 0 || agent.egressAllowlist || agent.exposePorts !== '8000')
+    setShowAdvanced(Boolean(Object.keys(agent.envVariables).length > 0 || agent.egressAllowlist || agent.exposePorts !== '8000'))
   }
 
   const handleDelete = (id: string, name: string) => {
