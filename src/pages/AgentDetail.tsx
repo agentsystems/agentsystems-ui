@@ -10,7 +10,7 @@ import StatusBadge from '@components/common/StatusBadge'
 import { useAudio } from '@hooks/useAudio'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
-import type { InvocationResult } from '@types/api'
+import type { InvocationResult } from '../types/api'
 import styles from './AgentDetail.module.css'
 
 export default function AgentDetail() {

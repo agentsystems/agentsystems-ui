@@ -156,7 +156,7 @@ export function setSentryContext(key: string, value: Record<string, unknown>) {
 export function addSentryBreadcrumb(
   message: string,
   category: string = 'ui',
-  level: Sentry.Severity = Sentry.Severity.Info
+  level: 'info' | 'warning' | 'error' | 'debug' = 'info'
 ) {
   Sentry.addBreadcrumb({
     message,
@@ -192,7 +192,7 @@ export function captureException(error: Error, context?: Record<string, unknown>
  */
 export function captureMessage(
   message: string,
-  level: Sentry.Severity = Sentry.Severity.Info,
+  level: 'info' | 'warning' | 'error' | 'debug' = 'info',
   context?: Record<string, unknown>
 ) {
   if (context) {

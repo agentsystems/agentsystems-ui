@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import AgentFilters from '@components/agents/AgentFilters'
 import AgentGrid from '@components/agents/AgentGrid'
 import ErrorMessage from '@components/ErrorMessage'
 import { useAudio } from '@hooks/useAudio'
 import { API_DEFAULTS } from '@constants/app'
-import { handleError } from '@utils/errorHandling'
 import styles from './Agents.module.css'
 
 /**
@@ -27,10 +26,8 @@ import styles from './Agents.module.css'
  * agents via Docker labels and displays their current operational status.
  */
 export default function Agents() {
-  const navigate = useNavigate()
-  const { playClickSound } = useAudio()
   const queryClient = useQueryClient()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'running' | 'stopped'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [operatingAgent, setOperatingAgent] = useState<string | null>(null)
