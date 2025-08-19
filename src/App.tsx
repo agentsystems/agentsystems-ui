@@ -9,6 +9,7 @@ import Settings from '@pages/Settings'
 import ConfigurationOverview from '@pages/ConfigurationOverview'
 import CredentialsPage from '@pages/configuration/CredentialsPage'
 import RegistriesPage from '@pages/configuration/RegistriesPage'
+import AgentsPage from '@pages/configuration/AgentsPage'
 import ConnectionPage from '@pages/configuration/ConnectionPage'
 import AgentDetail from '@pages/AgentDetail'
 import ErrorBoundary from '@components/ErrorBoundary'
@@ -52,6 +53,7 @@ function App() {
           <Route path="configuration" element={<ConfigurationOverview />} />
           <Route path="configuration/credentials" element={<CredentialsPage />} />
           <Route path="configuration/registries" element={<RegistriesPage />} />
+          <Route path="configuration/agents" element={<AgentsPage />} />
           <Route path="configuration/connection" element={<ConnectionPage />} />
           <Route path="settings" element={<Settings />} />
         </Route>
