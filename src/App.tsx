@@ -1,21 +1,56 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, Suspense, lazy } from 'react'
 import MainLayout from '@components/layouts/MainLayout'
-import Dashboard from '@pages/Dashboard'
-import Agents from '@pages/Agents'
-import Executions from '@pages/Executions'
-import Logs from '@pages/Logs'
-import Settings from '@pages/Settings'
-import ConfigurationOverview from '@pages/ConfigurationOverview'
-import CredentialsPage from '@pages/configuration/CredentialsPage'
-import RegistriesPage from '@pages/configuration/RegistriesPage'
-import AgentsPage from '@pages/configuration/AgentsPage'
-import ConnectionPage from '@pages/configuration/ConnectionPage'
-import AgentDetail from '@pages/AgentDetail'
 import ErrorBoundary from '@components/ErrorBoundary'
 import SkipLinks from '@components/SkipLinks'
 import { useThemeStore } from '@stores/themeStore'
 import { useScanline } from '@hooks/useScanline'
+
+// Lazy-loaded components for code splitting
+const Dashboard = lazy(() => import('@pages/Dashboard'))
+const Agents = lazy(() => import('@pages/Agents'))
+const Executions = lazy(() => import('@pages/Executions'))
+const Logs = lazy(() => import('@pages/Logs'))
+const Settings = lazy(() => import('@pages/Settings'))
+const ConfigurationOverview = lazy(() => import('@pages/ConfigurationOverview'))
+const CredentialsPage = lazy(() => import('@pages/configuration/CredentialsPage'))
+const RegistriesPage = lazy(() => import('@pages/configuration/RegistriesPage'))
+const AgentsPage = lazy(() => import('@pages/configuration/AgentsPage'))
+const ConnectionPage = lazy(() => import('@pages/configuration/ConnectionPage'))
+const AgentDetail = lazy(() => import('@pages/AgentDetail'))
+
+/**
+ * Loading component displayed while lazy components are loading
+ */
+function LoadingSpinner() {
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '200px',
+      color: 'var(--text-primary)',
+      fontSize: '14px'
+    }}>
+      <div style={{
+        width: '20px',
+        height: '20px',
+        border: '2px solid var(--border)',
+        borderTop: '2px solid var(--primary)',
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite',
+        marginRight: '12px'
+      }} />
+      Loading...
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  )
+}
 
 function App() {
   const { theme, scanlineEnabled, initTheme } = useThemeStore()
@@ -42,22 +77,68 @@ function App() {
   return (
     <ErrorBoundary>
       <SkipLinks />
-      <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="agents" element={<Agents />} />
-          <Route path="agents/:agentName" element={<AgentDetail />} />
-          <Route path="executions" element={<Executions />} />
-          <Route path="logs" element={<Logs />} />
-          <Route path="configuration" element={<ConfigurationOverview />} />
-          <Route path="configuration/credentials" element={<CredentialsPage />} />
-          <Route path="configuration/registries" element={<RegistriesPage />} />
-          <Route path="configuration/agents" element={<AgentsPage />} />
-          <Route path="configuration/connection" element={<ConnectionPage />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Dashboard />
+              </Suspense>
+            } />
+            <Route path="agents" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Agents />
+              </Suspense>
+            } />
+            <Route path="agents/:agentName" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AgentDetail />
+              </Suspense>
+            } />
+            <Route path="executions" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Executions />
+              </Suspense>
+            } />
+            <Route path="logs" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Logs />
+              </Suspense>
+            } />
+            <Route path="configuration" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ConfigurationOverview />
+              </Suspense>
+            } />
+            <Route path="configuration/credentials" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <CredentialsPage />
+              </Suspense>
+            } />
+            <Route path="configuration/registries" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <RegistriesPage />
+              </Suspense>
+            } />
+            <Route path="configuration/agents" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AgentsPage />
+              </Suspense>
+            } />
+            <Route path="configuration/connection" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ConnectionPage />
+              </Suspense>
+            } />
+            <Route path="settings" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Settings />
+              </Suspense>
+            } />
+          </Route>
+        </Routes>
+      </Suspense>
     </ErrorBoundary>
   )
 }

@@ -1,14 +1,34 @@
+/**
+ * Theme store for managing application theming and visual preferences
+ * 
+ * Manages:
+ * - Theme selection (dark, light, cyber)
+ * - Cyber theme scanline effects
+ * - Scanline frequency configuration (30s, 90s, 300s)
+ * - Persistent storage of preferences
+ * - System theme detection and initialization
+ * 
+ * All preferences are automatically persisted to localStorage and restored on app startup.
+ */
+
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Theme, ScanlineFrequency } from '../types/common'
 
 interface ThemeStore {
+  /** Current active theme */
   theme: Theme
+  /** Whether scanline effects are enabled (cyber theme only) */
   scanlineEnabled: boolean
+  /** Frequency of scanline sweeps in seconds */
   scanlineFrequency: ScanlineFrequency
+  /** Set the active theme */
   setTheme: (theme: Theme) => void
+  /** Enable or disable scanline effects */
   setScanlineEnabled: (enabled: boolean) => void
+  /** Set scanline sweep frequency */
   setScanlineFrequency: (frequency: ScanlineFrequency) => void
+  /** Initialize theme from localStorage or system preference */
   initTheme: () => void
 }
 

@@ -33,6 +33,7 @@
       "@styles/*": ["src/styles/*"],
       "@types/*": ["src/types/*"],
       "@constants/*": ["src/constants/*"],
+      "@config/*": ["src/config/*"],
       "@test/*": ["src/test/*"]
     }
   },

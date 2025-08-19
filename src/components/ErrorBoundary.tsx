@@ -1,4 +1,5 @@
 import { Component, ReactNode } from 'react'
+import { captureException, addSentryBreadcrumb } from '@config/sentry'
 
 interface Props {
   children: ReactNode
@@ -21,6 +22,18 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo)
+    
+    // Log breadcrumb and capture error in Sentry
+    addSentryBreadcrumb(
+      `Error boundary caught: ${error.message}`,
+      'error',
+    )
+    
+    captureException(error, {
+      errorBoundary: true,
+      componentStack: errorInfo.componentStack,
+      errorBoundaryLocation: 'global',
+    })
   }
 
   render() {
