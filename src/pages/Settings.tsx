@@ -1,3 +1,22 @@
+/**
+ * Settings page component for configuring application preferences and connection settings
+ * 
+ * Features:
+ * - Gateway URL and authentication token configuration
+ * - Theme selection (Dark, Light, Cyber) with live preview
+ * - Audio preferences for cyber theme sound effects
+ * - Cyber theme scanline frequency configuration
+ * - Form validation with real-time feedback
+ * - Rate limiting to prevent abuse
+ * - Input sanitization for security
+ * - Accessibility compliance with ARIA labels
+ * 
+ * @example
+ * ```tsx
+ * <Route path="settings" element={<Settings />} />
+ * ```
+ */
+
 import { useState } from 'react'
 import { CheckIcon } from '@heroicons/react/24/outline'
 import { useAuthStore } from '@stores/authStore'

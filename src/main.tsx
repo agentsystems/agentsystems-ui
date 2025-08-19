@@ -3,8 +3,16 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { initSentry } from '@config/sentry'
+import { initPerformanceMonitoring } from '@utils/performance'
 import App from './App'
 import './styles/global.css'
+
+// Initialize error tracking as early as possible
+initSentry()
+
+// Initialize performance monitoring
+initPerformanceMonitoring()
 
 const queryClient = new QueryClient({
   defaultOptions: {
