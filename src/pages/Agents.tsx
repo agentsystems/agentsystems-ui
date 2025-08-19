@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import AgentFilters from '@components/agents/AgentFilters'
 import AgentGrid from '@components/agents/AgentGrid'
 import ErrorMessage from '@components/ErrorMessage'
-import { useAudio } from '@hooks/useAudio'
 import { API_DEFAULTS } from '@constants/app'
 import styles from './Agents.module.css'
 

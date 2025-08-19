@@ -3,9 +3,8 @@ import { useConfigStore } from '@stores/configStore'
 import { useAudio } from '@hooks/useAudio'
 import { useToast } from '@hooks/useToast'
 import Card from '@components/common/Card'
-import { RegistryConnectionForm, AuthMethod } from '@types/config'
+import { RegistryConnectionForm, AuthMethod } from '../../types/config'
 import {
-  PlusIcon,
   ServerIcon,
   TrashIcon,
   CheckIcon,

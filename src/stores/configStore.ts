@@ -5,7 +5,7 @@ import {
   RegistryConnectionForm, 
   AgentConfigForm, 
   EnvVariable
-} from '@types/config'
+} from '../types/config'
 import { configRepository, configUtils } from '@api/configRepository'
 
 interface ConfigState {

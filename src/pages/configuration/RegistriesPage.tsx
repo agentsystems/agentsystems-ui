@@ -5,7 +5,7 @@ import { useAudio } from '@hooks/useAudio'
 import { useToast } from '@hooks/useToast'
 import Card from '@components/common/Card'
 import Toast from '@components/Toast'
-import { RegistryConnectionForm, AuthMethod } from '@types/config'
+import { RegistryConnectionForm, AuthMethod } from '../../types/config'
 import {
   PlusIcon,
   ServerIcon,

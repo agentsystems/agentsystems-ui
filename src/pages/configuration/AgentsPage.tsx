@@ -5,7 +5,7 @@ import { useAudio } from '@hooks/useAudio'
 import { useToast } from '@hooks/useToast'
 import Card from '@components/common/Card'
 import Toast from '@components/Toast'
-import { AgentConfigForm } from '@types/config'
+import { AgentConfigForm } from '../../types/config'
 import {
   PlusIcon,
   RocketLaunchIcon,

@@ -175,7 +175,7 @@ export function captureException(error: Error, context?: Record<string, unknown>
   if (context) {
     Sentry.withScope((scope) => {
       Object.entries(context).forEach(([key, value]) => {
-        scope.setContext(key, value)
+        scope.setContext(key, value as Record<string, unknown>)
       })
       Sentry.captureException(error)
     })
@@ -198,7 +198,7 @@ export function captureMessage(
   if (context) {
     Sentry.withScope((scope) => {
       Object.entries(context).forEach(([key, value]) => {
-        scope.setContext(key, value)
+        scope.setContext(key, value as Record<string, unknown>)
       })
       Sentry.captureMessage(message, level)
     })
