@@ -284,6 +284,19 @@ export const useConfigStore = create<ConfigState>()(
         })
         
         return referenced
+      },
+
+      getReferencedRegistries: () => {
+        const state = get()
+        const referenced = new Set<string>()
+        
+        state.config.agents.forEach(agent => {
+          if (agent.registry_connection) {
+            referenced.add(agent.registry_connection)
+          }
+        })
+        
+        return referenced
       }
     }),
     {

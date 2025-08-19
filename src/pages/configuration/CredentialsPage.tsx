@@ -20,13 +20,11 @@ import styles from './CredentialsPage.module.css'
 interface CredentialFormData {
   key: string
   value: string
-  isSecret: boolean
 }
 
 const initialFormData: CredentialFormData = {
   key: '',
-  value: '',
-  isSecret: false
+  value: ''
 }
 
 export default function CredentialsPage() {
@@ -102,14 +100,14 @@ export default function CredentialsPage() {
     }
   }
 
-  const handleEdit = (envVar: { key: string; value: string; isSecret: boolean }) => {
+  const handleEdit = (envVar: { key: string; value: string }) => {
     playClickSound()
     setFormData(envVar)
     setEditingKey(envVar.key)
     setErrors({})
   }
 
-  const handleDelete = (key: string) => {
+  const handleDelete = async (key: string) => {
     playClickSound()
     
     if (referencedVars.has(key)) {
@@ -120,6 +118,9 @@ export default function CredentialsPage() {
     if (confirm(`Are you sure you want to delete ${key}?`)) {
       try {
         deleteEnvVar(key)
+        // Save changes to file
+        const { envVars } = useConfigStore.getState()
+        await configRepository.writeEnvVars(envVars)
         showSuccess(`Deleted ${key}`)
       } catch (error) {
         showError(error instanceof Error ? error.message : 'Failed to delete environment variable')
@@ -188,8 +189,7 @@ export default function CredentialsPage() {
                   const value = e.target.value.toUpperCase()
                   setFormData(prev => ({ 
                     ...prev, 
-                    key: value,
-                    isSecret: detectIsSecret(value)
+                    key: value
                   }))
                   if (errors.key) setErrors(prev => ({ ...prev, key: '' }))
                 }}
@@ -210,7 +210,7 @@ export default function CredentialsPage() {
               <label htmlFor="env-value">Value</label>
               <input
                 id="env-value"
-                type={formData.isSecret ? 'password' : 'text'}
+                type={detectIsSecret(formData.key) && !editingKey ? 'password' : 'text'}
                 value={formData.value}
                 onChange={(e) => {
                   setFormData(prev => ({ ...prev, value: e.target.value }))
@@ -226,23 +226,8 @@ export default function CredentialsPage() {
             </div>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={formData.isSecret}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  isSecret: e.target.checked 
-                }))}
-                className={styles.checkbox}
-              />
-              This is a secret (mask value in UI)
-            </label>
-          </div>
-
           <div className={styles.formActions}>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-lg btn-bright">
               <PlusIcon />
               {editingKey ? 'Update' : 'Add'} Variable
             </button>
@@ -251,7 +236,7 @@ export default function CredentialsPage() {
               <button 
                 type="button" 
                 onClick={handleCancel}
-                className="btn btn-subtle"
+                className="btn btn-lg btn-subtle"
               >
                 Cancel
               </button>

@@ -181,7 +181,7 @@ export default function ConnectionPage() {
           <div className={styles.formActions}>
             <button 
               onClick={handleSave} 
-              className="btn btn-primary"
+              className="btn btn-lg btn-bright"
               aria-describedby="save-button-hint"
             >
               <CheckIcon />
@@ -190,7 +190,7 @@ export default function ConnectionPage() {
             
             <button 
               onClick={testConnection} 
-              className="btn btn-subtle"
+              className="btn btn-lg btn-subtle"
               disabled={!localGatewayUrl || !localToken}
             >
               Test Connection
