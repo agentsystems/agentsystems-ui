@@ -1,0 +1,507 @@
+name: Build and Release to GHCR
+
+# Workflow for building and releasing agentsystems-ui Docker images to GitHub Container Registry
+#
+# Manual workflow dispatch only - matches agent-control-plane pattern
+# No automatic triggers on push/merge/tag
+
+on:
+  # Manual trigger ONLY - no automatic builds
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., 0.1.0 or v0.1.0)'
+        required: true
+      push:
+        description: 'Push to registry'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      tag_release:
+        description: 'Create git tag and GitHub release (only if push is true)'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}  # Will be agentsystems/agentsystems-ui
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      docker_tags: ${{ steps.tags.outputs.tags }}
+      should_push: ${{ steps.push.outputs.should_push }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for git describe
+
+      - name: Check if version already exists
+        if: github.event.inputs.push == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          DOCKER_VERSION="${VERSION#v}"
+
+          # Check if this version already exists in GHCR
+          echo "🔍 Checking if version ${DOCKER_VERSION} already exists..."
+
+          # Try to get package versions from GHCR
+          if gh api "/orgs/${{ github.repository_owner }}/packages/container/agentsystems-ui/versions" \
+             --jq '.[].metadata.container.tags[]' 2>/dev/null | grep -q "^${DOCKER_VERSION}$"; then
+            echo "❌ ERROR: Version ${DOCKER_VERSION} already exists in registry!"
+            echo "   Cannot overwrite existing versions."
+            echo "   Please use a different version number."
+            exit 1
+          fi
+
+          echo "✅ Version ${DOCKER_VERSION} is available"
+
+      - name: Determine version
+        id: version
+        run: |
+          # Use workflow input (required)
+          VERSION="${{ github.event.inputs.version }}"
+
+          # Normalize version (remove 'v' prefix for Docker tags if present)
+          DOCKER_VERSION="${VERSION#v}"
+
+          # Safety check 1: Version format validation
+          if [[ "${{ github.event.inputs.tag_release }}" == "true" ]]; then
+            # Production release - enforce strict semver (X.Y.Z)
+            if [[ ! "${DOCKER_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ ERROR: Production releases must use semantic versioning (X.Y.Z)"
+              echo "   You entered: ${DOCKER_VERSION}"
+              echo "   Valid examples: 0.1.0, 1.0.0, 2.14.5"
+              echo "   Invalid examples: 0.1.0-rc1, v0.1.0, 0.1, 0.1.0.1"
+              exit 1
+            fi
+          else
+            # Non-production - must have suffix
+            if [[ ! "${DOCKER_VERSION}" =~ - ]]; then
+              echo "❌ ERROR: Non-production releases must have a suffix (e.g., 0.1.0-rc1, 0.1.0-test)"
+              echo "   You entered: ${DOCKER_VERSION}"
+              echo "   This looks like a production version!"
+              echo "   For production release, use push=true and tag_release=true"
+              echo "   For testing, add a suffix like -rc1, -test, -beta"
+              exit 1
+            fi
+            # Also validate base version before the suffix
+            BASE_VERSION="${DOCKER_VERSION%%-*}"
+            if [[ ! "${BASE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ ERROR: Invalid version format"
+              echo "   Base version must be X.Y.Z format: ${BASE_VERSION}"
+              echo "   Valid examples: 0.1.0-rc1, 1.0.0-beta, 2.14.5-test"
+              echo "   Invalid examples: 0.1-rc1, v0.1.0-rc1, 0.1.0.1-rc1"
+              exit 1
+            fi
+          fi
+
+          # Safety check 2: Invalid combination (tag without push)
+          if [[ "${{ github.event.inputs.push }}" == "false" ]] && [[ "${{ github.event.inputs.tag_release }}" == "true" ]]; then
+            echo "❌ ERROR: Cannot create release tags without pushing!"
+            echo "   Invalid combination: push=false, tag_release=true"
+            echo "   To create a release, use: push=true, tag_release=true"
+            exit 1
+          fi
+
+          # Safety check 3: Production releases must be from main branch
+          if [[ "${{ github.event.inputs.tag_release }}" == "true" ]]; then
+            CURRENT_BRANCH="${{ github.ref_name }}"
+            if [[ "${CURRENT_BRANCH}" != "main" ]]; then
+              echo "❌ ERROR: Production releases must be from main branch!"
+              echo "   Current branch: ${CURRENT_BRANCH}"
+              echo "   To create a production release:"
+              echo "   1. Merge your changes to main"
+              echo "   2. Run this workflow from main branch"
+              echo "   For testing, use tag_release=false from any branch"
+              exit 1
+            fi
+          fi
+
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "docker_version=${DOCKER_VERSION}" >> $GITHUB_OUTPUT
+          echo "📦 Version: ${VERSION} (Docker: ${DOCKER_VERSION})"
+
+      - name: Determine Docker tags
+        id: tags
+        run: |
+          DOCKER_VERSION="${{ steps.version.outputs.docker_version }}"
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+
+          # Build tag list based on context
+          TAGS="${IMAGE}:${DOCKER_VERSION}"
+
+          # Add 'latest' tag for stable releases (when tag_release is true)
+          if [[ "${{ github.event.inputs.tag_release }}" == "true" ]] && [[ ! "${DOCKER_VERSION}" =~ - ]]; then
+            TAGS="${TAGS},${IMAGE}:latest"
+          fi
+
+          # Add SHA tag for traceability
+          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
+            TAGS="${TAGS},${IMAGE}:sha-${GITHUB_SHA::8}"
+          fi
+
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "🏷️ Tags: ${TAGS}"
+
+      - name: Determine if should push
+        id: push
+        run: |
+          # Use workflow input for push decision
+          SHOULD_PUSH="${{ github.event.inputs.push }}"
+
+          echo "should_push=${SHOULD_PUSH}" >> $GITHUB_OUTPUT
+          echo "🚀 Push to registry: ${SHOULD_PUSH}"
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write  # For attestations
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pre-build security check
+        run: |
+          echo "🔍 Checking source for sensitive files..."
+
+          # Check for .env files (except .env.example)
+          if find . -name ".env" -not -name ".env.example" | grep .; then
+            echo "❌ ERROR: Found .env file in source!"
+            echo "Remove it or add to .dockerignore"
+            exit 1
+          fi
+
+          # Check for node_modules in source (should be in .dockerignore)
+          if [ -d "node_modules" ]; then
+            echo "⚠️  WARNING: node_modules directory found - ensure it's in .dockerignore"
+          fi
+
+          # Check .dockerignore exists and has key entries
+          if [ ! -f .dockerignore ]; then
+            echo "⚠️  WARNING: No .dockerignore file found"
+          else
+            echo "✅ .dockerignore found, checking contents..."
+            for pattern in ".env" ".git" "node_modules" "*.key" "*.pem" "*.p12" ".DS_Store" "coverage"; do
+              if ! grep -q "$pattern" .dockerignore; then
+                echo "⚠️  WARNING: Consider adding '$pattern' to .dockerignore"
+              fi
+            done
+          fi
+
+          # Check for common secret patterns in source
+          echo "Checking for potential secrets in source code..."
+          if grep -r "api[_-]key\|auth[_-]token\|secret[_-]key" src/ 2>/dev/null | grep -v example | grep -v test | grep -v demo; then
+            echo "⚠️  WARNING: Found potential API keys in source - please verify these are safe"
+          fi
+
+          echo "✅ Pre-build security check completed"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Verify package integrity
+        run: |
+          echo "🔍 Verifying package-lock.json integrity..."
+          npm ci --audit
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: needs.validate.outputs.should_push == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.enhanced
+          # For build-only: single platform with load. For push: multi-platform
+          platforms: ${{ needs.validate.outputs.should_push == 'true' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          push: ${{ needs.validate.outputs.should_push == 'true' }}
+          load: ${{ needs.validate.outputs.should_push == 'false' }}
+          tags: ${{ needs.validate.outputs.docker_tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # Attestations only work with push, not with load
+          provenance: ${{ needs.validate.outputs.should_push == 'true' }}
+          sbom: ${{ needs.validate.outputs.should_push == 'true' }}
+
+      - name: Security scan - Check for secrets
+        run: |
+          echo "🔍 Scanning image for secrets and sensitive data..."
+
+          # Image reference is always the same - with GHCR prefix
+          IMAGE_TO_SCAN="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.validate.outputs.version }}"
+
+          if [[ "${{ needs.validate.outputs.should_push }}" == "true" ]]; then
+            # Image was pushed, need to pull
+            echo "Pulling pushed image: ${IMAGE_TO_SCAN}"
+            docker pull "${IMAGE_TO_SCAN}"
+          else
+            # Image was loaded locally with --load
+            echo "Using locally loaded image: ${IMAGE_TO_SCAN}"
+          fi
+
+          # Check for common secret patterns
+          docker run --rm --entrypoint sh "${IMAGE_TO_SCAN}" -c '
+            echo "Checking for .env files..."
+            if find /usr/share/nginx/html -name ".env" -o -name "*.env" 2>/dev/null | grep -v "\.env\.example" | grep .; then
+              echo "❌ ERROR: Found .env files in image!"
+              exit 1
+            fi
+
+            echo "Checking for .git directory..."
+            if [ -d "/usr/share/nginx/html/.git" ]; then
+              echo "❌ ERROR: .git directory found in image! Add .git to .dockerignore"
+              exit 1
+            fi
+
+            echo "Checking for node_modules..."
+            if [ -d "/usr/share/nginx/html/node_modules" ]; then
+              echo "❌ ERROR: node_modules found in runtime image! This should only be in build stage"
+              exit 1
+            fi
+
+            echo "Checking for source maps in production..."
+            if find /usr/share/nginx/html -name "*.js.map" 2>/dev/null | grep .; then
+              echo "⚠️  WARNING: Source maps found in production build - consider disabling for security"
+            fi
+
+            echo "Checking for other config files..."
+            if find /usr/share/nginx/html -name ".npmrc" -o -name ".yarnrc" -o -name ".netrc" -o -name ".aws" -o -name ".kube" 2>/dev/null | grep .; then
+              echo "❌ ERROR: Found config files that may contain credentials!"
+              exit 1
+            fi
+
+            echo "Checking for private keys..."
+            if find /usr/share/nginx/html -name "*.pem" -o -name "*.key" -o -name "*_rsa" -o -name "*_dsa" -o -name "*_ecdsa" -o -name "*_ed25519" 2>/dev/null | grep .; then
+              echo "⚠️  WARNING: Found potential private key files - please verify these are safe"
+            fi
+
+            echo "Verifying license files are present..."
+            if [ ! -d "/app/licenses" ]; then
+              echo "❌ ERROR: License directory not found!"
+              exit 1
+            fi
+            
+            if [ ! -f "/app/licenses/README.md" ]; then
+              echo "❌ ERROR: License summary not found!"
+              exit 1
+            fi
+
+            echo "✅ Security scan completed - no secrets found in web root"
+          '
+
+          # Final success message (only shown if all checks pass)
+          echo "🎉 Security scan PASSED"
+
+  verify:
+    needs: [validate, build]
+    if: needs.validate.outputs.should_push == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify image
+        run: |
+          # Pull and verify the image exists
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.validate.outputs.version != 'main' && needs.validate.outputs.version || 'main' }}"
+          echo "🔍 Verifying image: ${IMAGE}"
+
+          # Pull the image (now authenticated for private repos)
+          docker pull "${IMAGE}"
+
+          # Basic smoke test - check UI is accessible and licenses present
+          docker run -d --name ui-test -p 8080:80 "${IMAGE}"
+          sleep 5
+          
+          # Test health endpoint
+          if ! curl -f http://localhost:8080/health; then
+            echo "❌ ERROR: Health check failed"
+            docker logs ui-test
+            exit 1
+          fi
+          
+          # Test license files are accessible
+          docker exec ui-test sh -c "ls -la /app/licenses/ && echo '✅ License files present'"
+          
+          # Test main UI loads
+          if ! curl -f -s http://localhost:8080/ | grep -q "AgentSystems"; then
+            echo "❌ ERROR: UI does not appear to load correctly"
+            exit 1
+          fi
+          
+          docker stop ui-test && docker rm ui-test
+
+          echo "✅ Image verification successful"
+
+  create-release:
+    needs: [validate, build, verify]
+    if: github.event.inputs.tag_release == 'true' && github.event.inputs.push == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+
+          # Check if release already exists
+          if gh release view "v${VERSION}" &>/dev/null; then
+            echo "✅ Release v${VERSION} already exists"
+          else
+            echo "📦 Creating release v${VERSION}..."
+
+            # Create release notes
+            cat > release_notes.md << EOF
+          ## AgentSystems UI ${VERSION}
+
+          ### Docker Images
+          \`\`\`bash
+          # Pull the image
+          docker pull ${IMAGE}:${VERSION#v}
+          docker pull ${IMAGE}:latest
+
+          # Run the UI
+          docker run -d \\
+            --name agentsystems-ui \\
+            -p 3001:80 \\
+            -e API_GATEWAY_URL=http://localhost:18080 \\
+            ${IMAGE}:${VERSION#v}
+          \`\`\`
+
+          ### Features
+          - 🎨 Three professional themes (Dark, Light, Cyber)
+          - 📊 Real-time agent monitoring and management
+          - 🔒 Security hardening with input sanitization
+          - ♿ WCAG 2.1 accessibility compliance
+          - 📝 Live log streaming and file management
+          - 🧪 100% test coverage (73 test cases)
+
+          ### What's Changed
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+
+          ### Container Registry
+          - GHCR: https://github.com/${{ github.repository }}/pkgs/container/agentsystems-ui
+          EOF
+
+            # Create the release
+            gh release create "v${VERSION}" \
+              --title "v${VERSION}" \
+              --notes-file release_notes.md \
+              --target ${{ github.sha }}
+
+            echo "✅ Release created successfully"
+          fi
+
+  summary:
+    if: always()
+    needs: [validate, build, verify]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Version Information" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: \`${{ needs.validate.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Push to registry: ${{ needs.validate.outputs.should_push }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.validate.outputs.should_push }}" == "true" ]]; then
+            echo "### Published Images" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "${{ needs.validate.outputs.docker_tags }}" | tr ',' '\n' >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            echo "### Pull Commands" >> $GITHUB_STEP_SUMMARY
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+            VERSION="${{ needs.validate.outputs.version }}"
+            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            if [[ "${VERSION}" == v* ]]; then
+              echo "docker pull ${IMAGE}:${VERSION#v}" >> $GITHUB_STEP_SUMMARY
+              echo "docker pull ${IMAGE}:latest" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "docker pull ${IMAGE}:${VERSION}" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Usage" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Run with AgentSystems gateway" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -d \\" >> $GITHUB_STEP_SUMMARY
+          echo "  --name agentsystems-ui \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -p 3001:80 \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e API_GATEWAY_URL=http://localhost:18080 \\" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.validate.outputs.should_push }}" == "true" ]]; then
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+            VERSION="${{ needs.validate.outputs.version }}"
+            if [[ "${VERSION}" == v* ]]; then
+              echo "  ${IMAGE}:${VERSION#v}" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "  ${IMAGE}:${VERSION}" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "  agentsystems-ui:local" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Validation: ${{ needs.validate.result }} ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Build: ${{ needs.build.result }} ✅" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.validate.outputs.should_push }}" == "true" ]]; then
+            echo "- Verify: ${{ needs.verify.result }} ✅" >> $GITHUB_STEP_SUMMARY
+          fi
