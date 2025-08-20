@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, ArrowPathIcon, XMarkIcon, CalendarIcon, DocumentIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { apiClient } from '@api/client'
-import type { AuditEntry } from '@types/api'
+import type { AuditEntry } from '../types/api'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
 import { API_DEFAULTS } from '@constants/app'
@@ -33,41 +33,6 @@ interface ArtifactFile {
   type: 'in' | 'out'
 }
 
-// Mock data for now - will be replaced with real API
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _mockExecutions: Execution[] = [
-  {
-    thread_id: '123e4567-e89b-12d3-a456-426614174000',
-    agent: 'hello-world-agent',
-    state: 'completed',
-    created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    started_at: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
-    ended_at: new Date(Date.now() - 1000 * 60 * 3).toISOString(),
-    user_token: 'demo',
-    payload: { message: 'Hello, agent!', task: 'generate greeting' },
-    result: { message: 'Hello, World!', status: 'success' }
-  },
-  {
-    thread_id: '223e4567-e89b-12d3-a456-426614174001',
-    agent: 'data-processor',
-    state: 'failed',
-    created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-    started_at: new Date(Date.now() - 1000 * 60 * 9).toISOString(),
-    ended_at: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
-    user_token: 'demo',
-    payload: { data: 'large_dataset.csv', action: 'process_batch' },
-    error: { message: 'Agent timeout after 60 seconds' }
-  },
-  {
-    thread_id: '323e4567-e89b-12d3-a456-426614174002',
-    agent: 'assistant-agent',
-    state: 'running',
-    created_at: new Date(Date.now() - 1000 * 30).toISOString(),
-    started_at: new Date(Date.now() - 1000 * 20).toISOString(),
-    user_token: 'demo',
-    payload: { query: 'What is the weather today?', context: 'user_conversation' }
-  }
-]
 
 export default function Executions() {
   const navigate = useNavigate()
@@ -248,7 +213,7 @@ export default function Executions() {
       setPreviewContent(response.data)
     } catch (error) {
       console.error('Preview failed:', error)
-      setPreviewContent(`Failed to load preview: ${error.response?.status || 'Network error'}`)
+      setPreviewContent(`Failed to load preview: ${(error as any)?.response?.status || 'Network error'}`)
     } finally {
       setPreviewLoading(false)
     }
@@ -273,7 +238,7 @@ export default function Executions() {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download failed:', error)
-      alert(`Download failed: ${error.response?.status || 'Network error'}`)
+      alert(`Download failed: ${(error as any)?.response?.status || 'Network error'}`)
     }
   }
 
@@ -646,7 +611,7 @@ export default function Executions() {
                             <div className={styles.filesList}>
                               {artifactsData.input_files.map(file => (
                                 <div key={file.path} className={styles.fileItem}>
-                                  {getFileIcon(file.name)}
+                                  {getFileIcon()}
                                   <div className={styles.fileInfo}>
                                     <span className={styles.fileName}>{file.name}</span>
                                     <span className={styles.fileSize}>{formatFileSize(file.size)}</span>
@@ -683,7 +648,7 @@ export default function Executions() {
                             <div className={styles.filesList}>
                               {artifactsData.output_files.map(file => (
                                 <div key={file.path} className={styles.fileItem}>
-                                  {getFileIcon(file.name)}
+                                  {getFileIcon()}
                                   <div className={styles.fileInfo}>
                                     <span className={styles.fileName}>{file.name}</span>
                                     <span className={styles.fileSize}>{formatFileSize(file.size)}</span>
@@ -740,7 +705,7 @@ export default function Executions() {
                                 : selectedExecution.payload
                               return JSON.stringify(payload, null, 2)
                             } catch {
-                              return selectedExecution.payload as string
+                              return String(selectedExecution.payload)
                             }
                           })()}
                         </pre>
@@ -762,7 +727,7 @@ export default function Executions() {
                               return JSON.stringify(selectedExecution.result, null, 2)
                             } catch {
                               // If parsing fails, display the raw string
-                              return selectedExecution.result as string
+                              return String(selectedExecution.result)
                             }
                           })()}
                         </pre>
@@ -784,7 +749,7 @@ export default function Executions() {
                               return JSON.stringify(selectedExecution.error, null, 2)
                             } catch {
                               // If parsing fails, display the raw string
-                              return selectedExecution.error as string
+                              return String(selectedExecution.error)
                             }
                           })()}
                         </pre>

@@ -15,7 +15,7 @@ vi.mock('@stores/themeStore', () => ({
 
 import { playCyberClick, isAudioEnabled } from '@utils/audioFx'
 import { useThemeStore } from '@stores/themeStore'
-import type { Theme } from '@types/common'
+import type { Theme } from '../../types/common'
 
 const mockedPlayCyberClick = vi.mocked(playCyberClick)
 const mockedIsAudioEnabled = vi.mocked(isAudioEnabled)

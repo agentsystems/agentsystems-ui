@@ -17,7 +17,7 @@ export const useScanline = () => {
     }
 
     const baseSeconds = parseInt(scanlineFrequency)
-    let timeoutId: NodeJS.Timeout
+    let timeoutId: ReturnType<typeof setTimeout>
 
     const triggerScanline = () => {
       // Add scanline class to trigger animation

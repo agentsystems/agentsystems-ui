@@ -25,7 +25,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { agentsApi } from '@api/agents'
 import { api } from '@api/client'
-import type { Execution } from '@types/api'
+import type { Execution } from '../types/api'
 import StatsGrid from '@components/dashboard/StatsGrid'
 import RecentExecutions from '@components/dashboard/RecentExecutions'
 import SystemHealth from '@components/dashboard/SystemHealth'
@@ -48,7 +48,7 @@ export default function Dashboard() {
 
   const { data: healthData } = useQuery({
     queryKey: ['health'],
-    queryFn: () => api.get('/health'),
+    queryFn: () => api.get<{ status: string }>('/health'),
     refetchInterval: 30000,
   })
 

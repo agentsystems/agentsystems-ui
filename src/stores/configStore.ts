@@ -43,6 +43,7 @@ interface ConfigState {
   // Utility
   reset: () => void
   getReferencedEnvVars: () => Set<string>
+  getReferencedRegistries: () => Set<string>
 }
 
 const defaultConfig: AgentSystemsConfig = {

@@ -11,6 +11,7 @@ import type {
   ArtifactsResponse,
   AuditResponse,
   IntegrityCheckResponse,
+  LogsResponse,
 } from '../types/api'
 
 /**

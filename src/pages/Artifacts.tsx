@@ -103,7 +103,7 @@ export default function Artifacts() {
       
       return Promise.all(artifactsPromises)
     },
-    enabled: isAuthenticated && !!executionsData?.executions,
+    enabled: isAuthenticated && (executionsData?.executions?.length ?? 0) > 0,
     staleTime: 30000, // Cache for 30 seconds
   })
 
@@ -182,7 +182,7 @@ export default function Artifacts() {
       setPreviewContent(response.data)
     } catch (error) {
       console.error('Preview failed:', error)
-      setPreviewContent(`Failed to load preview: ${error.response?.status || 'Network error'}`)
+      setPreviewContent(`Failed to load preview: ${(error as any)?.response?.status || 'Network error'}`)
     } finally {
       setPreviewLoading(false)
     }
@@ -207,7 +207,7 @@ export default function Artifacts() {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download failed:', error)
-      alert(`Download failed: ${error.response?.status || 'Network error'}`)
+      alert(`Download failed: ${(error as any)?.response?.status || 'Network error'}`)
     }
   }
 

@@ -9,12 +9,8 @@ import { api } from './client'
  * Later this can be evolved to work with database storage.
  */
 export class FileConfigRepository implements ConfigRepository {
-  private readonly configPath: string
-  private readonly envPath: string
-
-  constructor(configPath = './agentsystems-config.yml', envPath = './.env') {
-    this.configPath = configPath
-    this.envPath = envPath
+  constructor(_configPath = './agentsystems-config.yml', _envPath = './.env') {
+    // Parameters stored for potential future use
   }
 
   async readConfig(): Promise<AgentSystemsConfig> {

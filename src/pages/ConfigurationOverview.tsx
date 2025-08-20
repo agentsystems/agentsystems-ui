@@ -112,7 +112,7 @@ export default function ConfigurationOverview() {
   // Models Status (placeholder - will be implemented)
   const modelsStatus = (() => {
     // TODO: Calculate based on actual model configuration
-    return { status: 'warning' as const, text: 'Not configured', description: 'Model routing needs to be set up' }
+    return { status: 'warning' as 'healthy' | 'warning' | 'error', text: 'Not configured', description: 'Model routing needs to be set up' }
   })()
 
   // Registries Status

@@ -30,9 +30,9 @@ describe('Security Utilities', () => {
     })
 
     it('handles non-string input gracefully', () => {
-      expect(sanitizeHtml(null as unknown)).toBe('')
-      expect(sanitizeHtml(undefined as unknown)).toBe('')
-      expect(sanitizeHtml(123 as unknown)).toBe('')
+      expect(sanitizeHtml(null as any)).toBe('')
+      expect(sanitizeHtml(undefined as any)).toBe('')
+      expect(sanitizeHtml(123 as any)).toBe('')
     })
   })
 
@@ -51,8 +51,8 @@ describe('Security Utilities', () => {
     })
 
     it('handles non-string input', () => {
-      expect(sanitizeText(null as unknown)).toBe('')
-      expect(sanitizeText({} as unknown)).toBe('')
+      expect(sanitizeText(null as any)).toBe('')
+      expect(sanitizeText({} as any)).toBe('')
     })
   })
 
@@ -102,7 +102,7 @@ describe('Security Utilities', () => {
     it('returns empty object for invalid JSON', () => {
       expect(sanitizeJsonString('invalid json')).toBe('{}')
       expect(sanitizeJsonString('')).toBe('{}')
-      expect(sanitizeJsonString(null as unknown)).toBe('{}')
+      expect(sanitizeJsonString(null as any)).toBe('{}')
     })
   })
 
@@ -114,8 +114,8 @@ describe('Security Utilities', () => {
     })
 
     it('handles non-string input', () => {
-      expect(sanitizeToken(null as unknown)).toBe('')
-      expect(sanitizeToken(undefined as unknown)).toBe('')
+      expect(sanitizeToken(null as any)).toBe('')
+      expect(sanitizeToken(undefined as any)).toBe('')
     })
   })
 
