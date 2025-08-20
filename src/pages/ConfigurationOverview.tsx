@@ -5,6 +5,7 @@ import { useAuthStore } from '@stores/authStore'
 import { useThemeStore } from '@stores/themeStore'
 import { useAudio } from '@hooks/useAudio'
 import Card from '@components/common/Card'
+import SystemStatusBanner from '@components/common/SystemStatusBanner'
 import {
   KeyIcon,
   CpuChipIcon,
@@ -39,7 +40,7 @@ function ConfigCard({ title, icon: Icon, status, statusText, description, onClic
   const StatusIcon = statusIcon
 
   return (
-    <Card className={`${styles.configCard} ${styles[status]}`} onClick={onClick}>
+    <Card onClick={onClick}>
       <div className={styles.cardHeader}>
         <div className={styles.cardTitle}>
           <Icon className={styles.cardIcon} />
@@ -178,19 +179,11 @@ export default function ConfigurationOverview() {
       </div>
 
       {/* System Status Banner */}
-      <Card className={`${styles.statusBanner} ${styles[overallStatus.status]}`}>
-        <div className={styles.statusContent}>
-          <div className={styles.statusInfo}>
-            {overallStatus.status === 'healthy' && <CheckCircleIcon className={styles.statusBannerIcon} />}
-            {overallStatus.status === 'warning' && <ExclamationTriangleIcon className={styles.statusBannerIcon} />}
-            {overallStatus.status === 'error' && <XCircleIcon className={styles.statusBannerIcon} />}
-            <div>
-              <h3>System Status</h3>
-              <p>{overallStatus.message}</p>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <SystemStatusBanner
+        status={overallStatus.status}
+        title="System Status"
+        message={overallStatus.message}
+      />
 
       {error && (
         <Card className={styles.errorCard}>

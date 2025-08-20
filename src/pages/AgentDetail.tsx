@@ -7,6 +7,7 @@ import { agentsApi } from '@api/agents'
 import { getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
 import StatusBadge from '@components/common/StatusBadge'
+import SystemStatusBanner from '@components/common/SystemStatusBanner'
 import { useAudio } from '@hooks/useAudio'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
@@ -23,6 +24,7 @@ export default function AgentDetail() {
   const [pollingStatus, setPollingStatus] = useState<string>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [syncMode, setSyncMode] = useState(false)
+  const [isLazyStarting, setIsLazyStarting] = useState(false)
 
   // Get agent state from agents list
   const { data: agentsData } = useQuery({
@@ -91,9 +93,10 @@ export default function AgentDetail() {
   const { data: metadata, isLoading: metadataLoading, error: metadataError } = useQuery({
     queryKey: ['agent-metadata', agentName, currentAgent?.state],
     queryFn: () => agentsApi.getMetadata(agentName!),
-    enabled: !!agentName && currentAgent?.state === 'running',
-    retry: 1,
-    refetchInterval: currentAgent?.state === 'running' ? 5000 : false,
+    enabled: !!agentName && (currentAgent?.state === 'running' || isLazyStarting),
+    retry: 3, // Increased retries for newly started agents
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
+    refetchInterval: (currentAgent?.state === 'running' || isLazyStarting) ? 2000 : false, // More frequent polling during startup
   })
 
   const invokeMutation = useMutation({
@@ -108,6 +111,10 @@ export default function AgentDetail() {
       }
     },
     onMutate: () => {
+      // Set lazy starting state to trigger metadata polling
+      if (currentAgent?.state !== 'running') {
+        setIsLazyStarting(true)
+      }
       // Invalidate queries since invocation might trigger agent startup
       queryClient.invalidateQueries({ queryKey: ['agents'] })
       queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
@@ -140,8 +147,14 @@ export default function AgentDetail() {
             const result = await agentsApi.getResult(response.thread_id)
             setPollingStatus('')
             setInvocationResult(result)
+            
+            // Refresh metadata since agent is now definitely running
+            setIsLazyStarting(false) // Agent is now running
+            queryClient.invalidateQueries({ queryKey: ['agents'] })
+            queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
           } else if (status.state === 'failed') {
             setPollingStatus('')
+            setIsLazyStarting(false) // Reset lazy starting state
             setInvocationResult({
               thread_id: response.thread_id,
               error: status.error || {
@@ -156,6 +169,7 @@ export default function AgentDetail() {
         } catch (error) {
           console.error('Error polling status:', error)
           setPollingStatus('')
+          setIsLazyStarting(false) // Reset on error
           setInvocationResult({
             thread_id: response.thread_id,
             error: {
@@ -171,6 +185,7 @@ export default function AgentDetail() {
     onError: (error) => {
       console.error('Invocation failed:', error)
       setPollingStatus('')
+      setIsLazyStarting(false) // Reset on invocation error
       setInvocationResult({
         thread_id: '',
         error: {
@@ -277,13 +292,16 @@ export default function AgentDetail() {
         </div>
         <p className={styles.subtitle}>
           Agent details and invocation
-          {currentAgent && (
-            <span className={styles.statusIndicator}>
-              • Status: <StatusBadge type="agent" status={currentAgent.state as 'running' | 'stopped' | 'not-created'} />
-            </span>
-          )}
         </p>
       </div>
+
+      {currentAgent && (
+          <SystemStatusBanner
+            status={currentAgent.state === 'running' ? 'healthy' : 'warning'}
+            title="Agent Status"
+            message={`Agent is currently ${currentAgent.state === 'running' ? 'running and ready for requests' : currentAgent.state === 'stopped' ? 'stopped but will auto-start on first request' : 'not created yet'}`}
+          />
+        )}
 
       <div className={styles.grid}>
         <Card>
@@ -387,22 +405,55 @@ export default function AgentDetail() {
           )}
           
           <div className={styles.documentationLinks}>
-            <a 
-              href={`${gatewayUrl}/${agentName}/docs`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn btn-sm btn-subtle"
-            >
-              <DocumentTextIcon className={styles.docIcon} />
-              View API Documentation
-            </a>
+            {currentAgent?.state === 'running' ? (
+              <a 
+                href={`${gatewayUrl}/${agentName}/docs`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="btn btn-sm btn-subtle"
+                title="View interactive API documentation"
+              >
+                <DocumentTextIcon className={styles.docIcon} />
+                View API Documentation
+              </a>
+            ) : (
+              <button 
+                className="btn btn-sm btn-subtle"
+                disabled
+                title="Start the agent to view API documentation"
+              >
+                <DocumentTextIcon className={styles.docIcon} />
+                View API Documentation
+              </button>
+            )}
             
-            <div className={styles.rawMetadata}>
-              <h4>Raw Metadata (JSON)</h4>
-              <pre className={styles.metadata}>
-                {JSON.stringify(metadata, null, 2)}
-              </pre>
-            </div>
+            {currentAgent?.state === 'running' ? (
+              <div className={styles.rawMetadata}>
+                <h4>Raw Metadata (JSON)</h4>
+                {metadataLoading ? (
+                  <div className={styles.metadataLoading}>
+                    <p>Loading metadata...</p>
+                    <p className={styles.loadingHint}>Agent just started - metadata endpoint is initializing</p>
+                  </div>
+                ) : metadataError ? (
+                  <div className={styles.metadataError}>
+                    <p>Metadata not yet available</p>
+                    <p className={styles.errorHint}>Agent may still be starting up</p>
+                  </div>
+                ) : (
+                  <pre className={styles.metadata}>
+                    {JSON.stringify(metadata, null, 2)}
+                  </pre>
+                )}
+              </div>
+            ) : (
+              <div className={styles.disabledNote}>
+                <p>
+                  <strong>API documentation and metadata are only available when the agent is running.</strong>
+                </p>
+                <p>Start the agent container to access interactive documentation and detailed metadata.</p>
+              </div>
+            )}
           </div>
         </Card>
 

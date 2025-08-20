@@ -61,6 +61,9 @@
   margin-bottom: 1rem;
   border-left: 4px solid var(--border);
   transition: all 0.2s ease;
+  padding: 20px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
 }
 
 .statusBanner.healthy {
@@ -163,27 +166,7 @@
 }
 
 .configCard {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.configCard:hover {
-  background: var(--surface-3);
-  border-color: var(--accent);
-  box-shadow: 0 8px 24px rgba(0, 217, 255, 0.1);
-}
-
-.configCard.healthy {
-  border-left: 4px solid var(--success);
-}
-
-.configCard.warning {
-  border-left: 4px solid var(--warning);
-}
-
-.configCard.error {
-  border-left: 4px solid var(--error);
+  /* Remove custom styling to use default Card hover behavior */
 }
 
 .cardHeader {
