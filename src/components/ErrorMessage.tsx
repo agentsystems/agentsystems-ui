@@ -2,7 +2,7 @@
  * Enhanced error message component with accessibility and standardized error handling
  */
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { AppError, ErrorType, getUserFriendlyMessage } from '@utils/errorHandling'
 import { XCircleIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
 import styles from './ErrorMessage.module.css'
@@ -48,14 +48,16 @@ export default function ErrorMessage({
   className = '',
   announceToScreenReader = true,
 }: ErrorMessageProps) {
-  // Handle legacy message prop or new error object
-  const displayError: AppError | null = error 
-    ? typeof error === 'string' 
-      ? { type: ErrorType.UNKNOWN, message: error }
-      : error
-    : message
-      ? { type: ErrorType.UNKNOWN, message }
-      : null
+  // Handle legacy message prop or new error object - memoized to prevent unnecessary re-renders
+  const displayError: AppError | null = useMemo(() => {
+    return error 
+      ? typeof error === 'string' 
+        ? { type: ErrorType.UNKNOWN, message: error }
+        : error
+      : message
+        ? { type: ErrorType.UNKNOWN, message }
+        : null
+  }, [error, message])
 
   // Announce errors to screen readers for accessibility
   useEffect(() => {

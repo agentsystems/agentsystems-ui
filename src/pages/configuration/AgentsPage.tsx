@@ -117,7 +117,7 @@ export default function AgentsPage() {
     })
     setEditingId(agent.id)
     setErrors({})
-    setShowAdvanced(Object.keys(agent.envVariables).length > 0 || agent.egressAllowlist || agent.exposePorts !== '8000')
+    setShowAdvanced(Object.keys(agent.envVariables).length > 0 || !!agent.egressAllowlist || agent.exposePorts !== '8000')
   }
 
   const handleDelete = async (id: string, name: string) => {

@@ -8,10 +8,10 @@ import type {
   InvocationStatus,
   InvocationResult,
   ExecutionsResponse,
-  HealthResponse,
   ArtifactsResponse,
   AuditResponse,
   IntegrityCheckResponse,
+  LogsResponse,
 } from '../types/api'
 
 /**

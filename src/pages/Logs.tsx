@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
-import { API_DEFAULTS } from '@constants/app'
+import type { LogsResponse, LogEntry } from '../types/api'
 import styles from './Logs.module.css'
 
 export default function Logs() {
@@ -10,19 +10,19 @@ export default function Logs() {
   const [levelFilter, setLevelFilter] = useState('all')
 
   // Get real logs from gateway (simple approach)
-  const { data: logsData, isLoading, error } = useQuery({
+  const { data: logsData, isLoading, error } = useQuery<LogsResponse>({
     queryKey: ['logs'],
     queryFn: () => agentsApi.getLogs(150), // Get last 150 logs
     refetchInterval: 15000, // Every 15 seconds
     refetchOnWindowFocus: false, // Don't spam on tab switch
     refetchIntervalInBackground: false, // Stop when tab inactive
     staleTime: 0, // Always consider data stale to ensure fresh fetches
-    cacheTime: 0, // Don't cache log data
+    gcTime: 0, // Don't cache log data
   })
 
   const logs = logsData?.logs || []
 
-  const filteredLogs = logs.filter(log => {
+  const filteredLogs = logs.filter((log: LogEntry) => {
     const matchesText = log.message.toLowerCase().includes(filter.toLowerCase()) ||
                        log.source.toLowerCase().includes(filter.toLowerCase())
     const matchesLevel = levelFilter === 'all' || log.level === levelFilter
@@ -91,7 +91,7 @@ export default function Logs() {
         </div>
 
         <div className={styles.logContainer}>
-          {filteredLogs.map((log, index) => (
+          {filteredLogs.map((log: LogEntry, index: number) => (
             <div key={index} className={`${styles.logEntry} ${styles[log.level]}`}>
               <span className={styles.timestamp}>
                 {new Date(log.timestamp).toLocaleTimeString()}

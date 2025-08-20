@@ -4,7 +4,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'path'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => ({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     // Bundle analyzer for production builds

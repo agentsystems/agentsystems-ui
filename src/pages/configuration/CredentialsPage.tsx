@@ -40,8 +40,7 @@ export default function CredentialsPage() {
     getEnvVars,
     setEnvVar,
     deleteEnvVar,
-    getReferencedEnvVars,
-    saveConfig
+    getReferencedEnvVars
   } = useConfigStore()
 
   const envVars = getEnvVars()

@@ -4,6 +4,13 @@
 
 import { captureMessage, addSentryBreadcrumb } from '@config/sentry'
 
+// Extend PerformanceEntry to include properties not yet in TypeScript types
+interface ExtendedPerformanceEntry extends PerformanceEntry {
+  processingStart?: number
+  hadRecentInput?: boolean
+  value?: number
+}
+
 export interface PerformanceMetric {
   name: string
   value: number
@@ -62,7 +69,7 @@ class PerformanceMonitor {
       new PerformanceObserver((entryList) => {
         for (const entry of entryList.getEntries()) {
           if (entry.entryType === 'first-input') {
-            const fid = (entry as any).processingStart - entry.startTime
+            const fid = (entry as ExtendedPerformanceEntry).processingStart! - entry.startTime
             this.webVitals.FID = fid
             this.recordMetric('FID', fid, 'ms', { type: 'web-vital' })
           }
@@ -73,8 +80,8 @@ class PerformanceMonitor {
       let clsValue = 0
       new PerformanceObserver((entryList) => {
         for (const entry of entryList.getEntries()) {
-          if (!(entry as any).hadRecentInput) {
-            clsValue += (entry as any).value
+          if (!(entry as ExtendedPerformanceEntry).hadRecentInput) {
+            clsValue += (entry as ExtendedPerformanceEntry).value!
           }
         }
         this.webVitals.CLS = clsValue
@@ -157,7 +164,7 @@ class PerformanceMonitor {
     if (threshold && metric.value > threshold) {
       captureMessage(
         `Performance budget exceeded: ${metric.name} = ${metric.value}${metric.unit} (threshold: ${threshold}${metric.unit})`,
-        'warning' as any,
+        'warning',
         {
           performance: true,
           metric: metric.name,

@@ -15,6 +15,7 @@ vi.mock('@stores/themeStore', () => ({
 
 import { playCyberClick, isAudioEnabled } from '@utils/audioFx'
 import { useThemeStore } from '@stores/themeStore'
+import type { Theme } from '../../types/common'
 
 const mockedPlayCyberClick = vi.mocked(playCyberClick)
 const mockedIsAudioEnabled = vi.mocked(isAudioEnabled)
@@ -26,7 +27,7 @@ describe('useAudio Hook', () => {
   })
 
   it('plays cyber click sound when theme is cyber and audio is enabled', () => {
-    mockedUseThemeStore.mockReturnValue({ theme: 'cyber' } as any)
+    mockedUseThemeStore.mockReturnValue({ theme: 'cyber' as Theme })
     mockedIsAudioEnabled.mockReturnValue(true)
 
     const { result } = renderHook(() => useAudio())
@@ -37,7 +38,7 @@ describe('useAudio Hook', () => {
   })
 
   it('does not play sound when audio is disabled', () => {
-    mockedUseThemeStore.mockReturnValue({ theme: 'cyber' } as any)
+    mockedUseThemeStore.mockReturnValue({ theme: 'cyber' as Theme })
     mockedIsAudioEnabled.mockReturnValue(false)
 
     const { result } = renderHook(() => useAudio())
@@ -48,7 +49,7 @@ describe('useAudio Hook', () => {
   })
 
   it('does not play sound when theme is not cyber', () => {
-    mockedUseThemeStore.mockReturnValue({ theme: 'dark' } as any)
+    mockedUseThemeStore.mockReturnValue({ theme: 'dark' as Theme })
     mockedIsAudioEnabled.mockReturnValue(true)
 
     const { result } = renderHook(() => useAudio())
@@ -59,7 +60,7 @@ describe('useAudio Hook', () => {
   })
 
   it('handles audio errors gracefully', () => {
-    mockedUseThemeStore.mockReturnValue({ theme: 'cyber' } as any)
+    mockedUseThemeStore.mockReturnValue({ theme: 'cyber' as Theme })
     mockedIsAudioEnabled.mockReturnValue(true)
     mockedPlayCyberClick.mockImplementation(() => {
       throw new Error('Audio context failed')
@@ -76,7 +77,7 @@ describe('useAudio Hook', () => {
   })
 
   it('returns stable function reference', () => {
-    mockedUseThemeStore.mockReturnValue({ theme: 'cyber' } as any)
+    mockedUseThemeStore.mockReturnValue({ theme: 'cyber' as Theme })
 
     const { result, rerender } = renderHook(() => useAudio())
     const firstRender = result.current.playClickSound

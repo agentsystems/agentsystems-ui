@@ -8,6 +8,9 @@ import {
   rateLimiter 
 } from '../security'
 
+// Test helper for invalid input types
+const invalidInput = (value: unknown) => value as string
+
 describe('Security Utilities', () => {
   describe('sanitizeHtml', () => {
     it('removes script tags', () => {
@@ -30,9 +33,9 @@ describe('Security Utilities', () => {
     })
 
     it('handles non-string input gracefully', () => {
-      expect(sanitizeHtml(null as any)).toBe('')
-      expect(sanitizeHtml(undefined as any)).toBe('')
-      expect(sanitizeHtml(123 as any)).toBe('')
+      expect(sanitizeHtml(invalidInput(null))).toBe('')
+      expect(sanitizeHtml(invalidInput(undefined))).toBe('')
+      expect(sanitizeHtml(invalidInput(123))).toBe('')
     })
   })
 
@@ -51,8 +54,8 @@ describe('Security Utilities', () => {
     })
 
     it('handles non-string input', () => {
-      expect(sanitizeText(null as any)).toBe('')
-      expect(sanitizeText({} as any)).toBe('')
+      expect(sanitizeText(invalidInput(null))).toBe('')
+      expect(sanitizeText(invalidInput({}))).toBe('')
     })
   })
 
@@ -102,7 +105,7 @@ describe('Security Utilities', () => {
     it('returns empty object for invalid JSON', () => {
       expect(sanitizeJsonString('invalid json')).toBe('{}')
       expect(sanitizeJsonString('')).toBe('{}')
-      expect(sanitizeJsonString(null as any)).toBe('{}')
+      expect(sanitizeJsonString(invalidInput(null))).toBe('{}')
     })
   })
 
@@ -114,8 +117,8 @@ describe('Security Utilities', () => {
     })
 
     it('handles non-string input', () => {
-      expect(sanitizeToken(null as any)).toBe('')
-      expect(sanitizeToken(undefined as any)).toBe('')
+      expect(sanitizeToken(invalidInput(null))).toBe('')
+      expect(sanitizeToken(invalidInput(undefined))).toBe('')
     })
   })
 

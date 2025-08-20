@@ -6,8 +6,6 @@ import {
   FolderIcon, 
   DocumentIcon, 
   ArrowDownTrayIcon, 
-  MagnifyingGlassIcon,
-  FunnelIcon,
   EyeIcon,
   ClockIcon,
   XMarkIcon
@@ -19,6 +17,12 @@ import { useAudio } from '@hooks/useAudio'
 import { useAuthStore } from '@stores/authStore'
 import ErrorMessage from '@components/ErrorMessage'
 import styles from './Artifacts.module.css'
+
+interface ApiError {
+  response?: {
+    status?: number
+  }
+}
 
 interface ArtifactFile {
   name: string
@@ -39,8 +43,9 @@ interface ExecutionArtifacts {
 
 export default function Artifacts() {
   const { playClickSound } = useAudio()
-  const { isAuthenticated, gatewayUrl, token } = useAuthStore()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const { isAuthenticated } = useAuthStore()
+  const authenticated = isAuthenticated()
+  const [searchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [agentFilter, setAgentFilter] = useState<string>('all')
   const [fileTypeFilter, setFileTypeFilter] = useState<string>('all')
@@ -60,7 +65,7 @@ export default function Artifacts() {
   const { data: executionsData, isLoading, error } = useQuery({
     queryKey: ['executions', 'artifacts'],
     queryFn: () => agentsApi.listExecutions({ limit: 100 }),
-    enabled: isAuthenticated,
+    enabled: authenticated,
     refetchInterval: 10000,
   })
 
@@ -68,7 +73,7 @@ export default function Artifacts() {
   const { data: agentsData } = useQuery({
     queryKey: ['agents'],
     queryFn: agentsApi.list,
-    enabled: isAuthenticated,
+    enabled: authenticated,
     refetchInterval: 5000,
   })
 
@@ -105,7 +110,7 @@ export default function Artifacts() {
       
       return Promise.all(artifactsPromises)
     },
-    enabled: isAuthenticated && !!executionsData?.executions,
+    enabled: authenticated && (executionsData?.executions?.length ?? 0) > 0,
     staleTime: 30000, // Cache for 30 seconds
   })
 
@@ -184,7 +189,7 @@ export default function Artifacts() {
       setPreviewContent(response.data)
     } catch (error) {
       console.error('Preview failed:', error)
-      setPreviewContent(`Failed to load preview: ${error.response?.status || 'Network error'}`)
+      setPreviewContent(`Failed to load preview: ${(error as ApiError)?.response?.status || 'Network error'}`)
     } finally {
       setPreviewLoading(false)
     }
@@ -209,11 +214,11 @@ export default function Artifacts() {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download failed:', error)
-      alert(`Download failed: ${error.response?.status || 'Network error'}`)
+      alert(`Download failed: ${(error as ApiError)?.response?.status || 'Network error'}`)
     }
   }
 
-  if (!isAuthenticated) {
+  if (!authenticated) {
     return (
       <div className={styles.container}>
         <ErrorMessage message="Please configure your gateway connection in Settings first" />
