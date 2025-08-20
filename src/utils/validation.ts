@@ -27,6 +27,26 @@ const PATTERNS = {
   SAFE_TEXT: /^[a-zA-Z0-9\s\-_.,!?()]+$/,
 } as const
 
+// Helper functions for JSON validation
+function checkDepth(obj: unknown, depth = 0, maxDepth = 10): boolean {
+  if (depth > maxDepth) return false
+  if (obj && typeof obj === 'object') {
+    return Object.values(obj as Record<string, unknown>).every(value => checkDepth(value, depth + 1, maxDepth))
+  }
+  return true
+}
+
+function checkArraySizes(obj: unknown): boolean {
+  if (Array.isArray(obj)) {
+    if (obj.length > 1000) return false
+    return obj.every(item => checkArraySizes(item))
+  }
+  if (obj && typeof obj === 'object') {
+    return Object.values(obj as Record<string, unknown>).every(value => checkArraySizes(value))
+  }
+  return true
+}
+
 /**
  * Validate URL format with length and security checks
  */
@@ -115,30 +135,12 @@ export const validateJson = (jsonString: string): string | null => {
     const parsed = JSON.parse(trimmedJson)
     
     // Security: Prevent deeply nested objects that could cause DoS
-    const maxDepth = 10
-    function checkDepth(obj: any, depth = 0): boolean {
-      if (depth > maxDepth) return false
-      if (obj && typeof obj === 'object') {
-        return Object.values(obj).every(value => checkDepth(value, depth + 1))
-      }
-      return true
-    }
     
     if (!checkDepth(parsed)) {
       return 'JSON payload is too deeply nested (max 10 levels)'
     }
     
     // Security: Limit array sizes
-    function checkArraySizes(obj: any): boolean {
-      if (Array.isArray(obj)) {
-        if (obj.length > 1000) return false
-        return obj.every(item => checkArraySizes(item))
-      }
-      if (obj && typeof obj === 'object') {
-        return Object.values(obj).every(value => checkArraySizes(value))
-      }
-      return true
-    }
     
     if (!checkArraySizes(parsed)) {
       return 'JSON payload contains arrays that are too large (max 1000 items)'

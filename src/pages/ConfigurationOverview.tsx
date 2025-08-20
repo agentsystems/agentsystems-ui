@@ -29,7 +29,7 @@ interface ConfigCardProps {
   onClick: () => void
 }
 
-function ConfigCard({ title, icon: Icon, status, statusText, description, href, onClick }: ConfigCardProps) {
+function ConfigCard({ title, icon: Icon, status, statusText, description, onClick }: ConfigCardProps) {
   const statusIcon = {
     healthy: CheckCircleIcon,
     warning: ExclamationTriangleIcon,
@@ -68,8 +68,6 @@ export default function ConfigurationOverview() {
   const { playClickSound } = useAudio()
   
   const {
-    config,
-    envVars,
     getRegistryConnections,
     getAgents,
     getEnvVars,
@@ -96,7 +94,7 @@ export default function ConfigurationOverview() {
   const registries = getRegistryConnections()
   const agents = getAgents()
   const credentials = getEnvVars()
-  const referencedVars = getReferencedEnvVars()
+  getReferencedEnvVars()
 
   // Connection Status
   const connectionStatus = (() => {

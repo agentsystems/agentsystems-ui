@@ -6,8 +6,6 @@ import {
   FolderIcon, 
   DocumentIcon, 
   ArrowDownTrayIcon, 
-  MagnifyingGlassIcon,
-  FunnelIcon,
   EyeIcon,
   ClockIcon,
   XMarkIcon
@@ -39,8 +37,8 @@ interface ExecutionArtifacts {
 
 export default function Artifacts() {
   const { playClickSound } = useAudio()
-  const { isAuthenticated, gatewayUrl, token } = useAuthStore()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const { isAuthenticated } = useAuthStore()
+  const [searchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [agentFilter, setAgentFilter] = useState<string>('all')
   const [fileTypeFilter, setFileTypeFilter] = useState<string>('all')

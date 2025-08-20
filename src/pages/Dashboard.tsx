@@ -25,6 +25,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { agentsApi } from '@api/agents'
 import { api } from '@api/client'
+import type { Execution } from '@types/api'
 import StatsGrid from '@components/dashboard/StatsGrid'
 import RecentExecutions from '@components/dashboard/RecentExecutions'
 import SystemHealth from '@components/dashboard/SystemHealth'
@@ -73,20 +74,20 @@ export default function Dashboard() {
 
     const executions = executionsData.executions
     const total = executions.length
-    const completed = executions.filter((e: any) => e.state === 'completed').length
-    const failed = executions.filter((e: any) => e.state === 'failed').length  
-    const running = executions.filter((e: any) => e.state === 'running').length
+    const completed = executions.filter((e: Execution) => e.state === 'completed').length
+    const failed = executions.filter((e: Execution) => e.state === 'failed').length  
+    const running = executions.filter((e: Execution) => e.state === 'running').length
 
     // Calculate executions in last hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-    const recentExecutions = executions.filter((e: any) => 
+    const recentExecutions = executions.filter((e: Execution) => 
       new Date(e.created_at) > oneHourAgo
     ).length
 
     // Calculate average response time for completed executions
     const responseTimes = executions
-      .filter((e: any) => e.state === 'completed' && e.started_at && e.ended_at)
-      .map((e: any) => differenceInMilliseconds(new Date(e.ended_at), new Date(e.started_at)))
+      .filter((e: Execution) => e.state === 'completed' && e.started_at && e.ended_at)
+      .map((e: Execution) => differenceInMilliseconds(new Date(e.ended_at!), new Date(e.started_at!)))
 
     const avgResponseTime = responseTimes.length > 0
       ? responseTimes.reduce((a: number, b: number) => a + b, 0) / responseTimes.length

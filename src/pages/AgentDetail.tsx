@@ -10,7 +10,7 @@ import StatusBadge from '@components/common/StatusBadge'
 import { useAudio } from '@hooks/useAudio'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
-import type { InvocationResult } from '../types/api'
+import type { InvocationResult, Execution } from '../types/api'
 import styles from './AgentDetail.module.css'
 
 export default function AgentDetail() {
@@ -55,19 +55,19 @@ export default function AgentDetail() {
 
     const executions = executionHistory.executions
     const total = executions.length
-    const completed = executions.filter((e: any) => e.state === 'completed').length
-    const failed = executions.filter((e: any) => e.state === 'failed').length
+    const completed = executions.filter((e: Execution) => e.state === 'completed').length
+    const failed = executions.filter((e: Execution) => e.state === 'failed').length
 
     // Calculate executions in last 24 hours
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    const recentExecutions = executions.filter((e: any) => 
+    const recentExecutions = executions.filter((e: Execution) => 
       new Date(e.created_at) > oneDayAgo
     ).length
 
     // Calculate average response time for completed executions
     const responseTimes = executions
-      .filter((e: any) => e.state === 'completed' && e.started_at && e.ended_at)
-      .map((e: any) => differenceInMilliseconds(new Date(e.ended_at), new Date(e.started_at)))
+      .filter((e: Execution) => e.state === 'completed' && e.started_at && e.ended_at)
+      .map((e: Execution) => differenceInMilliseconds(new Date(e.ended_at!), new Date(e.started_at!)))
 
     const avgResponseTime = responseTimes.length > 0
       ? responseTimes.reduce((a: number, b: number) => a + b, 0) / responseTimes.length
@@ -558,7 +558,7 @@ export default function AgentDetail() {
               <span>Thread ID</span>
             </div>
             
-            {executionHistory.executions.slice(0, 5).map((execution: any) => (
+            {executionHistory.executions.slice(0, 5).map((execution: Execution) => (
               <div
                 key={execution.thread_id}
                 className={styles.executionRow}

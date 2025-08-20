@@ -3,8 +3,7 @@ import { persist } from 'zustand/middleware'
 import { 
   AgentSystemsConfig, 
   RegistryConnectionForm, 
-  AgentConfigForm, 
-  EnvVariable
+  AgentConfigForm
 } from '../types/config'
 import { configRepository, configUtils } from '@api/configRepository'
 
@@ -161,7 +160,8 @@ export const useConfigStore = create<ConfigState>()(
 
       deleteRegistryConnection: (id) => {
         set((state) => {
-          const { [id]: deleted, ...remainingConnections } = state.config.registry_connections
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [id]: _, ...remainingConnections } = state.config.registry_connections
           
           // Remove agents that use this registry connection
           const filteredAgents = state.config.agents.filter(
@@ -254,7 +254,8 @@ export const useConfigStore = create<ConfigState>()(
 
       deleteEnvVar: (key) => {
         set((state) => {
-          const { [key]: deleted, ...remaining } = state.envVars
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [key]: _, ...remaining } = state.envVars
           return {
             envVars: remaining,
             hasUnsavedChanges: true

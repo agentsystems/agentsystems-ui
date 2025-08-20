@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { agentsApi } from '@api/agents'
 import Card from '@components/common/Card'
-import { API_DEFAULTS } from '@constants/app'
 import styles from './Logs.module.css'
 
 export default function Logs() {

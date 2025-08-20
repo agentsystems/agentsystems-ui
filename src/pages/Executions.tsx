@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, ArrowPathIcon, XMarkIcon, CalendarIcon, DocumentIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { apiClient } from '@api/client'
+import type { AuditEntry } from '@types/api'
 import Card from '@components/common/Card'
 import { useAudio } from '@hooks/useAudio'
 import { API_DEFAULTS } from '@constants/app'
@@ -33,7 +34,8 @@ interface ArtifactFile {
 }
 
 // Mock data for now - will be replaced with real API
-const mockExecutions: Execution[] = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _mockExecutions: Execution[] = [
   {
     thread_id: '123e4567-e89b-12d3-a456-426614174000',
     agent: 'hello-world-agent',
@@ -70,7 +72,7 @@ const mockExecutions: Execution[] = [
 export default function Executions() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [stateFilter, setStateFilter] = useState<'all' | 'completed' | 'failed' | 'running'>('all')
@@ -90,7 +92,7 @@ export default function Executions() {
       }
       throw new Error('No payload available to retry')
     },
-    onSuccess: (response) => {
+    onSuccess: () => {
       navigate(`/agents/${selectedExecution?.agent}`)
       // Could also navigate to the new execution details when we have real thread tracking
     },
@@ -109,7 +111,7 @@ export default function Executions() {
     refetchInterval: API_DEFAULTS.REFETCH_INTERVAL,
   })
 
-  const executions = executionsResponse?.executions || []
+  const executions = useMemo(() => executionsResponse?.executions || [], [executionsResponse?.executions])
 
   // Bulk audit verification
   const { data: auditVerification } = useQuery({
@@ -120,7 +122,7 @@ export default function Executions() {
 
   // Get unique thread IDs that are compromised
   const compromisedThreadIds = new Set(
-    auditVerification?.compromised_entries?.map((entry: any) => entry.thread_id) || []
+    auditVerification?.compromised_entries?.map(entry => entry.thread_id) || []
   )
   const compromisedExecutionCount = compromisedThreadIds.size
 
@@ -157,7 +159,7 @@ export default function Executions() {
     if (agentParam && searchQuery === '') {
       setSearchQuery(agentParam)
     }
-  }, [executions]) // Removed searchParams and searchQuery from dependencies
+  }, [executions, searchParams, searchQuery])
 
   // Filter executions
   const filteredExecutions = executions.filter(execution => {
@@ -217,8 +219,7 @@ export default function Executions() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
-  const getFileIcon = (filename: string) => {
-    const ext = filename.split('.').pop()?.toLowerCase()
+  const getFileIcon = () => {
     return <DocumentIcon className={styles.fileIcon} />
   }
 
@@ -856,7 +857,7 @@ export default function Executions() {
                           Detailed audit events ({auditData.audit_trail?.length || 0} entries)
                         </h4>
                         <div className={styles.auditEvents}>
-                          {auditData.audit_trail?.map((entry: any, index: number) => (
+                          {auditData.audit_trail?.map((entry: AuditEntry) => (
                             <div key={entry.id} className={styles.simpleAuditEntry}>
                               <span className={styles.auditAction}>{entry.action}</span>
                               <span className={styles.auditActor}>{entry.actor}</span>
