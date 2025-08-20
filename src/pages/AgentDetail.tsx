@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
@@ -24,7 +24,7 @@ export default function AgentDetail() {
   const [pollingStatus, setPollingStatus] = useState<string>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [syncMode, setSyncMode] = useState(false)
-  const [isLazyStarting, setIsLazyStarting] = useState(false)
+  const previousAgentState = useRef<string | undefined>()
 
   // Get agent state from agents list
   const { data: agentsData } = useQuery({
@@ -34,6 +34,23 @@ export default function AgentDetail() {
   })
 
   const currentAgent = agentsData?.agents.find(a => a.name === agentName)
+
+  // Watch for agent state changes and trigger metadata refresh
+  useEffect(() => {
+    const currentState = currentAgent?.state
+    const previousState = previousAgentState.current
+
+    // If agent just became running (lazy start completed)
+    if (previousState && previousState !== 'running' && currentState === 'running') {
+      console.log('Agent just became running - refreshing metadata in 1 second')
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
+      }, 1000) // 1 second delay to ensure endpoint is ready
+    }
+
+    // Update ref for next comparison
+    previousAgentState.current = currentState
+  }, [currentAgent?.state, queryClient, agentName])
 
   // Get execution history for this agent
   const { data: executionHistory } = useQuery({
@@ -93,10 +110,10 @@ export default function AgentDetail() {
   const { data: metadata, isLoading: metadataLoading, error: metadataError } = useQuery({
     queryKey: ['agent-metadata', agentName, currentAgent?.state],
     queryFn: () => agentsApi.getMetadata(agentName!),
-    enabled: !!agentName && (currentAgent?.state === 'running' || isLazyStarting),
+    enabled: !!agentName && currentAgent?.state === 'running',
     retry: 3, // Increased retries for newly started agents
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
-    refetchInterval: (currentAgent?.state === 'running' || isLazyStarting) ? 2000 : false, // More frequent polling during startup
+    refetchInterval: currentAgent?.state === 'running' ? 5000 : false,
   })
 
   const invokeMutation = useMutation({
@@ -111,13 +128,8 @@ export default function AgentDetail() {
       }
     },
     onMutate: () => {
-      // Set lazy starting state to trigger metadata polling
-      if (currentAgent?.state !== 'running') {
-        setIsLazyStarting(true)
-      }
       // Invalidate queries since invocation might trigger agent startup
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-      queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
     },
     onSuccess: async (response) => {
       // Poll for status with proper error handling and timeout
@@ -148,13 +160,10 @@ export default function AgentDetail() {
             setPollingStatus('')
             setInvocationResult(result)
             
-            // Refresh metadata since agent is now definitely running
-            setIsLazyStarting(false) // Agent is now running
+            // Refresh agents list since invocation completed
             queryClient.invalidateQueries({ queryKey: ['agents'] })
-            queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
           } else if (status.state === 'failed') {
             setPollingStatus('')
-            setIsLazyStarting(false) // Reset lazy starting state
             setInvocationResult({
               thread_id: response.thread_id,
               error: status.error || {
@@ -169,7 +178,6 @@ export default function AgentDetail() {
         } catch (error) {
           console.error('Error polling status:', error)
           setPollingStatus('')
-          setIsLazyStarting(false) // Reset on error
           setInvocationResult({
             thread_id: response.thread_id,
             error: {
@@ -185,7 +193,6 @@ export default function AgentDetail() {
     onError: (error) => {
       console.error('Invocation failed:', error)
       setPollingStatus('')
-      setIsLazyStarting(false) // Reset on invocation error
       setInvocationResult({
         thread_id: '',
         error: {
