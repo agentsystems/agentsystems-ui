@@ -90,7 +90,7 @@ export const validateToken = (token: string): string | null => {
   }
   
   // Basic format validation - tokens should be alphanumeric with some special chars
-  if (!/^[a-zA-Z0-9\-_\.]+$/.test(trimmedToken)) {
+  if (!/^[a-zA-Z0-9\-_.]+$/.test(trimmedToken)) {
     return 'Auth token contains invalid characters'
   }
   
