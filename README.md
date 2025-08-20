@@ -7,7 +7,7 @@
 
 A **production-ready**, self-hostable web interface for the AgentSystems platform. Built with modern React patterns, comprehensive testing, and enterprise-grade security.
 
-## ✨ Features
+## Features
 
 ### 🎨 **Professional Theming**
 - **Dark Theme**: Professional dark interface with electric cyan accents
