@@ -14,6 +14,8 @@ interface ApiError {
   }
 }
 import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
+import Toast from '@components/Toast'
 import { API_DEFAULTS } from '@constants/app'
 import styles from './Executions.module.css'
 
@@ -43,6 +45,7 @@ interface ArtifactFile {
 export default function Executions() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
+  const { toasts, removeToast, showError } = useToast()
   const [searchParams] = useSearchParams()
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -68,7 +71,7 @@ export default function Executions() {
       // Could also navigate to the new execution details when we have real thread tracking
     },
     onError: (error) => {
-      alert(`Failed to retry execution: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      showError(`Failed to retry execution: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   })
 
@@ -244,7 +247,7 @@ export default function Executions() {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download failed:', error)
-      alert(`Download failed: ${(error as ApiError)?.response?.status || 'Network error'}`)
+      showError(`Download failed: ${(error as ApiError)?.response?.status || 'Network error'}`)
     }
   }
 
@@ -890,6 +893,17 @@ export default function Executions() {
         </div>
       )}
 
+      {/* Toast notifications */}
+      {toasts.map((toast, index) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          index={index}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
     </div>
   )
 }
