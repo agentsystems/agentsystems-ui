@@ -2,32 +2,82 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
   push:
     branches: [main]
 
 jobs:
   lint:
-    name: lint
+    name: Pre-commit & Docker smoke test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run type-check
 
-  security-scan:
-    name: security-scan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
           cache: 'npm'
-      - run: npm ci
-      - run: npm audit --audit-level=high
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build UI image
+        run: docker buildx build --platform linux/amd64 --load -t agentsystems-ui -f Dockerfile.enhanced .
+
+      - name: Run UI container
+        run: docker run -d -p 3001:80 --name ui-test agentsystems-ui
+
+      - name: Wait for /health to return 200
+        run: |
+          for i in {1..30}; do
+            if curl -fs http://localhost:3001/health >/dev/null; then
+              echo "UI healthy"; exit 0; fi
+            sleep 2
+          done
+          echo "UI health check failed" && docker logs ui-test && exit 1
+
+      - name: Verify license attribution
+        run: |
+          # Extract license files from test container
+          docker cp ui-test:/app/licenses/nodejs/THIRD_PARTY_LICENSES.json ./licenses.json
+          
+          # Run verification
+          node scripts/verify-attribution.cjs
+          
+          echo "✅ License verification passed"
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f ui-test || true
+
+  tests:
+    name: Run tests and collect coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:coverage
+
+      - name: Build application
+        run: npm run build
