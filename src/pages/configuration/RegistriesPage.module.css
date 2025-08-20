@@ -59,7 +59,9 @@
 
 .formCard {
   margin-bottom: 1rem;
-  border: 2px dashed var(--border-strong);
+  border-left: 2px dashed var(--border-strong);
+  border-bottom: 2px dashed var(--border-strong);
+  border-right: 2px dashed var(--border-strong);
   background: var(--surface-2);
 }
 

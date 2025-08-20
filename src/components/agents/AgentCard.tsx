@@ -82,7 +82,7 @@ export default function AgentCard({
       <div className={styles.agentHeader}>
         <div className={styles.agentInfo}>
           <h3 className={styles.agentName} title={agent.name}>
-            {agent.name}
+            {agent.name.length > 23 ? `${agent.name.substring(0, 23)}..` : agent.name}
           </h3>
           <div className={styles.agentVersion}>
             {getAgentVersion(agent.name)}
@@ -93,7 +93,8 @@ export default function AgentCard({
         </div>
         <StatusBadge 
           type="agent" 
-          status={agent.state} 
+          status={agent.state}
+          className={styles.statusBadge}
         />
       </div>
 

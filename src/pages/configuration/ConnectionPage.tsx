@@ -38,15 +38,27 @@ export default function ConnectionPage() {
     const sanitizedToken = sanitizeToken(localToken)
     
     if (sanitizedUrl !== localGatewayUrl) {
-      showError('Gateway URL contains invalid characters and was cleaned.')
+      console.log('URL normalized:', { 
+        original: `"${localGatewayUrl}"`, 
+        sanitized: `"${sanitizedUrl}"`,
+        originalLength: localGatewayUrl.length,
+        sanitizedLength: sanitizedUrl.length,
+        charCodes: {
+          original: localGatewayUrl.split('').map(c => c.charCodeAt(0)),
+          sanitized: sanitizedUrl.split('').map(c => c.charCodeAt(0))
+        }
+      })
       setLocalGatewayUrl(sanitizedUrl)
-      return
     }
     
     if (sanitizedToken !== localToken) {
-      showError('Auth token contains invalid characters and was cleaned.')
+      console.log('Token sanitized:', {
+        original: `"${localToken}"`,
+        sanitized: `"${sanitizedToken}"`,
+        originalLength: localToken.length,
+        sanitizedLength: sanitizedToken.length
+      })
       setLocalToken(sanitizedToken)
-      return
     }
     
     // Validate form
@@ -64,6 +76,8 @@ export default function ConnectionPage() {
     try {
       setToken(sanitizedToken)
       setGatewayUrl(sanitizedUrl)
+      
+      // Always show simple success message
       showSuccess('Connection settings saved successfully!')
     } catch (error) {
       showError('Failed to save settings. Please try again.')
@@ -80,10 +94,17 @@ export default function ConnectionPage() {
 
     try {
       // Test the connection by making a simple API call
-      const response = await fetch(`${localGatewayUrl}/health`, {
+      // In development, use proxy route; in production, use direct URL
+      const testUrl = import.meta.env.DEV ? '/api/health' : `${localGatewayUrl}/health`
+      console.log('Testing connection to:', testUrl, '(original URL:', localGatewayUrl, ')')
+      
+      const response = await fetch(testUrl, {
+        method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localToken}`
-        }
+          'Authorization': `Bearer ${localToken}`,
+          'Content-Type': 'application/json'
+        },
+        mode: 'cors' // Explicitly handle CORS
       })
       
       if (response.ok) {
@@ -92,7 +113,23 @@ export default function ConnectionPage() {
         showError(`Connection test failed: ${response.status} ${response.statusText}`)
       }
     } catch (error) {
-      showError(`Connection test failed: ${error instanceof Error ? error.message : 'Network error'}`)
+      console.error('Connection test error:', error)
+      let errorMessage = 'Network error'
+      let suggestions = ''
+      
+      if (error instanceof Error) {
+        if (error.message === 'Failed to fetch') {
+          errorMessage = 'Cannot reach the gateway URL'
+          suggestions = 'Common causes:\n• Gateway is not running (try: agentsystems up)\n• Wrong URL (should be http://localhost:18080)\n• CORS issues (if running on different domain)'
+        } else if (error.message.includes('CORS')) {
+          errorMessage = 'Cross-origin request blocked'
+          suggestions = 'The gateway may not allow requests from this domain. Check CORS configuration.'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
+      showError(`Connection test failed: ${errorMessage}${suggestions ? '\n\n' + suggestions : ''}`)
     }
   }
 
@@ -204,8 +241,8 @@ export default function ConnectionPage() {
       </Card>
 
       {/* Connection Status */}
-      <Card>
-        <h2>Connection Status</h2>
+      <Card className={styles.statusCard}>
+        <h2>Current Connection Status</h2>
         <div className={styles.statusGrid}>
           <div className={styles.statusItem}>
             <span className={styles.statusLabel}>Gateway URL:</span>
@@ -236,12 +273,13 @@ export default function ConnectionPage() {
       </Card>
 
       {/* Toast notifications */}
-      {toasts.map((toast) => (
+      {toasts.map((toast, index) => (
         <Toast
           key={toast.id}
           message={toast.message}
           type={toast.type}
           duration={toast.duration}
+          index={index}
           onClose={() => removeToast(toast.id)}
         />
       ))}

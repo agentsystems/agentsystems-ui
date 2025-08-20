@@ -65,7 +65,7 @@
 }
 
 .statusIndicator {
-  margin-left: 1rem;
+  margin-left: 0;
   color: var(--text-muted);
   font-size: 12px;
 }
@@ -706,4 +706,65 @@
   .performanceGrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Disabled note styling */
+.disabledNote {
+  padding: 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 1rem;
+}
+
+.disabledNote p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.disabledNote p:last-child {
+  margin-bottom: 0;
+}
+
+.disabledNote strong {
+  color: var(--text);
+}
+
+/* Metadata loading states */
+.metadataLoading,
+.metadataError {
+  padding: 1rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.metadataLoading {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.metadataError {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--warning);
+}
+
+.metadataLoading p,
+.metadataError p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.metadataLoading p:last-child,
+.metadataError p:last-child {
+  margin-bottom: 0;
+}
+
+.loadingHint,
+.errorHint {
+  font-size: 0.75rem !important;
+  color: var(--text-muted) !important;
+  font-style: italic;
 }

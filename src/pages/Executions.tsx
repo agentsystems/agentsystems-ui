@@ -74,10 +74,10 @@ export default function Executions() {
 
   // Real API query
   const { data: executionsResponse, isLoading, error } = useQuery({
-    queryKey: ['executions', stateFilter],
+    queryKey: ['executions'],
     queryFn: () => agentsApi.listExecutions({ 
-      limit: 100,
-      state: stateFilter === 'all' ? undefined : stateFilter 
+      limit: 100
+      // Always fetch all executions - filter on client side
     }),
     refetchInterval: API_DEFAULTS.REFETCH_INTERVAL,
   })

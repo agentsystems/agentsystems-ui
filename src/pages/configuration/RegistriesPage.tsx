@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useConfigStore } from '@stores/configStore'
 import { useAudio } from '@hooks/useAudio'
@@ -27,6 +27,7 @@ export default function RegistriesPage() {
   const [formData, setFormData] = useState<Omit<RegistryConnectionForm, 'id'>>(initialFormData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const formRef = useRef<HTMLDivElement>(null)
   
   const { playClickSound } = useAudio()
   const { toasts, removeToast, showSuccess, showError } = useToast()
@@ -120,6 +121,11 @@ export default function RegistriesPage() {
     })
     setEditingId(registry.id)
     setErrors({})
+    
+    // Auto-scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const handleDelete = async (id: string, name: string) => {
@@ -168,7 +174,7 @@ export default function RegistriesPage() {
       </div>
 
       {/* Add/Edit Form */}
-      <Card className={styles.formCard}>
+      <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
             <ServerIcon />
@@ -448,12 +454,13 @@ export default function RegistriesPage() {
       </Card>
 
       {/* Toast notifications */}
-      {toasts.map((toast) => (
+      {toasts.map((toast, index) => (
         <Toast
           key={toast.id}
           message={toast.message}
           type={toast.type}
           duration={toast.duration}
+          index={index}
           onClose={() => removeToast(toast.id)}
         />
       ))}
