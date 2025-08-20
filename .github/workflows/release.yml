@@ -246,7 +246,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha,prefix=sha-,format=short
 
-      - name: Build and push Docker image
+      - name: Build Docker image with license verification
         id: build
         uses: docker/build-push-action@v6
         with:
@@ -261,6 +261,37 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           # Attestations only work with push, not with load
+          provenance: ${{ needs.validate.outputs.should_push == 'true' }}
+          sbom: ${{ needs.validate.outputs.should_push == 'true' }}
+          target: builder
+          
+      - name: Verify license attribution
+        run: |
+          echo "🔍 Verifying all dependencies are properly attributed..."
+          
+          # Extract license files from builder stage
+          docker create --name temp-container ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.validate.outputs.version }}
+          docker cp temp-container:/app/licenses/nodejs/THIRD_PARTY_LICENSES.json ./licenses.json
+          docker rm temp-container
+          
+          # Run verification
+          node scripts/verify-attribution.cjs
+          
+          echo "✅ License attribution verification passed"
+          
+      - name: Build final image
+        if: success()
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.enhanced
+          platforms: ${{ needs.validate.outputs.should_push == 'true' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          push: ${{ needs.validate.outputs.should_push == 'true' }}
+          load: ${{ needs.validate.outputs.should_push == 'false' }}
+          tags: ${{ needs.validate.outputs.docker_tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           provenance: ${{ needs.validate.outputs.should_push == 'true' }}
           sbom: ${{ needs.validate.outputs.should_push == 'true' }}
 
