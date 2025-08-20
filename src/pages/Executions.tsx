@@ -7,6 +7,12 @@ import { agentsApi } from '@api/agents'
 import { apiClient } from '@api/client'
 import type { AuditEntry } from '../types/api'
 import Card from '@components/common/Card'
+
+interface ApiError {
+  response?: {
+    status?: number
+  }
+}
 import { useAudio } from '@hooks/useAudio'
 import { API_DEFAULTS } from '@constants/app'
 import styles from './Executions.module.css'
@@ -213,7 +219,7 @@ export default function Executions() {
       setPreviewContent(response.data)
     } catch (error) {
       console.error('Preview failed:', error)
-      setPreviewContent(`Failed to load preview: ${(error as any)?.response?.status || 'Network error'}`)
+      setPreviewContent(`Failed to load preview: ${(error as ApiError)?.response?.status || 'Network error'}`)
     } finally {
       setPreviewLoading(false)
     }
@@ -238,7 +244,7 @@ export default function Executions() {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download failed:', error)
-      alert(`Download failed: ${(error as any)?.response?.status || 'Network error'}`)
+      alert(`Download failed: ${(error as ApiError)?.response?.status || 'Network error'}`)
     }
   }
 

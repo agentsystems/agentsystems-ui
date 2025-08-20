@@ -39,7 +39,7 @@ Object.defineProperty(window, 'AudioContext', {
 })
 
 // Mock matchMedia for theme detection  
-;(globalThis as any).matchMedia = vi.fn().mockImplementation(query => ({
+;(globalThis as typeof globalThis & { matchMedia: unknown }).matchMedia = vi.fn().mockImplementation(query => ({
   matches: false,
   media: query,
   onchange: null,
@@ -51,7 +51,7 @@ Object.defineProperty(window, 'AudioContext', {
 }))
 
 // Mock IntersectionObserver
-(globalThis as any).IntersectionObserver = class IntersectionObserver {
+;(globalThis as typeof globalThis & { IntersectionObserver: unknown }).IntersectionObserver = class IntersectionObserver {
   root = null
   rootMargin = ''
   thresholds = []

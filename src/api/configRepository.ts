@@ -11,6 +11,8 @@ import { api } from './client'
 export class FileConfigRepository implements ConfigRepository {
   constructor(_configPath = './agentsystems-config.yml', _envPath = './.env') {
     // Parameters stored for potential future use
+    void _configPath; // Acknowledge parameter
+    void _envPath; // Acknowledge parameter
   }
 
   async readConfig(): Promise<AgentSystemsConfig> {

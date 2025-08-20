@@ -18,6 +18,12 @@ import { useAuthStore } from '@stores/authStore'
 import ErrorMessage from '@components/ErrorMessage'
 import styles from './Artifacts.module.css'
 
+interface ApiError {
+  response?: {
+    status?: number
+  }
+}
+
 interface ArtifactFile {
   name: string
   path: string
@@ -182,7 +188,7 @@ export default function Artifacts() {
       setPreviewContent(response.data)
     } catch (error) {
       console.error('Preview failed:', error)
-      setPreviewContent(`Failed to load preview: ${(error as any)?.response?.status || 'Network error'}`)
+      setPreviewContent(`Failed to load preview: ${(error as ApiError)?.response?.status || 'Network error'}`)
     } finally {
       setPreviewLoading(false)
     }
@@ -207,7 +213,7 @@ export default function Artifacts() {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download failed:', error)
-      alert(`Download failed: ${(error as any)?.response?.status || 'Network error'}`)
+      alert(`Download failed: ${(error as ApiError)?.response?.status || 'Network error'}`)
     }
   }
 
