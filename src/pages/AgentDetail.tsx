@@ -6,7 +6,6 @@ import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, Cl
 import { agentsApi } from '@api/agents'
 import { getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
-import StatusBadge from '@components/common/StatusBadge'
 import SystemStatusBanner from '@components/common/SystemStatusBanner'
 import { useAudio } from '@hooks/useAudio'
 import { useAuthStore } from '@stores/authStore'
