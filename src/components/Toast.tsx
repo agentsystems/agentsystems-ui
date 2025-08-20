@@ -5,6 +5,7 @@ interface ToastProps {
   message: string
   type?: 'success' | 'error' | 'warning' | 'info'
   duration?: number
+  index?: number
   onClose: () => void
 }
 
@@ -12,6 +13,7 @@ export default function Toast({
   message, 
   type = 'info', 
   duration = 3000, 
+  index = 0,
   onClose 
 }: ToastProps) {
   const [isVisible, setIsVisible] = useState(true)
@@ -37,6 +39,9 @@ export default function Toast({
   return (
     <div 
       className={`${styles.toast} ${styles[type]} ${isVisible ? styles.visible : styles.hidden}`}
+      style={{ 
+        top: `${1 + index * 5}rem` // Stack toasts vertically with 5rem spacing
+      }}
     >
       <span className={styles.icon}>{getIcon()}</span>
       <span className={styles.message}>{message}</span>

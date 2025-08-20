@@ -4,6 +4,10 @@
   padding: 0;
 }
 
+.statusCard {
+  margin-top: 24px;
+}
+
 .breadcrumb {
   display: flex;
   align-items: center;

@@ -509,7 +509,7 @@
 }
 
 .statusRunning {
-  color: var(--primary);
+  color: var(--info);
 }
 
 .statusQueued {

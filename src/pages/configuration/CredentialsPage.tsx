@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useConfigStore } from '@stores/configStore'
 import { configRepository } from '@api/configRepository'
@@ -32,6 +32,7 @@ export default function CredentialsPage() {
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [showValues, setShowValues] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const formRef = useRef<HTMLDivElement>(null)
   
   const { playClickSound } = useAudio()
   const { toasts, removeToast, showSuccess, showError } = useToast()
@@ -104,6 +105,11 @@ export default function CredentialsPage() {
     setFormData(envVar)
     setEditingKey(envVar.key)
     setErrors({})
+    
+    // Auto-scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const handleDelete = async (key: string) => {
@@ -170,7 +176,7 @@ export default function CredentialsPage() {
       </div>
 
       {/* Add/Edit Form */}
-      <Card className={styles.formCard}>
+      <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
             <KeyIcon />
@@ -325,12 +331,13 @@ export default function CredentialsPage() {
       </Card>
 
       {/* Toast notifications */}
-      {toasts.map((toast) => (
+      {toasts.map((toast, index) => (
         <Toast
           key={toast.id}
           message={toast.message}
           type={toast.type}
           duration={toast.duration}
+          index={index}
           onClose={() => removeToast(toast.id)}
         />
       ))}

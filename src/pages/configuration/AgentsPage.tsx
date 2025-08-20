@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useConfigStore } from '@stores/configStore'
 import { useAudio } from '@hooks/useAudio'
@@ -32,6 +32,7 @@ export default function AgentsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const formRef = useRef<HTMLDivElement>(null)
   
   const { playClickSound } = useAudio()
   const { toasts, removeToast, showSuccess, showError } = useToast()
@@ -118,6 +119,11 @@ export default function AgentsPage() {
     setEditingId(agent.id)
     setErrors({})
     setShowAdvanced(Object.keys(agent.envVariables).length > 0 || !!agent.egressAllowlist || agent.exposePorts !== '8000')
+    
+    // Auto-scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const handleDelete = async (id: string, name: string) => {
@@ -162,7 +168,7 @@ export default function AgentsPage() {
       </div>
 
       {/* Add/Edit Form */}
-      <Card className={styles.formCard}>
+      <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
             <RocketLaunchIcon />
@@ -465,12 +471,13 @@ export default function AgentsPage() {
       </Card>
 
       {/* Toast notifications */}
-      {toasts.map((toast) => (
+      {toasts.map((toast, index) => (
         <Toast
           key={toast.id}
           message={toast.message}
           type={toast.type}
           duration={toast.duration}
+          index={index}
           onClose={() => removeToast(toast.id)}
         />
       ))}

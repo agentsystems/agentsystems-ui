@@ -1,4 +1,4 @@
-import { ReactNode, KeyboardEvent } from 'react'
+import { ReactNode, KeyboardEvent, forwardRef } from 'react'
 import clsx from 'clsx'
 import { useAudio } from '@hooks/useAudio'
 import styles from './Card.module.css'
@@ -49,7 +49,7 @@ interface CardProps {
  * </Card>
  * ```
  */
-export default function Card({ 
+const Card = forwardRef<HTMLDivElement, CardProps>(({ 
   children, 
   className, 
   variant = 'default',
@@ -59,7 +59,7 @@ export default function Card({
   isSelected,
   role,
   tabIndex 
-}: CardProps) {
+}, ref) => {
   const { playClickSound } = useAudio()
 
   const handleClick = () => {
@@ -78,6 +78,7 @@ export default function Card({
 
   return (
     <div 
+      ref={ref}
       className={clsx(
         styles.card,
         styles[variant],
@@ -95,4 +96,8 @@ export default function Card({
       {children}
     </div>
   )
-}
+})
+
+Card.displayName = 'Card'
+
+export default Card
