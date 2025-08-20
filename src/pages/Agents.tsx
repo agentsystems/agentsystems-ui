@@ -5,6 +5,8 @@ import { agentsApi } from '@api/agents'
 import AgentFilters from '@components/agents/AgentFilters'
 import AgentGrid from '@components/agents/AgentGrid'
 import ErrorMessage from '@components/ErrorMessage'
+import Toast from '@components/Toast'
+import { useToast } from '@hooks/useToast'
 import { API_DEFAULTS } from '@constants/app'
 import styles from './Agents.module.css'
 
@@ -30,6 +32,7 @@ export default function Agents() {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'running' | 'stopped'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [operatingAgent, setOperatingAgent] = useState<string | null>(null)
+  const { toasts, removeToast, showSuccess, showError } = useToast()
 
   // Initialize filter from URL parameter
   useEffect(() => {
@@ -51,15 +54,15 @@ export default function Agents() {
     onMutate: (agentName) => {
       setOperatingAgent(agentName)
     },
-    onSuccess: (data) => {
-      console.log('Agent started:', data.message)
+    onSuccess: (_, agentName) => {
+      showSuccess(`Agent ${agentName} started successfully`)
       setOperatingAgent(null)
       queryClient.invalidateQueries({ queryKey: ['agents'] })
     },
     onError: (error) => {
       console.error('Failed to start agent:', error)
       setOperatingAgent(null)
-      alert(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      showError(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
     },
   })
 
@@ -68,15 +71,15 @@ export default function Agents() {
     onMutate: (agentName) => {
       setOperatingAgent(agentName)
     },
-    onSuccess: (data) => {
-      console.log('Agent stopped:', data.message)
+    onSuccess: (_, agentName) => {
+      showSuccess(`Agent ${agentName} stopped successfully`)
       setOperatingAgent(null)
       queryClient.invalidateQueries({ queryKey: ['agents'] })
     },
     onError: (error) => {
       console.error('Failed to stop agent:', error)
       setOperatingAgent(null)
-      alert(`Failed to stop agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      showError(`Failed to stop agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
     },
   })
 
@@ -159,6 +162,18 @@ export default function Agents() {
         error={error}
         onRetry={() => refetch()}
       />
+
+      {/* Toast notifications */}
+      {toasts.map((toast, index) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          index={index}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
     </div>
   )
 }

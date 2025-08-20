@@ -37,7 +37,7 @@ function App() {
     if (currentTheme === 'cyber' && scanlineEnabled) {
       classes.push('scanline-enabled')
     }
-    console.log('Applying theme classes:', classes.join(' '))
+    // Apply theme classes to document root
     document.documentElement.className = classes.join(' ')
   }, [theme, scanlineEnabled])
 

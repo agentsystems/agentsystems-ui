@@ -7,7 +7,9 @@ import { agentsApi } from '@api/agents'
 import { getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
 import SystemStatusBanner from '@components/common/SystemStatusBanner'
+import Toast from '@components/Toast'
 import { useAudio } from '@hooks/useAudio'
+import { useToast } from '@hooks/useToast'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
 import type { InvocationResult, Execution } from '../types/api'
@@ -16,6 +18,7 @@ import styles from './AgentDetail.module.css'
 export default function AgentDetail() {
   const { agentName } = useParams<{ agentName: string }>()
   const { playClickSound } = useAudio()
+  const { toasts, removeToast, showError } = useToast()
   const { gatewayUrl } = useAuthStore()
   const queryClient = useQueryClient()
   const [invokePayload, setInvokePayload] = useState('{\n  "message": "Hello, agent!",\n  "task": "process this request"\n}')
@@ -41,7 +44,7 @@ export default function AgentDetail() {
 
     // If agent just became running (lazy start completed)
     if (previousState && previousState !== 'running' && currentState === 'running') {
-      console.log('Agent just became running - refreshing metadata in 1 second')
+      // Agent just became running - refresh metadata after short delay
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
       }, 1000) // 1 second delay to ensure endpoint is ready
@@ -210,7 +213,7 @@ export default function AgentDetail() {
     },
     onError: (error) => {
       console.error('Failed to start agent:', error)
-      alert(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      showError(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
     },
   })
 
@@ -222,7 +225,7 @@ export default function AgentDetail() {
     },
     onError: (error) => {
       console.error('Failed to stop agent:', error)
-      alert(`Failed to stop agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      showError(`Failed to stop agent: ${error instanceof Error ? error.message : 'Unknown error'}`)
     },
   })
 
@@ -235,7 +238,7 @@ export default function AgentDetail() {
     
     // Rate limiting to prevent spam
     if (!rateLimiter.isAllowed('agent-invoke', 10, 60000)) {
-      alert('Too many invocation attempts. Please wait a moment before trying again.')
+      showError('Too many invocation attempts. Please wait a moment before trying again.')
       return
     }
     
@@ -257,7 +260,7 @@ export default function AgentDetail() {
       invokeMutation.mutate({ payload, files: selectedFiles })
     } catch (error) {
       console.error('Invalid JSON payload:', error)
-      alert('Invalid JSON format. Please check your payload.')
+      showError('Invalid JSON format. Please check your payload.')
     }
   }
 
@@ -708,6 +711,18 @@ export default function AgentDetail() {
           </div>
         </Card>
       )}
+
+      {/* Toast notifications */}
+      {toasts.map((toast, index) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          index={index}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
     </div>
   )
 }
