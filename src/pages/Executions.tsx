@@ -452,7 +452,7 @@ export default function Executions() {
               <div className={styles.detailHeader}>
                 <h2 className={styles.alignedHeading}>Execution Details</h2>
                 <div className={styles.detailActions}>
-                  {selectedExecution.payload && selectedExecution.state === 'failed' && (
+                  {!!selectedExecution.payload && selectedExecution.state === 'failed' && (
                     <button
                       className="btn btn-sm btn-subtle"
                       onClick={() => {
@@ -699,7 +699,7 @@ export default function Executions() {
                 <div className={styles.tabContent}>
                   <h3 className={styles.tabHeading}>Execution Data</h3>
                   <div className={styles.detailGrid}>
-                    {selectedExecution.payload && (
+                    {!!selectedExecution.payload && (
                       <div className={styles.detailItem} data-content-type="payload">
                         <label>Request Payload</label>
                         <pre className={styles.detailValue}>
@@ -709,7 +709,7 @@ export default function Executions() {
                               const payload = typeof selectedExecution.payload === 'string' 
                                 ? JSON.parse(selectedExecution.payload)
                                 : selectedExecution.payload
-                              return JSON.stringify(payload, null, 2)
+                              return JSON.stringify(payload, null, 2) || 'null'
                             } catch {
                               return String(selectedExecution.payload)
                             }
@@ -718,7 +718,7 @@ export default function Executions() {
                       </div>
                     )}
 
-                    {selectedExecution.result && (
+                    {!!selectedExecution.result && (
                       <div className={styles.detailItem} data-content-type="result">
                         <label>Result</label>
                         <pre className={styles.detailValue}>
@@ -727,10 +727,10 @@ export default function Executions() {
                               // If result is a string, parse and beautify it
                               if (typeof selectedExecution.result === 'string') {
                                 const parsed = JSON.parse(selectedExecution.result)
-                                return JSON.stringify(parsed, null, 2)
+                                return JSON.stringify(parsed, null, 2) || 'null'
                               }
                               // If it's already an object, stringify it
-                              return JSON.stringify(selectedExecution.result, null, 2)
+                              return JSON.stringify(selectedExecution.result, null, 2) || 'null'
                             } catch {
                               // If parsing fails, display the raw string
                               return String(selectedExecution.result)
@@ -740,7 +740,7 @@ export default function Executions() {
                       </div>
                     )}
 
-                    {selectedExecution.error && (
+                    {!!selectedExecution.error && (
                       <div className={styles.detailItem} data-content-type="error">
                         <label>Error</label>
                         <pre className={styles.detailValue}>
@@ -749,10 +749,10 @@ export default function Executions() {
                               // If error is a string, parse and beautify it
                               if (typeof selectedExecution.error === 'string') {
                                 const parsed = JSON.parse(selectedExecution.error)
-                                return JSON.stringify(parsed, null, 2)
+                                return JSON.stringify(parsed, null, 2) || 'null'
                               }
                               // If it's already an object, stringify it
-                              return JSON.stringify(selectedExecution.error, null, 2)
+                              return JSON.stringify(selectedExecution.error, null, 2) || 'null'
                             } catch {
                               // If parsing fails, display the raw string
                               return String(selectedExecution.error)

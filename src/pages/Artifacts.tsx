@@ -44,6 +44,7 @@ interface ExecutionArtifacts {
 export default function Artifacts() {
   const { playClickSound } = useAudio()
   const { isAuthenticated } = useAuthStore()
+  const authenticated = isAuthenticated()
   const [searchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [agentFilter, setAgentFilter] = useState<string>('all')
@@ -64,7 +65,7 @@ export default function Artifacts() {
   const { data: executionsData, isLoading, error } = useQuery({
     queryKey: ['executions', 'artifacts'],
     queryFn: () => agentsApi.listExecutions({ limit: 100 }),
-    enabled: isAuthenticated,
+    enabled: authenticated,
     refetchInterval: 10000,
   })
 
@@ -72,7 +73,7 @@ export default function Artifacts() {
   const { data: agentsData } = useQuery({
     queryKey: ['agents'],
     queryFn: agentsApi.list,
-    enabled: isAuthenticated,
+    enabled: authenticated,
     refetchInterval: 5000,
   })
 
@@ -109,7 +110,7 @@ export default function Artifacts() {
       
       return Promise.all(artifactsPromises)
     },
-    enabled: isAuthenticated && (executionsData?.executions?.length ?? 0) > 0,
+    enabled: authenticated && (executionsData?.executions?.length ?? 0) > 0,
     staleTime: 30000, // Cache for 30 seconds
   })
 
@@ -217,7 +218,7 @@ export default function Artifacts() {
     }
   }
 
-  if (!isAuthenticated) {
+  if (!authenticated) {
     return (
       <div className={styles.container}>
         <ErrorMessage message="Please configure your gateway connection in Settings first" />
