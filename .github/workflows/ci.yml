@@ -30,7 +30,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build UI image
-        run: docker buildx build --platform linux/amd64 --load -t agentsystems-ui -f Dockerfile.enhanced .
+        run: docker buildx build --platform linux/amd64 --load -t agentsystems-ui .
 
       - name: Run UI container
         run: docker run -d -p 3001:80 --name ui-test agentsystems-ui

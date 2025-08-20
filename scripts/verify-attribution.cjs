@@ -120,10 +120,20 @@ try {
     if (license && (
       license.toLowerCase().includes('gpl') ||
       license.toLowerCase().includes('agpl') ||
-      license.toLowerCase().includes('copyleft') ||
-      license === 'UNLICENSED'
+      license.toLowerCase().includes('copyleft')
     )) {
       problematicLicenses.push(license);
+    }
+    
+    // Check for UNLICENSED packages (but exclude our own package)
+    if (license === 'UNLICENSED') {
+      const unlicensedPackages = Object.entries(licenses)
+        .filter(([pkg, info]) => info.licenses === 'UNLICENSED')
+        .filter(([pkg]) => !pkg.startsWith('agentsystems-ui@')); // Exclude our own package
+      
+      if (unlicensedPackages.length > 0) {
+        problematicLicenses.push(`UNLICENSED (${unlicensedPackages.length} packages)`);
+      }
     }
   }
   
