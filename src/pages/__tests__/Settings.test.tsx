@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderWithProviders, screen, userEvent, waitFor } from '@test/utils'
+import { renderWithProviders, screen, userEvent, waitFor, act } from '@test/utils'
 import Settings from '../Settings'
 
 // Mock the audio functions
@@ -38,7 +38,10 @@ describe('Settings Page', () => {
     renderWithProviders(<Settings />)
 
     const themeSelect = screen.getByLabelText('Theme')
-    await user.selectOptions(themeSelect, 'cyber')
+    
+    await act(async () => {
+      await user.selectOptions(themeSelect, 'cyber')
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Enable matrix scanline effect')).toBeInTheDocument()
@@ -52,7 +55,9 @@ describe('Settings Page', () => {
 
     // First select cyber theme
     const themeSelect = screen.getByLabelText('Theme')
-    await user.selectOptions(themeSelect, 'cyber')
+    await act(async () => {
+      await user.selectOptions(themeSelect, 'cyber')
+    })
 
     // Then enable scanline
     await waitFor(() => {
@@ -61,7 +66,9 @@ describe('Settings Page', () => {
     })
 
     const scanlineCheckbox = screen.getByRole('checkbox', { name: /enable matrix scanline effect/i })
-    await user.click(scanlineCheckbox)
+    await act(async () => {
+      await user.click(scanlineCheckbox)
+    })
 
     await waitFor(() => {
       expect(screen.getByLabelText('Scanline Frequency')).toBeInTheDocument()
@@ -74,15 +81,14 @@ describe('Settings Page', () => {
 
     // Clear the gateway URL to trigger validation error
     const gatewayInput = screen.getByLabelText('Gateway URL')
-    await user.clear(gatewayInput)
-
-    // Clear the auth token to trigger validation error
     const tokenInput = screen.getByLabelText('Auth Token')
-    await user.clear(tokenInput)
-
-    // Try to save
     const saveButton = screen.getByRole('button', { name: /save connection settings/i })
-    await user.click(saveButton)
+
+    await act(async () => {
+      await user.clear(gatewayInput)
+      await user.clear(tokenInput)
+      await user.click(saveButton)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Please fix the validation errors before saving')).toBeInTheDocument()
@@ -94,13 +100,13 @@ describe('Settings Page', () => {
     renderWithProviders(<Settings />)
 
     const gatewayInput = screen.getByLabelText('Gateway URL')
-    
-    // Try to enter a malicious URL
-    await user.clear(gatewayInput)
-    await user.type(gatewayInput, 'javascript:alert("xss")')
-
     const saveButton = screen.getByRole('button', { name: /save connection settings/i })
-    await user.click(saveButton)
+    
+    await act(async () => {
+      await user.clear(gatewayInput)
+      await user.type(gatewayInput, 'javascript:alert("xss")')
+      await user.click(saveButton)
+    })
 
     await waitFor(() => {
       expect(screen.getByText(/contains invalid characters/i)).toBeInTheDocument()
