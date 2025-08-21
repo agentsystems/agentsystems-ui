@@ -11,8 +11,8 @@ FROM node:20-alpine AS builder
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Install comprehensive license scanning tools
-RUN npm install -g license-checker npm-check-licenses
+# Install modern, actively maintained license scanning tool
+RUN npm install -g license-checker-rseidelsohn
 
 # Copy package files first for better caching
 COPY package*.json ./
@@ -30,7 +30,7 @@ RUN npm run build
 RUN mkdir -p /app/licenses/nodejs /app/licenses/alpine
 
 # 1) Capture ALL Node.js dependencies with license texts
-RUN license-checker \
+RUN license-checker-rseidelsohn \
       --production \
       --json \
       --out /app/licenses/nodejs/THIRD_PARTY_LICENSES.json
@@ -91,7 +91,7 @@ RUN find /app/licenses -name "*.json" -o -name "*.txt" -o -name "*.md" | \
     sort | xargs sha256sum > /app/licenses/ATTRIBUTION_CHECKSUMS.txt
 
 # 10) Remove license scanning tools to keep runtime clean
-RUN npm uninstall -g license-checker npm-check-licenses
+RUN npm uninstall -g license-checker-rseidelsohn
 
 # -----------------------------------------------------------------------------
 # Runtime stage – minimal nginx with complete license attribution
