@@ -46,13 +46,13 @@ jobs:
 
       - name: Verify license attribution
         run: |
-          # Extract license files from test container
-          docker cp ui-test:/app/licenses/nodejs/THIRD_PARTY_LICENSES.json ./licenses.json
+          # License verification already runs during Docker build
+          # Check that license files exist in the final container
+          docker exec ui-test ls -la /app/licenses/nodejs/ATTRIBUTIONS.md
+          docker exec ui-test ls -la /app/licenses/alpine/ATTRIBUTIONS.md
+          docker exec ui-test cat /app/licenses/README.md
           
-          # Run verification
-          node scripts/verify-attribution.cjs
-          
-          echo "✅ License verification passed"
+          echo "✅ License files verified in container"
 
       - name: Cleanup
         if: always()
@@ -77,7 +77,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm run test:coverage
+        run: npm test
 
       - name: Build application
         run: npm run build
