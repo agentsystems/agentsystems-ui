@@ -66,6 +66,15 @@ export const validateUrl = (url: string): string | null => {
     return 'Invalid URL protocol'
   }
   
+  // Allow relative paths for proxy setup (e.g., "/api")
+  if (trimmedUrl.startsWith('/')) {
+    // Validate relative path
+    if (trimmedUrl.includes('..') || trimmedUrl.includes('//')) {
+      return 'Invalid path: cannot contain .. or //'
+    }
+    return null
+  }
+  
   try {
     const urlObj = new URL(trimmedUrl)
     if (!['http:', 'https:'].includes(urlObj.protocol)) {
