@@ -43,9 +43,9 @@ describe('Agents Page', () => {
     renderWithProviders(<Agents />)
 
     await waitFor(() => {
-      // Check status badges
-      expect(screen.getByText('running')).toBeInTheDocument()
-      expect(screen.getByText('stopped')).toBeInTheDocument()
+      // Check status badges (UI shows "on"/"off" not "running"/"stopped")
+      expect(screen.getByText('on')).toBeInTheDocument()
+      expect(screen.getByText('off')).toBeInTheDocument()
       expect(screen.getByText('not-created')).toBeInTheDocument()
     })
   })
