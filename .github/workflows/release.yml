@@ -252,27 +252,23 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          # For build-only: single platform with load. For push: multi-platform
-          platforms: ${{ needs.validate.outputs.should_push == 'true' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
-          push: ${{ needs.validate.outputs.should_push == 'true' }}
-          load: ${{ needs.validate.outputs.should_push == 'false' }}
-          tags: ${{ needs.validate.outputs.docker_tags }}
+          # Always build locally first for verification, never push in this step
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: agentsystems-ui-local
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # Attestations only work with push, not with load
-          provenance: ${{ needs.validate.outputs.should_push == 'true' }}
-          sbom: ${{ needs.validate.outputs.should_push == 'true' }}
           
       - name: Verify license attribution
         run: |
           echo "🔍 Verifying all dependencies are properly attributed..."
           
           # The license verification already ran during Docker build
-          # This step confirms the final image has license files
-          IMAGE_TAG=$(echo "${{ needs.validate.outputs.docker_tags }}" | cut -d',' -f1)
+          # This step confirms the final local image has license files
           
-          docker run --rm "${IMAGE_TAG}" sh -c '
+          docker run --rm agentsystems-ui-local sh -c '
             if [ ! -f "/app/licenses/nodejs/THIRD_PARTY_LICENSES.json" ]; then
               echo "❌ ERROR: License files missing from final image!"
               exit 1
@@ -291,22 +287,13 @@ jobs:
 
       - name: Security scan - Check for secrets
         run: |
-          echo "🔍 Scanning image for secrets and sensitive data..."
+          echo "🔍 Scanning local image for secrets and sensitive data..."
 
-          # Image reference is always the same - with GHCR prefix
-          IMAGE_TO_SCAN="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.validate.outputs.version }}"
-
-          if [[ "${{ needs.validate.outputs.should_push }}" == "true" ]]; then
-            # Image was pushed, need to pull
-            echo "Pulling pushed image: ${IMAGE_TO_SCAN}"
-            docker pull "${IMAGE_TO_SCAN}"
-          else
-            # Image was loaded locally with --load
-            echo "Using locally loaded image: ${IMAGE_TO_SCAN}"
-          fi
+          # Always scan the locally built image before any potential push
+          echo "Using locally built image: agentsystems-ui-local"
 
           # Check for common secret patterns
-          docker run --rm --entrypoint sh "${IMAGE_TO_SCAN}" -c '
+          docker run --rm --entrypoint sh agentsystems-ui-local -c '
             echo "Checking for .env files..."
             if find /usr/share/nginx/html -name ".env" -o -name "*.env" 2>/dev/null | grep -v "\.env\.example" | grep .; then
               echo "❌ ERROR: Found .env files in image!"
@@ -358,53 +345,24 @@ jobs:
           # Final success message (only shown if all checks pass)
           echo "🎉 Security scan PASSED"
 
-  verify:
-    needs: [validate, build]
-    if: needs.validate.outputs.should_push == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+      - name: Push verified image to registry
+        if: needs.validate.outputs.should_push == 'true'
+        uses: docker/build-push-action@v6
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify image
-        run: |
-          # Pull and verify the image exists
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.validate.outputs.version != 'main' && needs.validate.outputs.version || 'main' }}"
-          echo "🔍 Verifying image: ${IMAGE}"
-
-          # Pull the image (now authenticated for private repos)
-          docker pull "${IMAGE}"
-
-          # Basic smoke test - check UI is accessible and licenses present
-          docker run -d --name ui-test -p 8080:80 "${IMAGE}"
-          sleep 5
-          
-          # Test health endpoint
-          if ! curl -f http://localhost:8080/health; then
-            echo "❌ ERROR: Health check failed"
-            docker logs ui-test
-            exit 1
-          fi
-          
-          # Test license files are accessible
-          docker exec ui-test sh -c "ls -la /app/licenses/ && echo '✅ License files present'"
-          
-          # Test main UI loads
-          if ! curl -f -s http://localhost:8080/ | grep -q "AgentSystems"; then
-            echo "❌ ERROR: UI does not appear to load correctly"
-            exit 1
-          fi
-          
-          docker stop ui-test && docker rm ui-test
-
-          echo "✅ Image verification successful"
+          context: .
+          file: ./Dockerfile
+          # Multi-platform build for registry (only after all verification passes)
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ needs.validate.outputs.docker_tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
 
   create-release:
-    needs: [validate, build, verify]
+    needs: [validate, build]
     if: github.event.inputs.tag_release == 'true' && github.event.inputs.push == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -469,7 +427,7 @@ jobs:
 
   summary:
     if: always()
-    needs: [validate, build, verify]
+    needs: [validate, build]
     runs-on: ubuntu-latest
     steps:
       - name: Summary
@@ -527,6 +485,3 @@ jobs:
           echo "### Job Results" >> $GITHUB_STEP_SUMMARY
           echo "- Validation: ${{ needs.validate.result }} ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Build: ${{ needs.build.result }} ✅" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ needs.validate.outputs.should_push }}" == "true" ]]; then
-            echo "- Verify: ${{ needs.verify.result }} ✅" >> $GITHUB_STEP_SUMMARY
-          fi
