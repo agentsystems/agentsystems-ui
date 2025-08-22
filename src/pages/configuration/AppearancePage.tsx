@@ -25,7 +25,7 @@ export default function AppearancePage() {
 
   const handleThemeChange = (newTheme: string) => {
     playClickSound()
-    setTheme(newTheme)
+    setTheme(newTheme as any) // TODO: Import proper Theme type
   }
 
   const handleScanlineToggle = () => {
@@ -35,7 +35,7 @@ export default function AppearancePage() {
 
   const handleScanlineFrequencyChange = (frequency: string) => {
     playClickSound()
-    setScanlineFrequency(frequency)
+    setScanlineFrequency(frequency as any) // TODO: Import proper ScanlineFrequency type
   }
 
   const handleAudioToggle = () => {

@@ -4,8 +4,7 @@ import {
   CpuChipIcon,
   BoltIcon,
   DocumentTextIcon,
-  WrenchScrewdriverIcon,
-  Cog6ToothIcon 
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
 import { useThemeStore } from '@stores/themeStore'

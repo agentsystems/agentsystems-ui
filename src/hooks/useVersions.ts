@@ -24,7 +24,22 @@ interface ComponentVersions {
 /**
  * Fetch all component versions from centralized endpoint
  */
-const fetchComponentVersions = async () => {
+interface ComponentVersionsResponse {
+  components?: {
+    'agent-control-plane'?: {
+      current_version?: string
+      latest_version?: string
+      update_available?: boolean
+    }
+    'agentsystems-ui'?: {
+      current_version?: string
+      latest_version?: string
+      update_available?: boolean
+    }
+  }
+}
+
+const fetchComponentVersions = async (): Promise<ComponentVersionsResponse> => {
   try {
     return await api.get('/component-versions')
   } catch (error) {
@@ -44,8 +59,8 @@ export const useVersions = () => {
   })
 
   const components = componentVersions?.components || {}
-  const acp = components['agent-control-plane'] || {}
-  const ui = components['agentsystems-ui'] || {}
+  const acp = components?.['agent-control-plane'] || {}
+  const ui = components?.['agentsystems-ui'] || {}
 
   const versions: ComponentVersions = {
     ui_version: ui.current_version || 'unknown',
