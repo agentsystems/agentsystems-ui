@@ -23,7 +23,6 @@ export const ROUTES = {
   EXECUTIONS: '/executions',
   LOGS: '/logs',
   CONFIGURATION: '/configuration',
-  SETTINGS: '/settings',
 } as const
 
 export const THEME_DEFAULTS = {

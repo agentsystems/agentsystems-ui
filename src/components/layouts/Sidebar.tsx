@@ -4,12 +4,12 @@ import {
   CpuChipIcon,
   BoltIcon,
   DocumentTextIcon,
-  WrenchScrewdriverIcon,
-  Cog6ToothIcon 
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
 import { useThemeStore } from '@stores/themeStore'
-import { APP_VERSION, APP_NAME, ROUTES } from '@constants/app'
+import { APP_NAME, ROUTES } from '@constants/app'
+import { useVersions } from '@hooks/useVersions'
 import styles from './Sidebar.module.css'
 
 const navigationSections = [
@@ -26,7 +26,6 @@ const navigationSections = [
     items: [
       { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
       { name: 'Configuration', href: ROUTES.CONFIGURATION, icon: WrenchScrewdriverIcon },
-      { name: 'Settings', href: ROUTES.SETTINGS, icon: Cog6ToothIcon },
     ]
   }
 ]
@@ -34,6 +33,7 @@ const navigationSections = [
 export default function Sidebar() {
   const { playClickSound } = useAudio()
   const { theme } = useThemeStore()
+  const { ui_version, gateway_version } = useVersions()
 
   return (
     <aside className={styles.sidebar} id="navigation" role="navigation" aria-label="Main navigation">
@@ -68,7 +68,9 @@ export default function Sidebar() {
       </nav>
       
       <div className={styles.footer}>
-        <div className={styles.version}>{APP_VERSION}</div>
+        <div className={styles.version}>
+          UI {ui_version} | ACP {gateway_version}
+        </div>
       </div>
     </aside>
   )

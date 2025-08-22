@@ -4,6 +4,7 @@ import { useConfigStore } from '@stores/configStore'
 import { useAuthStore } from '@stores/authStore'
 import { useThemeStore } from '@stores/themeStore'
 import { useAudio } from '@hooks/useAudio'
+import { useVersions } from '@hooks/useVersions'
 import Card from '@components/common/Card'
 import SystemStatusBanner from '@components/common/SystemStatusBanner'
 import {
@@ -16,7 +17,8 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline'
 import styles from './ConfigurationOverview.module.css'
 
@@ -81,6 +83,7 @@ export default function ConfigurationOverview() {
   
   const { gatewayUrl, token } = useAuthStore()
   const { theme } = useThemeStore()
+  const { ui_version, gateway_version, latest_versions, update_available } = useVersions()
 
   useEffect(() => {
     loadConfig()
@@ -260,29 +263,45 @@ export default function ConfigurationOverview() {
         />
       </div>
 
-      {/* Quick Actions or Recent Activity could go here */}
-      <Card className={styles.recentActivity}>
-        <h3>Quick Setup Guide</h3>
-        <div className={styles.setupSteps}>
-          <div className={`${styles.step} ${connectionStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>1. Configure gateway connection</span>
+      {/* About Section */}
+      <Card>
+        <h2>About</h2>
+        <div className={styles.about}>
+          <div className={styles.aboutRow}>
+            <span>User Interface (UI) Version</span>
+            <div className={styles.versionInfo}>
+              <span className={styles.mono}>{ui_version}</span>
+              {(update_available.ui || ui_version === 'unknown') && (
+                <ArrowPathIcon 
+                  className={styles.updateIcon}
+                  title={`Update available: ${latest_versions.ui}`}
+                  aria-label={`Update available to ${latest_versions.ui}`}
+                />
+              )}
+            </div>
           </div>
-          <div className={`${styles.step} ${credentialsStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>2. Add authentication credentials</span>
+          <div className={styles.aboutRow}>
+            <span>Agent Control Plane (ACP) Version</span>
+            <div className={styles.versionInfo}>
+              <span className={styles.mono}>{gateway_version}</span>
+              {(update_available.gateway || gateway_version === 'unknown') && (
+                <ArrowPathIcon 
+                  className={styles.updateIcon}
+                  title={`Update available: ${latest_versions.gateway}`}
+                  aria-label={`Update available to ${latest_versions.gateway}`}
+                />
+              )}
+            </div>
           </div>
-          <div className={`${styles.step} ${modelsStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>3. Configure model routing</span>
+          <div className={styles.aboutRow}>
+            <span>Gateway</span>
+            <span className={styles.mono}>{gatewayUrl}</span>
           </div>
-          <div className={`${styles.step} ${registriesStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>4. Connect to registries</span>
-          </div>
-          <div className={`${styles.step} ${agentsStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>5. Deploy your agents</span>
+          <div className={styles.aboutRow}>
+            <span>Documentation</span>
+            <a href="https://github.com/agentsystems/agentsystems" target="_blank" rel="noopener noreferrer">
+              GitHub
+            </a>
           </div>
         </div>
       </Card>
