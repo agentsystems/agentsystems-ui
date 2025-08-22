@@ -1,0 +1,491 @@
+/* Base page styling - matches other configuration pages */
+.modelConnectionsPage {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Breadcrumb navigation */
+.breadcrumb {
+  margin-bottom: 0.5rem;
+}
+
+.breadcrumbLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+  transition: color 0.2s ease;
+}
+
+.breadcrumbLink:hover {
+  color: var(--color-text-primary);
+}
+
+.breadcrumbIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Page header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.header h1 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+.header p {
+  margin: 0.5rem 0 0 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+/* Model connections list */
+.connectionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.connectionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg-secondary);
+  transition: border-color 0.2s ease;
+}
+
+.connectionItem:hover {
+  border-color: var(--color-border-hover);
+}
+
+.connectionInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.connectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.connectionIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.connectionHeader h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.connectionMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.provider {
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.providerModel {
+  font-family: var(--font-mono);
+  color: var(--color-text-tertiary);
+}
+
+.endpoint {
+  font-family: var(--font-mono);
+  color: var(--color-text-tertiary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connectionAuth {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.authMethod {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.envVar {
+  font-family: var(--font-mono);
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-tertiary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+/* Connection actions */
+.connectionActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+}
+
+.statusEnabled {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-success);
+}
+
+.statusDisabled {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-error);
+}
+
+.editButton {
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.editButton:hover {
+  background: var(--color-accent-hover);
+}
+
+.deleteButton {
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteButton:hover {
+  background: var(--color-error);
+  color: var(--color-bg-primary);
+}
+
+.deleteIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Form styling */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Model info styling */
+.modelInfo {
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  margin: 1rem 0;
+}
+
+.modelDescription {
+  margin: 0 0 0.5rem 0;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.modelCategory {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.formIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-accent);
+  margin-right: 0.5rem;
+  vertical-align: text-bottom;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+}
+
+.required::after {
+  content: ' *';
+  color: var(--color-error);
+}
+
+.inputGroup input,
+.inputGroup select,
+.inputGroup textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus,
+.inputGroup textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.inputGroup input.readonly {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+.inputGroup input.error,
+.inputGroup select.error,
+.inputGroup textarea.error {
+  border-color: var(--color-error);
+}
+
+.errorText {
+  color: var(--color-error);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.help {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.checkbox input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-accent);
+}
+
+.checkboxLabel {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+/* Info box for authentication methods */
+.infoBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: 0.375rem;
+  color: var(--color-warning-text);
+}
+
+.infoIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.infoBox p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Form actions */
+.formActions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding-top: 0.5rem;
+}
+
+.saveButton {
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-hover);
+  color: var(--color-text-primary);
+}
+
+/* Unsaved changes warning */
+.unsavedWarning {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: 0.375rem;
+  color: var(--color-warning-text);
+  font-size: 0.875rem;
+}
+
+.warningIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .modelConnectionsPage {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .connectionItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .connectionActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .connectionMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .formActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .saveButton,
+  .cancelButton {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Cyber theme enhancements */
+.theme-cyber .connectionItem {
+  background: rgba(0, 255, 255, 0.05);
+  border-color: rgba(0, 255, 255, 0.3);
+}
+
+.theme-cyber .connectionItem:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.theme-cyber .provider {
+  background: linear-gradient(45deg, var(--color-accent), #00ff00);
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}

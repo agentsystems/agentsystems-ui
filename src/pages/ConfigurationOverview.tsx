@@ -74,6 +74,7 @@ export default function ConfigurationOverview() {
     getRegistryConnections,
     getAgents,
     getEnvVars,
+    getModelConnections,
     getReferencedEnvVars,
     loadConfig,
     isLoading,
@@ -98,12 +99,14 @@ export default function ConfigurationOverview() {
   const registries = getRegistryConnections()
   const agents = getAgents()
   const credentials = getEnvVars()
+  const modelConnections = getModelConnections()
   getReferencedEnvVars()
 
   // Connection Status
   const connectionStatus = (() => {
     if (!gatewayUrl || !token) return { status: 'error' as const, text: 'Not configured', description: 'Missing gateway URL or auth token' }
-    if (!gatewayUrl.match(/^https?:\/\//)) return { status: 'warning' as const, text: 'Invalid URL', description: 'Gateway URL format is invalid' }
+    // Accept both full URLs (http/https) and development proxy path (/api)
+    if (!gatewayUrl.match(/^https?:\/\//) && gatewayUrl !== '/api') return { status: 'warning' as const, text: 'Invalid URL', description: 'Gateway URL format is invalid' }
     return { status: 'healthy' as const, text: 'Connected', description: gatewayUrl }
   })()
 
@@ -113,10 +116,14 @@ export default function ConfigurationOverview() {
     return { status: 'healthy' as const, text: `${credentials.length} variables`, description: 'Environment variables configured' }
   })()
 
-  // Models Status (placeholder - will be implemented)
+  // Models Status
   const modelsStatus = (() => {
-    // TODO: Calculate based on actual model configuration
-    return { status: 'warning' as 'healthy' | 'warning' | 'error', text: 'Not configured', description: 'Model routing needs to be set up' }
+    if (modelConnections.length === 0) return { status: 'warning' as const, text: 'No models', description: 'Add model connections for agent routing' }
+    const disabled = modelConnections.filter(m => !m.enabled)
+    const enabled = modelConnections.filter(m => m.enabled)
+    if (enabled.length === 0) return { status: 'error' as const, text: 'All disabled', description: 'Enable at least one model connection' }
+    if (disabled.length > 0) return { status: 'warning' as const, text: `${enabled.length} enabled`, description: `${disabled.length} models disabled` }
+    return { status: 'healthy' as const, text: `${modelConnections.length} connected`, description: 'All model connections enabled and ready' }
   })()
 
   // Registries Status
@@ -203,7 +210,7 @@ export default function ConfigurationOverview() {
       {/* Configuration Cards Grid */}
       <div className={styles.cardsGrid}>
         <ConfigCard
-          title="Connection"
+          title="Gateway Connection"
           icon={LinkIcon}
           status={connectionStatus.status}
           statusText={connectionStatus.text}
@@ -233,7 +240,7 @@ export default function ConfigurationOverview() {
         />
         
         <ConfigCard
-          title="Registries"
+          title="Registry Connections"
           icon={ServerIcon}
           status={registriesStatus.status}
           statusText={registriesStatus.text}

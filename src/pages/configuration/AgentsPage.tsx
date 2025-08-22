@@ -162,7 +162,7 @@ export default function AgentsPage() {
 
       <div className={styles.header}>
         <div>
-          <h1>Agent Configuration</h1>
+          <h1>Agents</h1>
           <p>Configure agent deployments using your registry connections</p>
         </div>
       </div>
