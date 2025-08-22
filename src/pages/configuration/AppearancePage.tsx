@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckIcon, ChevronLeftIcon } from '@heroicons/react/24/outline'
 import { useThemeStore } from '@stores/themeStore'
+import type { Theme, ScanlineFrequency } from '@types/common'
 import { isAudioEnabled, setAudioEnabled } from '@utils/audioFx'
 import { useAudio } from '@hooks/useAudio'
 import Card from '@components/common/Card'
@@ -25,7 +26,7 @@ export default function AppearancePage() {
 
   const handleThemeChange = (newTheme: string) => {
     playClickSound()
-    setTheme(newTheme as any) // TODO: Import proper Theme type
+    setTheme(newTheme as Theme)
   }
 
   const handleScanlineToggle = () => {
@@ -35,7 +36,7 @@ export default function AppearancePage() {
 
   const handleScanlineFrequencyChange = (frequency: string) => {
     playClickSound()
-    setScanlineFrequency(frequency as any) // TODO: Import proper ScanlineFrequency type
+    setScanlineFrequency(frequency as ScanlineFrequency)
   }
 
   const handleAudioToggle = () => {
