@@ -3,6 +3,11 @@
 # Ensures bulletproof compliance with all third-party software licenses
 # -----------------------------------------------------------------------------
 
+# Build args for version injection
+ARG VERSION=unknown
+ARG BUILD_TIMESTAMP=unknown
+ARG GIT_COMMIT=unknown
+
 # -----------------------------------------------------------------------------
 # Builder stage – install deps, build app, and collect ALL licenses
 # -----------------------------------------------------------------------------
@@ -98,6 +103,11 @@ RUN npm uninstall -g license-checker-rseidelsohn
 # -----------------------------------------------------------------------------
 FROM nginx:1.25-alpine
 
+# Re-declare args for final stage
+ARG VERSION=unknown
+ARG BUILD_TIMESTAMP=unknown
+ARG GIT_COMMIT=unknown
+
 WORKDIR /app
 
 # Copy built application
@@ -113,6 +123,9 @@ COPY LICENSE /app/LICENSE
 
 # Copy comprehensive license attribution artifacts
 COPY --from=builder /app/licenses /app/licenses
+
+# Create version file for runtime access
+RUN echo "{\"version\": \"${VERSION}\", \"build_timestamp\": \"${BUILD_TIMESTAMP}\", \"git_commit\": \"${GIT_COMMIT}\"}" > /usr/share/nginx/html/version.json
 
 # Generate final license summary for easy access
 RUN echo "# AgentSystems UI - Complete License Attribution\n" > /app/licenses/README.md && \
@@ -136,7 +149,10 @@ LABEL org.opencontainers.image.title="AgentSystems UI" \
       org.opencontainers.image.license.attribution="COMPREHENSIVE" \
       org.opencontainers.image.license.files="/app/licenses" \
       org.opencontainers.image.license.verification="/app/licenses/ATTRIBUTION_CHECKSUMS.txt" \
-      org.opencontainers.image.source="https://github.com/agentsystems/agentsystems-ui"
+      org.opencontainers.image.source="https://github.com/agentsystems/agentsystems-ui" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.created="${BUILD_TIMESTAMP}" \
+      org.opencontainers.image.revision="${GIT_COMMIT}"
 
 # Create non-root user for consistency
 RUN addgroup -g 1001 appuser && \
