@@ -12,12 +12,12 @@ const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Agents = lazy(() => import('@pages/Agents'))
 const Executions = lazy(() => import('@pages/Executions'))
 const Logs = lazy(() => import('@pages/Logs'))
-const Settings = lazy(() => import('@pages/Settings'))
 const ConfigurationOverview = lazy(() => import('@pages/ConfigurationOverview'))
 const CredentialsPage = lazy(() => import('@pages/configuration/CredentialsPage'))
 const RegistriesPage = lazy(() => import('@pages/configuration/RegistriesPage'))
 const AgentsPage = lazy(() => import('@pages/configuration/AgentsPage'))
 const ConnectionPage = lazy(() => import('@pages/configuration/ConnectionPage'))
+const AppearancePage = lazy(() => import('@pages/configuration/AppearancePage'))
 const AgentDetail = lazy(() => import('@pages/AgentDetail'))
 
 function App() {
@@ -99,9 +99,9 @@ function App() {
                 <ConnectionPage />
               </Suspense>
             } />
-            <Route path="settings" element={
+            <Route path="configuration/appearance" element={
               <Suspense fallback={<LoadingSpinner />}>
-                <Settings />
+                <AppearancePage />
               </Suspense>
             } />
           </Route>

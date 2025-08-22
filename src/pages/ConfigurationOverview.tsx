@@ -4,6 +4,7 @@ import { useConfigStore } from '@stores/configStore'
 import { useAuthStore } from '@stores/authStore'
 import { useThemeStore } from '@stores/themeStore'
 import { useAudio } from '@hooks/useAudio'
+import { useVersions } from '@hooks/useVersions'
 import Card from '@components/common/Card'
 import SystemStatusBanner from '@components/common/SystemStatusBanner'
 import {
@@ -16,7 +17,8 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline'
 import styles from './ConfigurationOverview.module.css'
 
@@ -81,6 +83,7 @@ export default function ConfigurationOverview() {
   
   const { gatewayUrl, token } = useAuthStore()
   const { theme } = useThemeStore()
+  const { ui_version, gateway_version, latest_versions, update_available } = useVersions()
 
   useEffect(() => {
     loadConfig()
@@ -283,6 +286,52 @@ export default function ConfigurationOverview() {
           <div className={`${styles.step} ${agentsStatus.status === 'healthy' ? styles.completed : ''}`}>
             <CheckCircleIcon className={styles.stepIcon} />
             <span>5. Deploy your agents</span>
+          </div>
+        </div>
+      </Card>
+
+      {/* About Section */}
+      <Card>
+        <h2>Platform Information</h2>
+        <div className={styles.steps}>
+          <div className={styles.step}>
+            <CheckCircleIcon className={styles.stepIcon} />
+            <div className={styles.stepContent}>
+              <span className={styles.stepTitle}>User Interface (UI)</span>
+              <div className={styles.versionInfo}>
+                <span className={styles.mono}>{ui_version}</span>
+                {(update_available.ui || ui_version === 'unknown') && (
+                  <ArrowPathIcon 
+                    className={styles.updateIcon}
+                    title={`Update available: ${latest_versions.ui}`}
+                    aria-label={`Update available to ${latest_versions.ui}`}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+          <div className={styles.step}>
+            <CheckCircleIcon className={styles.stepIcon} />
+            <div className={styles.stepContent}>
+              <span className={styles.stepTitle}>Agent Control Plane (ACP)</span>
+              <div className={styles.versionInfo}>
+                <span className={styles.mono}>{gateway_version}</span>
+                {(update_available.gateway || gateway_version === 'unknown') && (
+                  <ArrowPathIcon 
+                    className={styles.updateIcon}
+                    title={`Update available: ${latest_versions.gateway}`}
+                    aria-label={`Update available to ${latest_versions.gateway}`}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+          <div className={styles.step}>
+            <CheckCircleIcon className={styles.stepIcon} />
+            <div className={styles.stepContent}>
+              <span className={styles.stepTitle}>Gateway Endpoint</span>
+              <span className={styles.mono}>{gatewayUrl}</span>
+            </div>
           </div>
         </div>
       </Card>
