@@ -263,75 +263,45 @@ export default function ConfigurationOverview() {
         />
       </div>
 
-      {/* Quick Actions or Recent Activity could go here */}
-      <Card className={styles.recentActivity}>
-        <h3>Quick Setup Guide</h3>
-        <div className={styles.setupSteps}>
-          <div className={`${styles.step} ${connectionStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>1. Configure gateway connection</span>
-          </div>
-          <div className={`${styles.step} ${credentialsStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>2. Add authentication credentials</span>
-          </div>
-          <div className={`${styles.step} ${modelsStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>3. Configure model routing</span>
-          </div>
-          <div className={`${styles.step} ${registriesStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>4. Connect to registries</span>
-          </div>
-          <div className={`${styles.step} ${agentsStatus.status === 'healthy' ? styles.completed : ''}`}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <span>5. Deploy your agents</span>
-          </div>
-        </div>
-      </Card>
-
       {/* About Section */}
       <Card>
-        <h2>Platform Information</h2>
-        <div className={styles.steps}>
-          <div className={styles.step}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <div className={styles.stepContent}>
-              <span className={styles.stepTitle}>User Interface (UI)</span>
-              <div className={styles.versionInfo}>
-                <span className={styles.mono}>{ui_version}</span>
-                {(update_available.ui || ui_version === 'unknown') && (
-                  <ArrowPathIcon 
-                    className={styles.updateIcon}
-                    title={`Update available: ${latest_versions.ui}`}
-                    aria-label={`Update available to ${latest_versions.ui}`}
-                  />
-                )}
-              </div>
+        <h2>About</h2>
+        <div className={styles.about}>
+          <div className={styles.aboutRow}>
+            <span>User Interface (UI) Version</span>
+            <div className={styles.versionInfo}>
+              <span className={styles.mono}>{ui_version}</span>
+              {(update_available.ui || ui_version === 'unknown') && (
+                <ArrowPathIcon 
+                  className={styles.updateIcon}
+                  title={`Update available: ${latest_versions.ui}`}
+                  aria-label={`Update available to ${latest_versions.ui}`}
+                />
+              )}
             </div>
           </div>
-          <div className={styles.step}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <div className={styles.stepContent}>
-              <span className={styles.stepTitle}>Agent Control Plane (ACP)</span>
-              <div className={styles.versionInfo}>
-                <span className={styles.mono}>{gateway_version}</span>
-                {(update_available.gateway || gateway_version === 'unknown') && (
-                  <ArrowPathIcon 
-                    className={styles.updateIcon}
-                    title={`Update available: ${latest_versions.gateway}`}
-                    aria-label={`Update available to ${latest_versions.gateway}`}
-                  />
-                )}
-              </div>
+          <div className={styles.aboutRow}>
+            <span>Agent Control Plane (ACP) Version</span>
+            <div className={styles.versionInfo}>
+              <span className={styles.mono}>{gateway_version}</span>
+              {(update_available.gateway || gateway_version === 'unknown') && (
+                <ArrowPathIcon 
+                  className={styles.updateIcon}
+                  title={`Update available: ${latest_versions.gateway}`}
+                  aria-label={`Update available to ${latest_versions.gateway}`}
+                />
+              )}
             </div>
           </div>
-          <div className={styles.step}>
-            <CheckCircleIcon className={styles.stepIcon} />
-            <div className={styles.stepContent}>
-              <span className={styles.stepTitle}>Gateway Endpoint</span>
-              <span className={styles.mono}>{gatewayUrl}</span>
-            </div>
+          <div className={styles.aboutRow}>
+            <span>Gateway</span>
+            <span className={styles.mono}>{gatewayUrl}</span>
+          </div>
+          <div className={styles.aboutRow}>
+            <span>Documentation</span>
+            <a href="https://github.com/agentsystems/agentsystems" target="_blank" rel="noopener noreferrer">
+              GitHub
+            </a>
           </div>
         </div>
       </Card>

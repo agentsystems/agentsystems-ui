@@ -10,41 +10,18 @@
  */
 
 import { useState } from 'react'
-import { CheckIcon } from '@heroicons/react/24/outline'
+import { Link } from 'react-router-dom'
+import { CheckIcon, ChevronLeftIcon } from '@heroicons/react/24/outline'
 import { useThemeStore } from '@stores/themeStore'
 import { isAudioEnabled, setAudioEnabled } from '@utils/audioFx'
 import { useAudio } from '@hooks/useAudio'
-import { useToast } from '@hooks/useToast'
-import { rateLimiter } from '@utils/security'
 import Card from '@components/common/Card'
-import Toast from '@components/Toast'
 import styles from './AppearancePage.module.css'
 
 export default function AppearancePage() {
   const { theme, scanlineEnabled, scanlineFrequency, setTheme, setScanlineEnabled, setScanlineFrequency } = useThemeStore()
   const { playClickSound } = useAudio()
-  const { toasts, removeToast, showSuccess, showError } = useToast()
   const [audioEnabled, setAudioEnabledState] = useState(isAudioEnabled())
-
-  const handleSave = () => {
-    playClickSound()
-    
-    // Rate limiting to prevent spam
-    if (!rateLimiter.isAllowed('appearance-save', 5, 60000)) {
-      showError('Too many requests. Please wait before saving again.')
-      return
-    }
-
-    try {
-      // Audio setting
-      setAudioEnabled(audioEnabled)
-      
-      showSuccess('Appearance settings saved successfully!')
-    } catch (error) {
-      console.error('Failed to save appearance settings:', error)
-      showError('Failed to save appearance settings. Please try again.')
-    }
-  }
 
   const handleThemeChange = (newTheme: string) => {
     playClickSound()
@@ -63,17 +40,30 @@ export default function AppearancePage() {
 
   const handleAudioToggle = () => {
     playClickSound()
-    setAudioEnabledState(!audioEnabled)
+    const newValue = !audioEnabled
+    setAudioEnabledState(newValue)
+    setAudioEnabled(newValue) // Save immediately
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.appearancePage}>
+      {/* Breadcrumb Navigation */}
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <Link to="/configuration" className={styles.breadcrumbLink}>
+          <ChevronLeftIcon className={styles.backIcon} />
+          <span>Configuration</span>
+        </Link>
+        <span className={styles.breadcrumbSeparator}>/</span>
+        <span className={styles.breadcrumbCurrent}>Appearance</span>
+      </nav>
+
       <div className={styles.header}>
-        <h1>Appearance</h1>
-        <p>Customize the visual theme and audio preferences</p>
+        <div>
+          <h1>Appearance</h1>
+          <p>Customize the visual theme and audio preferences</p>
+        </div>
       </div>
 
-      <div className={styles.content}>
         <Card>
           <h2>Theme</h2>
           <div className={styles.themeGrid}>
@@ -102,32 +92,29 @@ export default function AppearancePage() {
           </div>
         </Card>
 
-        <Card>
-          <h2>Audio</h2>
-          <div className={styles.settingRow}>
-            <div className={styles.settingInfo}>
-              <label htmlFor="audio-toggle">Sound Effects</label>
-              <p className={styles.settingDescription}>
-                Enable audio feedback for interactions (cyber theme)
-              </p>
-            </div>
-            <button
-              id="audio-toggle"
-              type="button"
-              onClick={handleAudioToggle}
-              className={`${styles.toggle} ${audioEnabled ? styles.enabled : styles.disabled}`}
-              role="switch"
-              aria-checked={audioEnabled}
-              aria-label={`${audioEnabled ? 'Disable' : 'Enable'} sound effects`}
-            >
-              <span className={styles.toggleSlider}></span>
-            </button>
-          </div>
-        </Card>
-
         {theme === 'cyber' && (
-          <Card>
+          <Card className={styles.cyberCard}>
             <h2>Cyber Theme Options</h2>
+            
+            <div className={styles.settingRow}>
+              <div className={styles.settingInfo}>
+                <label htmlFor="audio-toggle">Sound Effects</label>
+                <p className={styles.settingDescription}>
+                  Enable audio feedback for interactions
+                </p>
+              </div>
+              <button
+                id="audio-toggle"
+                type="button"
+                onClick={handleAudioToggle}
+                className={`${styles.toggle} ${audioEnabled ? styles.enabled : styles.disabled}`}
+                role="switch"
+                aria-checked={audioEnabled}
+                aria-label={`${audioEnabled ? 'Disable' : 'Enable'} sound effects`}
+              >
+                <span className={styles.toggleSlider}></span>
+              </button>
+            </div>
             
             <div className={styles.settingRow}>
               <div className={styles.settingInfo}>
@@ -172,28 +159,6 @@ export default function AppearancePage() {
             )}
           </Card>
         )}
-
-        <div className={styles.actions}>
-          <button 
-            onClick={handleSave}
-            className={styles.saveButton}
-            type="button"
-            aria-label="Save appearance settings"
-          >
-            Save Changes
-          </button>
-        </div>
-      </div>
-
-      {/* Toast notifications */}
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          type={toast.type}
-          message={toast.message}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
     </div>
   )
 }
