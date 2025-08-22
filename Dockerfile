@@ -34,9 +34,8 @@ RUN npm run build
 # ---- COMPREHENSIVE LICENSE COLLECTION ----
 RUN mkdir -p /app/licenses/nodejs /app/licenses/alpine
 
-# 1) Capture ALL Node.js dependencies with license texts
+# 1) Capture ALL Node.js dependencies with license texts (production + dev for complete coverage)
 RUN license-checker-rseidelsohn \
-      --production \
       --json \
       --out /app/licenses/nodejs/THIRD_PARTY_LICENSES.json
 
