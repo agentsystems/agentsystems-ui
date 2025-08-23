@@ -7,43 +7,44 @@ import Card from '@components/common/Card'
 import Toast from '@components/Toast'
 import { ModelConnectionForm } from '../../types/config'
 import { 
-  getModelIds, 
-  getModelEntry, 
-  getProvidersForModel, 
-  getProviderModelId 
-} from '../../data/modelCatalog'
+  getAllModelIds,
+  getModel,
+  getProvidersForModel,
+  getProviderModelId,
+  getProvider,
+  AUTH_METHODS,
+  type AuthFieldConfig,
+  type ProviderConfig
+} from '../../data/catalog'
 import {
   CpuChipIcon,
   TrashIcon,
-  CheckIcon,
-  XMarkIcon,
   ChevronLeftIcon,
-  ExclamationTriangleIcon,
   PlusIcon
 } from '@heroicons/react/24/outline'
 import styles from './ModelConnectionsPage.module.css'
 
 const initialFormData: Omit<ModelConnectionForm, 'id'> = {
   model_id: '',
-  provider: 'anthropic',
+  provider: '',
   enabled: true,
   provider_model_id: '',
   endpoint: '',
-  authMethod: 'api_key',
+  authMethod: 'none',
   apiKeyEnv: '',
   awsAccessKeyEnv: '',
   awsSecretKeyEnv: '',
   awsRegion: 'us-east-1',
   azureEndpoint: '',
   azureDeployment: '',
-  azureApiVersion: '2023-12-01-preview'
+  azureApiVersion: '2024-02-01'
 }
 
 export default function ModelConnectionsPage() {
   const [formData, setFormData] = useState<Omit<ModelConnectionForm, 'id'>>(initialFormData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [availableProviders, setAvailableProviders] = useState<any[]>([])
+  const [availableProviders, setAvailableProviders] = useState<ProviderConfig[]>([])
   const formRef = useRef<HTMLDivElement>(null)
   
   const { 
@@ -51,101 +52,99 @@ export default function ModelConnectionsPage() {
     addModelConnection, 
     updateModelConnection, 
     deleteModelConnection,
+    getEnvVars,
     saveConfig,
-    isSaving,
-    hasUnsavedChanges
+    isSaving
   } = useConfigStore()
   
   const { playClickSound } = useAudio()
   const { toasts, removeToast, showSuccess, showError } = useToast()
   
   const modelConnections = getModelConnections()
+  const envVars = getEnvVars()
+  const availableEnvVars = envVars.map(env => env.key)
 
   // Update available providers when model_id changes
   const handleModelIdChange = (modelId: string) => {
     const providers = getProvidersForModel(modelId)
     setAvailableProviders(providers)
     
-    // Reset provider and provider_model_id when model changes
-    const defaultProvider = providers.length > 0 ? providers[0].id : 'anthropic'
-    const defaultProviderModelId = providers.length > 0 ? providers[0].provider_model_id : ''
-    
+    // Always reset provider to empty when model changes
     setFormData(prev => ({
       ...prev,
       model_id: modelId,
-      provider: defaultProvider as any,
-      provider_model_id: defaultProviderModelId,
-      // Reset auth method based on first provider's supported methods
-      authMethod: providers.length > 0 && providers[0].auth_methods.includes('api_key') ? 'api_key' : 'none' as any
+      provider: '', // Always reset to "Select a provider..."
+      provider_model_id: '',
+      authMethod: 'none',
+      apiKeyEnv: '',
+      awsAccessKeyEnv: '',
+      awsSecretKeyEnv: '',
+      azureEndpoint: '',
+      azureDeployment: '',
+      azureApiKeyEnv: ''
     }))
     
     // Clear any existing errors
     setErrors(prev => ({ ...prev, model_id: '', provider: '' }))
   }
 
-  // Update provider_model_id when provider changes
+  // Update provider_model_id and auth method when provider changes
   const handleProviderChange = (providerId: string) => {
     const modelId = formData.model_id
     const providerModelId = getProviderModelId(modelId, providerId) || ''
-    const provider = availableProviders.find(p => p.id === providerId)
+    const provider = getProvider(providerId)
     
-    setFormData(prev => ({
-      ...prev,
-      provider: providerId as any,
-      provider_model_id: providerModelId,
-      // Update auth method to first supported method for this provider
-      authMethod: provider && provider.auth_methods.includes('api_key') ? 'api_key' : 
-                  provider && provider.auth_methods.includes('aws_credentials') ? 'aws_credentials' :
-                  provider && provider.auth_methods.includes('azure_ad') ? 'azure_ad' : 'none' as any
-    }))
+    if (provider) {
+      setFormData(prev => ({
+        ...prev,
+        provider: providerId,
+        provider_model_id: providerModelId,
+        authMethod: provider.defaultAuthMethod,
+        // Clear auth fields when switching providers
+        apiKeyEnv: '',
+        awsAccessKeyEnv: '',
+        awsSecretKeyEnv: '',
+        azureEndpoint: '',
+        azureDeployment: '',
+        azureApiKeyEnv: ''
+      }))
+    }
   }
 
   const validateForm = (data: Omit<ModelConnectionForm, 'id'>): Record<string, string> => {
     const newErrors: Record<string, string> = {}
     
     if (!data.model_id.trim()) {
-      newErrors.model_id = 'Model ID is required'
-    } else if (!/^[a-zA-Z0-9._-]+$/.test(data.model_id)) {
-      newErrors.model_id = 'Model ID can only contain letters, numbers, dots, hyphens, and underscores'
+      newErrors.model_id = 'Model is required'
     }
     
     if (!data.provider) {
       newErrors.provider = 'Provider is required'
     }
     
+    // Get provider config for validation
+    const provider = getProvider(data.provider)
+    
     // Provider-specific validation
-    if (data.provider === 'custom' || data.provider === 'ollama') {
-      if (!data.endpoint.trim()) {
-        newErrors.endpoint = 'Endpoint is required for custom/Ollama providers'
+    if (provider?.requiresEndpoint) {
+      if (!data.endpoint?.trim()) {
+        newErrors.endpoint = `Endpoint is required for ${provider.displayName}`
       } else if (!data.endpoint.match(/^https?:\/\//)) {
         newErrors.endpoint = 'Endpoint must be a valid HTTP/HTTPS URL'
       }
     }
     
-    // Auth method specific validation
-    if (data.authMethod === 'api_key' && !data.apiKeyEnv.trim()) {
-      newErrors.apiKeyEnv = 'API Key environment variable is required'
-    }
-    
-    if (data.authMethod === 'aws_credentials') {
-      if (!data.awsAccessKeyEnv.trim()) {
-        newErrors.awsAccessKeyEnv = 'AWS Access Key environment variable is required'
-      }
-      if (!data.awsSecretKeyEnv.trim()) {
-        newErrors.awsSecretKeyEnv = 'AWS Secret Key environment variable is required'
-      }
-      if (!data.awsRegion.trim()) {
-        newErrors.awsRegion = 'AWS Region is required'
-      }
-    }
-    
-    if (data.authMethod === 'azure_ad') {
-      if (!data.azureEndpoint.trim()) {
-        newErrors.azureEndpoint = 'Azure endpoint is required'
-      }
-      if (!data.azureDeployment.trim()) {
-        newErrors.azureDeployment = 'Azure deployment name is required'
-      }
+    // Auth method specific validation using catalog
+    const authConfig = AUTH_METHODS[data.authMethod]
+    if (authConfig) {
+      authConfig.fields.forEach(field => {
+        if (field.required) {
+          const value = (data as any)[field.name]
+          if (!value || (typeof value === 'string' && !value.trim())) {
+            newErrors[field.name] = `${field.label} is required`
+          }
+        }
+      })
     }
 
     return newErrors
@@ -166,7 +165,7 @@ export default function ModelConnectionsPage() {
     try {
       if (editingId) {
         updateModelConnection(editingId, formData)
-        showSuccess('Model connection updated successfully')
+        showSuccess(`Updated ${formData.model_id}`)
       } else {
         // Check for duplicate model_id
         if (modelConnections.some(conn => conn.model_id === formData.model_id)) {
@@ -176,13 +175,14 @@ export default function ModelConnectionsPage() {
         }
         
         addModelConnection(formData)
-        showSuccess('Model connection added successfully')
+        showSuccess(`Added ${formData.model_id}`)
       }
       
       // Reset form
       setFormData(initialFormData)
       setEditingId(null)
       setErrors({})
+      setAvailableProviders([])
       
       // Save to file
       await saveConfig()
@@ -213,39 +213,44 @@ export default function ModelConnectionsPage() {
       awsRegion: connection.awsRegion,
       azureEndpoint: connection.azureEndpoint,
       azureDeployment: connection.azureDeployment,
-      azureApiVersion: connection.azureApiVersion
+      azureApiVersion: connection.azureApiVersion,
+      azureApiKeyEnv: connection.azureApiKeyEnv
     })
     setEditingId(connection.id)
     setErrors({})
     
     // Scroll to form
-    formRef.current?.scrollIntoView({ behavior: 'smooth' })
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const handleDelete = async (id: string) => {
     playClickSound()
     
-    if (!confirm('Are you sure you want to delete this model connection? This action cannot be undone.')) {
-      return
-    }
+    const connection = modelConnections.find(c => c.id === id)
+    if (!connection) return
     
-    try {
-      deleteModelConnection(id)
-      showSuccess('Model connection deleted successfully')
-      
-      // Clear form if we were editing this connection
-      if (editingId === id) {
-        setFormData(initialFormData)
-        setEditingId(null)
-        setErrors({})
+    if (confirm(`Are you sure you want to delete ${connection.model_id}?`)) {
+      try {
+        deleteModelConnection(id)
+        showSuccess(`Deleted ${connection.model_id}`)
+        
+        // Clear form if we were editing this connection
+        if (editingId === id) {
+          setFormData(initialFormData)
+          setEditingId(null)
+          setErrors({})
+          setAvailableProviders([])
+        }
+        
+        // Save to file
+        await saveConfig()
+        
+      } catch (error) {
+        showError('Failed to delete model connection')
+        console.error('Error deleting model connection:', error)
       }
-      
-      // Save to file
-      await saveConfig()
-      
-    } catch (error) {
-      showError('Failed to delete model connection')
-      console.error('Error deleting model connection:', error)
     }
   }
 
@@ -254,124 +259,81 @@ export default function ModelConnectionsPage() {
     setFormData(initialFormData)
     setEditingId(null)
     setErrors({})
+    setAvailableProviders([])
   }
 
+  const handleFieldChange = (fieldName: string, value: string) => {
+    setFormData(prev => ({ ...prev, [fieldName]: value }))
+    if (errors[fieldName]) {
+      setErrors(prev => ({ ...prev, [fieldName]: '' }))
+    }
+  }
 
-  const renderAuthFields = () => {
-    switch (formData.authMethod) {
-      case 'api_key':
+  const renderAuthField = (field: AuthFieldConfig) => {
+    const value = (formData as any)[field.name] || ''
+    const error = errors[field.name]
+    
+    switch (field.type) {
+      case 'env_select':
         return (
-          <div className={styles.inputGroup}>
-            <label htmlFor="apiKeyEnv" className={styles.required}>API Key Environment Variable</label>
-            <input
-              id="apiKeyEnv"
-              type="text"
-              value={formData.apiKeyEnv}
-              onChange={(e) => setFormData(prev => ({ ...prev, apiKeyEnv: e.target.value }))}
-              placeholder="ANTHROPIC_API_KEY"
-              className={errors.apiKeyEnv ? styles.error : ''}
-            />
-            {errors.apiKeyEnv && <span className={styles.errorText}>{errors.apiKeyEnv}</span>}
-            <small className={styles.help}>
-              Name of the environment variable containing the API key
-            </small>
+          <div key={field.name} className={styles.formGroup}>
+            <label htmlFor={field.name}>{field.label}</label>
+            <select
+              id={field.name}
+              value={value}
+              onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              className={`${styles.input} ${error ? styles.inputError : ''}`}
+              required={field.required}
+            >
+              <option value="">{field.placeholder || 'Select...'}</option>
+              {availableEnvVars.map(key => (
+                <option key={key} value={key}>{key}</option>
+              ))}
+            </select>
+            {error && <span className={styles.errorText}>{error}</span>}
+            {field.helpText && <span className={styles.hint}>{field.helpText}</span>}
           </div>
         )
         
-      case 'aws_credentials':
+      case 'select':
         return (
-          <>
-            <div className={styles.inputGroup}>
-              <label htmlFor="awsAccessKeyEnv" className={styles.required}>AWS Access Key Environment Variable</label>
-              <input
-                id="awsAccessKeyEnv"
-                type="text"
-                value={formData.awsAccessKeyEnv}
-                onChange={(e) => setFormData(prev => ({ ...prev, awsAccessKeyEnv: e.target.value }))}
-                placeholder="AWS_ACCESS_KEY_ID"
-                className={errors.awsAccessKeyEnv ? styles.error : ''}
-              />
-              {errors.awsAccessKeyEnv && <span className={styles.errorText}>{errors.awsAccessKeyEnv}</span>}
-            </div>
-            
-            <div className={styles.inputGroup}>
-              <label htmlFor="awsSecretKeyEnv" className={styles.required}>AWS Secret Key Environment Variable</label>
-              <input
-                id="awsSecretKeyEnv"
-                type="text"
-                value={formData.awsSecretKeyEnv}
-                onChange={(e) => setFormData(prev => ({ ...prev, awsSecretKeyEnv: e.target.value }))}
-                placeholder="AWS_SECRET_ACCESS_KEY"
-                className={errors.awsSecretKeyEnv ? styles.error : ''}
-              />
-              {errors.awsSecretKeyEnv && <span className={styles.errorText}>{errors.awsSecretKeyEnv}</span>}
-            </div>
-            
-            <div className={styles.inputGroup}>
-              <label htmlFor="awsRegion" className={styles.required}>AWS Region</label>
-              <select
-                id="awsRegion"
-                value={formData.awsRegion}
-                onChange={(e) => setFormData(prev => ({ ...prev, awsRegion: e.target.value }))}
-                className={errors.awsRegion ? styles.error : ''}
-              >
-                <option value="us-east-1">US East (N. Virginia)</option>
-                <option value="us-west-2">US West (Oregon)</option>
-                <option value="eu-west-1">Europe (Ireland)</option>
-                <option value="ap-southeast-2">Asia Pacific (Sydney)</option>
-              </select>
-              {errors.awsRegion && <span className={styles.errorText}>{errors.awsRegion}</span>}
-            </div>
-          </>
+          <div key={field.name} className={styles.formGroup}>
+            <label htmlFor={field.name}>{field.label}</label>
+            <select
+              id={field.name}
+              value={value}
+              onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              className={`${styles.input} ${error ? styles.inputError : ''}`}
+              required={field.required}
+            >
+              <option value="">Select...</option>
+              {field.options?.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {error && <span className={styles.errorText}>{error}</span>}
+            {field.helpText && <span className={styles.hint}>{field.helpText}</span>}
+          </div>
         )
         
-      case 'azure_ad':
+      case 'url':
+      case 'text':
         return (
-          <>
-            <div className={styles.inputGroup}>
-              <label htmlFor="azureEndpoint" className={styles.required}>Azure OpenAI Endpoint</label>
-              <input
-                id="azureEndpoint"
-                type="url"
-                value={formData.azureEndpoint}
-                onChange={(e) => setFormData(prev => ({ ...prev, azureEndpoint: e.target.value }))}
-                placeholder="https://your-resource.openai.azure.com"
-                className={errors.azureEndpoint ? styles.error : ''}
-              />
-              {errors.azureEndpoint && <span className={styles.errorText}>{errors.azureEndpoint}</span>}
-            </div>
-            
-            <div className={styles.inputGroup}>
-              <label htmlFor="azureDeployment" className={styles.required}>Azure Deployment Name</label>
-              <input
-                id="azureDeployment"
-                type="text"
-                value={formData.azureDeployment}
-                onChange={(e) => setFormData(prev => ({ ...prev, azureDeployment: e.target.value }))}
-                placeholder="gpt-4o-deployment"
-                className={errors.azureDeployment ? styles.error : ''}
-              />
-              {errors.azureDeployment && <span className={styles.errorText}>{errors.azureDeployment}</span>}
-            </div>
-            
-            <div className={styles.inputGroup}>
-              <label htmlFor="azureApiVersion">API Version</label>
-              <input
-                id="azureApiVersion"
-                type="text"
-                value={formData.azureApiVersion}
-                onChange={(e) => setFormData(prev => ({ ...prev, azureApiVersion: e.target.value }))}
-                placeholder="2023-12-01-preview"
-              />
-            </div>
-          </>
-        )
-        
-      case 'none':
-        return (
-          <div className={styles.infoBox}>
-            <ExclamationTriangleIcon className={styles.infoIcon} />
-            <p>No authentication will be used for this model connection.</p>
+          <div key={field.name} className={styles.formGroup}>
+            <label htmlFor={field.name}>{field.label}</label>
+            <input
+              id={field.name}
+              type={field.type === 'url' ? 'url' : 'text'}
+              value={value}
+              onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              placeholder={field.placeholder}
+              className={`${styles.input} ${error ? styles.inputError : ''}`}
+              required={field.required}
+            />
+            {error && <span className={styles.errorText}>{error}</span>}
+            {field.helpText && <span className={styles.hint}>{field.helpText}</span>}
           </div>
         )
         
@@ -380,14 +342,76 @@ export default function ModelConnectionsPage() {
     }
   }
 
+  const renderAuthFields = () => {
+    if (!formData.provider || formData.authMethod === 'none') {
+      if (formData.authMethod === 'none') {
+        return (
+          <div className={styles.hint}>
+            No authentication required for this connection.
+          </div>
+        )
+      }
+      return null
+    }
+    
+    const authConfig = AUTH_METHODS[formData.authMethod]
+    if (!authConfig) return null
+    
+    // Group fields into rows for better layout
+    const fields = authConfig.fields
+    const rows: AuthFieldConfig[][] = []
+    
+    // Special handling for AWS credentials - put access and secret key side by side
+    if (formData.authMethod === 'aws_credentials') {
+      rows.push(fields.slice(0, 2)) // Access key and secret key
+      fields.slice(2).forEach(field => rows.push([field])) // Region on its own
+    } 
+    // Special handling for Azure - endpoint and deployment side by side
+    else if (formData.authMethod === 'azure_ad') {
+      const apiKeyField = fields.find(f => f.name === 'azureApiKeyEnv')
+      const endpointField = fields.find(f => f.name === 'azureEndpoint')
+      const deploymentField = fields.find(f => f.name === 'azureDeployment')
+      const versionField = fields.find(f => f.name === 'azureApiVersion')
+      
+      if (apiKeyField) rows.push([apiKeyField])
+      if (endpointField && deploymentField) rows.push([endpointField, deploymentField])
+      if (versionField) rows.push([versionField])
+    }
+    // Default: each field on its own row
+    else {
+      fields.forEach(field => rows.push([field]))
+    }
+    
+    return (
+      <>
+        {authConfig.helpText && (
+          <div className={styles.hint}>{authConfig.helpText}</div>
+        )}
+        {rows.map((row, idx) => (
+          row.length > 1 ? (
+            <div key={idx} className={styles.formRow}>
+              {row.map(field => renderAuthField(field))}
+            </div>
+          ) : (
+            <div key={idx}>
+              {row.map(field => renderAuthField(field))}
+            </div>
+          )
+        ))}
+      </>
+    )
+  }
+
   return (
-    <div className={styles.modelConnectionsPage}>
-      {/* Breadcrumb */}
-      <nav className={styles.breadcrumb}>
+    <div className={styles.credentialsPage}>
+      {/* Breadcrumb Navigation */}
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/configuration" className={styles.breadcrumbLink}>
-          <ChevronLeftIcon className={styles.breadcrumbIcon} />
-          Configuration
+          <ChevronLeftIcon className={styles.backIcon} />
+          <span>Configuration</span>
         </Link>
+        <span className={styles.breadcrumbSeparator}>/</span>
+        <span className={styles.breadcrumbCurrent}>Model Connections</span>
       </nav>
 
       <div className={styles.header}>
@@ -397,225 +421,103 @@ export default function ModelConnectionsPage() {
         </div>
       </div>
 
-      {/* Existing Model Connections */}
-      {modelConnections.length > 0 && (
-        <Card>
-          <h2>Model Connections</h2>
-          <div className={styles.connectionsList}>
-            {modelConnections.map((connection) => (
-              <div key={connection.id} className={styles.connectionItem}>
-                <div className={styles.connectionInfo}>
-                  <div className={styles.connectionHeader}>
-                    <CpuChipIcon className={styles.connectionIcon} />
-                    <div>
-                      <h3>{connection.model_id}</h3>
-                      <div className={styles.connectionMeta}>
-                        <span className={styles.provider}>{connection.provider}</span>
-                        {connection.provider_model_id && (
-                          <span className={styles.providerModel}>→ {connection.provider_model_id}</span>
-                        )}
-                        {connection.endpoint && (
-                          <span className={styles.endpoint}>{connection.endpoint}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.connectionAuth}>
-                    <span className={styles.authMethod}>{connection.authMethod}</span>
-                    {connection.authMethod === 'api_key' && connection.apiKeyEnv && (
-                      <span className={styles.envVar}>{connection.apiKeyEnv}</span>
-                    )}
-                    {connection.authMethod === 'aws_credentials' && (
-                      <span className={styles.envVar}>
-                        {connection.awsAccessKeyEnv} / {connection.awsRegion}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                
-                <div className={styles.connectionActions}>
-                  <div className={styles.connectionStatus}>
-                    {connection.enabled ? (
-                      <CheckIcon className={styles.statusEnabled} title="Enabled" />
-                    ) : (
-                      <XMarkIcon className={styles.statusDisabled} title="Disabled" />
-                    )}
-                  </div>
-                  
-                  <button
-                    onClick={() => handleEdit(connection)}
-                    className={styles.editButton}
-                    aria-label={`Edit ${connection.model_id}`}
-                  >
-                    Edit
-                  </button>
-                  
-                  <button
-                    onClick={() => handleDelete(connection.id)}
-                    className={styles.deleteButton}
-                    aria-label={`Delete ${connection.model_id}`}
-                  >
-                    <TrashIcon className={styles.deleteIcon} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
       {/* Add/Edit Form */}
-      <Card ref={formRef}>
-        <h2>
-          <PlusIcon className={styles.formIcon} />
-          {editingId ? 'Edit Model Connection' : 'Add Model Connection'}
-        </h2>
-        
+      <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.inputGroup}>
-            <label htmlFor="model_id" className={styles.required}>Model</label>
-            <select
-              id="model_id"
-              value={formData.model_id}
-              onChange={(e) => handleModelIdChange(e.target.value)}
-              className={errors.model_id ? styles.error : ''}
-            >
-              <option value="">Select a model...</option>
-              {getModelIds().map(modelId => {
-                const entry = getModelEntry(modelId)
-                return (
-                  <option key={modelId} value={modelId}>
-                    {entry?.display_name} ({modelId})
+          <h2>
+            <CpuChipIcon />
+            {editingId ? `Edit ${formData.model_id || 'Connection'}` : 'Add New Model Connection'}
+          </h2>
+          
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="model">Model</label>
+              <select
+                id="model"
+                value={formData.model_id}
+                onChange={(e) => handleModelIdChange(e.target.value)}
+                className={`${styles.input} ${errors.model_id ? styles.inputError : ''}`}
+                disabled={!!editingId}
+                required
+              >
+                <option value="">Select a model...</option>
+                {getAllModelIds().map(modelId => {
+                  const model = getModel(modelId)
+                  return (
+                    <option key={modelId} value={modelId}>
+                      {model?.displayName || modelId}
+                    </option>
+                  )
+                })}
+              </select>
+              {errors.model_id && (
+                <span className={styles.errorText}>{errors.model_id}</span>
+              )}
+              <span className={styles.hint}>
+                Choose the model to configure
+              </span>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="provider">Provider</label>
+              <select
+                id="provider"
+                value={formData.provider}
+                onChange={(e) => handleProviderChange(e.target.value)}
+                className={`${styles.input} ${errors.provider ? styles.inputError : ''}`}
+                disabled={!formData.model_id}
+                required
+              >
+                <option value="">Select a provider...</option>
+                {availableProviders.map(provider => (
+                  <option key={provider.id} value={provider.id}>
+                    {provider.displayName}
                   </option>
-                )
-              })}
-            </select>
-            {errors.model_id && <span className={styles.errorText}>{errors.model_id}</span>}
-            <small className={styles.help}>
-              Standardized model identifier used by agents
-            </small>
+                ))}
+              </select>
+              {errors.provider && (
+                <span className={styles.errorText}>{errors.provider}</span>
+              )}
+              <span className={styles.hint}>
+                {availableProviders.length === 0 && formData.model_id ? 
+                  'Select a model first' : 
+                  'Provider to use for this model'}
+              </span>
+            </div>
           </div>
 
-          {formData.model_id && (
-            <>
-              {/* Show model description */}
-              {getModelEntry(formData.model_id) && (
-                <div className={styles.modelInfo}>
-                  <p className={styles.modelDescription}>
-                    {getModelEntry(formData.model_id)?.description}
-                  </p>
-                  <span className={styles.modelCategory}>
-                    Category: {getModelEntry(formData.model_id)?.category}
-                  </span>
-                </div>
+          {/* Show endpoint field for providers that require it */}
+          {formData.provider && getProvider(formData.provider)?.requiresEndpoint && (
+            <div className={styles.formGroup}>
+              <label htmlFor="endpoint">Endpoint URL</label>
+              <input
+                id="endpoint"
+                type="url"
+                value={formData.endpoint}
+                onChange={(e) => handleFieldChange('endpoint', e.target.value)}
+                placeholder={getProvider(formData.provider)?.endpointPlaceholder || 'https://your-api.com/v1'}
+                className={`${styles.input} ${errors.endpoint ? styles.inputError : ''}`}
+                required
+              />
+              {errors.endpoint && (
+                <span className={styles.errorText}>{errors.endpoint}</span>
               )}
-
-              <div className={styles.inputGroup}>
-                <label htmlFor="provider" className={styles.required}>Provider</label>
-                <select
-                  id="provider"
-                  value={formData.provider}
-                  onChange={(e) => handleProviderChange(e.target.value)}
-                  className={errors.provider ? styles.error : ''}
-                >
-                  <option value="">Select a provider...</option>
-                  {availableProviders.map(provider => (
-                    <option key={provider.id} value={provider.id}>
-                      {provider.name} {provider.type ? `(${provider.type})` : ''}
-                    </option>
-                  ))}
-                </select>
-                {errors.provider && <span className={styles.errorText}>{errors.provider}</span>}
-                <small className={styles.help}>
-                  Choose which provider to use for this model
-                </small>
-              </div>
-
-              {formData.provider && formData.provider_model_id && (
-                <div className={styles.inputGroup}>
-                  <label htmlFor="provider_model_id">Provider Model ID</label>
-                  <input
-                    id="provider_model_id"
-                    type="text"
-                    value={formData.provider_model_id}
-                    readOnly
-                    className={styles.readonly}
-                  />
-                  <small className={styles.help}>
-                    Provider-specific model identifier (auto-populated from catalog)
-                  </small>
-                </div>
-              )}
-            </>
-          )}
-
-          {formData.provider && (
-            <>
-              {/* Show endpoint field for custom/ollama providers */}
-              {(formData.provider === 'custom' || formData.provider === 'ollama') && (
-                <div className={styles.inputGroup}>
-                  <label htmlFor="endpoint" className={styles.required}>Endpoint URL</label>
-                  <input
-                    id="endpoint"
-                    type="url"
-                    value={formData.endpoint}
-                    onChange={(e) => setFormData(prev => ({ ...prev, endpoint: e.target.value }))}
-                    placeholder={formData.provider === 'ollama' ? 'http://localhost:11434' : 'https://your-api.com/v1'}
-                    className={errors.endpoint ? styles.error : ''}
-                  />
-                  {errors.endpoint && <span className={styles.errorText}>{errors.endpoint}</span>}
-                </div>
-              )}
-
-              <div className={styles.inputGroup}>
-                <label htmlFor="authMethod" className={styles.required}>Authentication Method</label>
-                <select
-                  id="authMethod"
-                  value={formData.authMethod}
-                  onChange={(e) => setFormData(prev => ({ ...prev, authMethod: e.target.value as any }))}
-                >
-                  {availableProviders.find(p => p.id === formData.provider)?.auth_methods.map(method => {
-                    const label = method === 'api_key' ? 'API Key' :
-                                  method === 'aws_credentials' ? 'AWS Credentials' :
-                                  method === 'azure_ad' ? 'Azure AD' :
-                                  method === 'none' ? 'None' : method
-                    return <option key={method} value={method}>{label}</option>
-                  })}
-                </select>
-                <small className={styles.help}>
-                  Available authentication methods for selected provider
-                </small>
-              </div>
-            </>
+            </div>
           )}
 
           {renderAuthFields()}
 
-          <div className={styles.checkboxGroup}>
-            <label className={styles.checkbox}>
-              <input
-                type="checkbox"
-                checked={formData.enabled}
-                onChange={(e) => setFormData(prev => ({ ...prev, enabled: e.target.checked }))}
-              />
-              <span className={styles.checkboxLabel}>Enable this model connection</span>
-            </label>
-          </div>
-
           <div className={styles.formActions}>
-            <button
-              type="submit"
-              className={styles.saveButton}
-              disabled={isSaving}
-            >
-              {editingId ? 'Update Connection' : 'Add Connection'}
+            <button type="submit" className="btn btn-lg btn-bright" disabled={isSaving}>
+              <PlusIcon />
+              {editingId ? 'Update' : 'Add'} Connection
             </button>
             
             {editingId && (
-              <button
-                type="button"
+              <button 
+                type="button" 
                 onClick={handleCancel}
-                className={styles.cancelButton}
+                className="btn btn-lg btn-subtle"
               >
                 Cancel
               </button>
@@ -624,19 +526,87 @@ export default function ModelConnectionsPage() {
         </form>
       </Card>
 
-      {hasUnsavedChanges && (
-        <div className={styles.unsavedWarning}>
-          <ExclamationTriangleIcon className={styles.warningIcon} />
-          You have unsaved changes. They will be saved automatically when you add/update connections.
+      {/* Model Connections List */}
+      <Card>
+        <div className={styles.listHeader}>
+          <h2>Current Model Connections ({modelConnections.length})</h2>
         </div>
-      )}
 
-      {/* Toast messages */}
-      {toasts.map((toast) => (
+        {modelConnections.length === 0 ? (
+          <div className={styles.emptyState}>
+            <CpuChipIcon />
+            <h3>No model connections</h3>
+            <p>Add your first model connection using the form above</p>
+          </div>
+        ) : (
+          <div className={styles.list}>
+            {modelConnections.map((connection) => {
+              const model = getModel(connection.model_id)
+              const provider = getProvider(connection.provider)
+              const authMethod = AUTH_METHODS[connection.authMethod]
+              
+              return (
+                <div key={connection.id} className={styles.listItem}>
+                  <div className={styles.itemHeader}>
+                    <div className={styles.itemName}>
+                      <CpuChipIcon />
+                      <span className={styles.keyName}>
+                        {model?.displayName || connection.model_id}
+                      </span>
+                      <span className={styles.referencedBadge}>
+                        {provider?.displayName || connection.provider}
+                      </span>
+                    </div>
+                    
+                    <div className={styles.itemActions}>
+                      <button
+                        onClick={() => handleEdit(connection)}
+                        className="btn btn-sm btn-ghost"
+                        title="Edit connection"
+                      >
+                        Edit
+                      </button>
+                      
+                      <button
+                        onClick={() => handleDelete(connection.id)}
+                        className={`btn btn-sm btn-ghost`}
+                        title="Delete connection"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.itemValue}>
+                    <code className={styles.value}>
+                      {authMethod?.displayName || 'Unknown'}: 
+                      {connection.authMethod === 'api_key' && connection.apiKeyEnv ? 
+                        ` ${connection.apiKeyEnv}` :
+                       connection.authMethod === 'aws_credentials' ? 
+                        ` ${connection.awsAccessKeyEnv} (${connection.awsRegion})` :
+                       connection.authMethod === 'azure_ad' ? 
+                        ` ${connection.azureDeployment}` :
+                       connection.authMethod === 'none' ? 
+                        ' No authentication' : 
+                        ' Configuration required'}
+                      {connection.endpoint && ` → ${connection.endpoint}`}
+                    </code>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </Card>
+
+      {/* Toast notifications */}
+      {toasts.map((toast, index) => (
         <Toast
           key={toast.id}
           message={toast.message}
           type={toast.type}
+          duration={toast.duration}
+          index={index}
           onClose={() => removeToast(toast.id)}
         />
       ))}

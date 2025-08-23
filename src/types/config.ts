@@ -106,6 +106,7 @@ export interface ModelConnectionForm {
   azureEndpoint: string
   azureDeployment: string
   azureApiVersion: string
+  azureApiKeyEnv: string // Azure API key environment variable
 }
 
 export interface AgentConfigForm extends Omit<AgentConfig, 'egress_allowlist' | 'overrides'> {
