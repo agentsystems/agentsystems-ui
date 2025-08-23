@@ -5,29 +5,29 @@
 export type AuthMethod = 'none' | 'basic' | 'token'
 
 // Model Connection Types for LLM routing
-export type ModelProvider = 'anthropic' | 'openai' | 'aws_bedrock' | 'ollama' | 'azure_openai' | 'custom'
+export type ModelProvider = 'anthropic' | 'aws_bedrock' | 'gcp_vertex'
 
 export interface ModelAuth {
-  method: 'api_key' | 'aws_credentials' | 'azure_ad' | 'none'
+  method: 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'none'
   api_key_env?: string
   // AWS Bedrock
   aws_access_key_env?: string  
   aws_secret_key_env?: string
   aws_region?: string
-  // Azure OpenAI
-  azure_endpoint?: string
-  azure_deployment?: string
-  azure_api_version?: string
+  // GCP Vertex AI
+  gcp_service_account_key_env?: string
+  gcp_project_id?: string
+  gcp_region?: string
   // Custom headers for self-hosted
   custom_headers?: Record<string, string>
 }
 
 export interface ModelConnection {
   model_id: string // Standardized ID like 'claude-sonnet-4', 'gpt-4o', 'llama-3.1-8b'
-  provider: ModelProvider
+  hosting_provider: ModelProvider
   enabled: boolean
-  // Provider-specific model identifier (automatically populated from catalog)
-  provider_model_id: string // e.g., 'claude-sonnet-4-20250514', 'anthropic.claude-sonnet-4-20250514-v1:0'
+  // Hosting provider-specific model identifier (automatically populated from catalog)
+  hosting_provider_model_id: string // e.g., 'claude-sonnet-4-20250514', 'anthropic.claude-sonnet-4-20250514-v1:0'
   endpoint?: string // For custom/self-hosted models or Ollama
   auth: ModelAuth
   // No config section - agent controls temperature, max_tokens, etc.
@@ -94,19 +94,18 @@ export interface RegistryConnectionForm {
 export interface ModelConnectionForm {
   id: string
   model_id: string
-  provider: ModelProvider
+  hosting_provider: ModelProvider
   enabled: boolean
-  provider_model_id: string // Auto-populated from catalog
+  hosting_provider_model_id: string // Auto-populated from catalog
   endpoint: string // For custom/ollama
-  authMethod: 'api_key' | 'aws_credentials' | 'azure_ad' | 'none'
+  authMethod: 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'none'
   apiKeyEnv: string
   awsAccessKeyEnv: string
   awsSecretKeyEnv: string
   awsRegion: string
-  azureEndpoint: string
-  azureDeployment: string
-  azureApiVersion: string
-  azureApiKeyEnv: string // Azure API key environment variable
+  gcpServiceAccountKeyEnv: string
+  gcpProjectId: string
+  gcpRegion: string
 }
 
 export interface AgentConfigForm extends Omit<AgentConfig, 'egress_allowlist' | 'overrides'> {

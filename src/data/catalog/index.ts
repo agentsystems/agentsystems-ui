@@ -1,33 +1,33 @@
 /**
  * Main entry point for the model catalog system
- * Combines models, providers, and mappings into a unified API
+ * Combines models, hosting providers, and mappings into a unified API
  */
 
 export * from './models'
 export * from './providers'
 export * from './modelProviderMappings'
 
-import { MODELS, ModelDefinition, getModel } from './models'
-import { PROVIDERS, ProviderConfig, getProvider } from './providers'
+import { MODELS, ModelDefinition, getModel, ModelVendor } from './models'
+import { HOSTING_PROVIDERS, HostingProviderConfig, getHostingProvider } from './providers'
 import { 
-  MODEL_PROVIDER_MAPPINGS,
-  getProvidersForModel as getMappedProviders,
-  getProviderModelId as getMappedModelId,
-  getModelsForProvider as getMappedModels
+  MODEL_HOSTING_MAPPINGS,
+  getHostingProvidersForModel as getMappedProviders,
+  getHostingProviderModelId as getMappedModelId,
+  getModelsForHostingProvider as getMappedModels
 } from './modelProviderMappings'
 
-// Combined provider info with available models
-export interface ProviderWithModels {
-  provider: ProviderConfig
+// Combined hosting provider info with available models
+export interface HostingProviderWithModels {
+  hostingProvider: HostingProviderConfig
   availableModels: ModelDefinition[]
 }
 
-// Model with available providers
-export interface ModelWithProviders {
+// Model with available hosting providers
+export interface ModelWithHostingProviders {
   model: ModelDefinition
-  providers: Array<{
-    provider: ProviderConfig
-    providerModelId: string
+  hostingProviders: Array<{
+    hostingProvider: HostingProviderConfig
+    hostingProviderModelId: string
     notes?: string
   }>
 }
@@ -40,67 +40,67 @@ export function getAllModelIds(): string[] {
 }
 
 /**
- * Get all provider IDs in the catalog
+ * Get all hosting provider IDs in the catalog
  */
-export function getAllProviderIds(): string[] {
-  return Object.keys(PROVIDERS).sort()
+export function getAllHostingProviderIds(): string[] {
+  return Object.keys(HOSTING_PROVIDERS).sort()
 }
 
 /**
- * Get model with all its available providers
+ * Get model with all its available hosting providers
  */
-export function getModelWithProviders(modelId: string): ModelWithProviders | undefined {
+export function getModelWithHostingProviders(modelId: string): ModelWithHostingProviders | undefined {
   const model = getModel(modelId)
   if (!model) return undefined
   
-  const providerIds = getMappedProviders(modelId)
-  const providers = providerIds.map(providerId => {
-    const provider = getProvider(providerId)
-    const providerModelId = getMappedModelId(modelId, providerId)
-    const mapping = MODEL_PROVIDER_MAPPINGS.find(
-      m => m.modelId === modelId && m.providerId === providerId
+  const hostingProviderIds = getMappedProviders(modelId)
+  const hostingProviders = hostingProviderIds.map(hostingProviderId => {
+    const hostingProvider = getHostingProvider(hostingProviderId)
+    const hostingProviderModelId = getMappedModelId(modelId, hostingProviderId)
+    const mapping = MODEL_HOSTING_MAPPINGS.find(
+      m => m.modelId === modelId && m.hostingProviderId === hostingProviderId
     )
     
     return {
-      provider: provider!,
-      providerModelId: providerModelId!,
+      hostingProvider: hostingProvider!,
+      hostingProviderModelId: hostingProviderModelId!,
       notes: mapping?.notes
     }
-  }).filter(p => p.provider)
+  }).filter(p => p.hostingProvider)
   
-  return { model, providers }
+  return { model, hostingProviders }
 }
 
 /**
- * Get provider with all its available models
+ * Get hosting provider with all its available models
  */
-export function getProviderWithModels(providerId: string): ProviderWithModels | undefined {
-  const provider = getProvider(providerId)
-  if (!provider) return undefined
+export function getHostingProviderWithModels(hostingProviderId: string): HostingProviderWithModels | undefined {
+  const hostingProvider = getHostingProvider(hostingProviderId)
+  if (!hostingProvider) return undefined
   
-  const modelIds = getMappedModels(providerId)
+  const modelIds = getMappedModels(hostingProviderId)
   const availableModels = modelIds
     .map(modelId => getModel(modelId))
     .filter((model): model is ModelDefinition => model !== undefined)
   
-  return { provider, availableModels }
+  return { hostingProvider, availableModels }
 }
 
 /**
- * Get providers for a model with full provider configs
+ * Get hosting providers for a model with full hosting provider configs
  */
-export function getProvidersForModel(modelId: string): ProviderConfig[] {
-  const providerIds = getMappedProviders(modelId)
-  return providerIds
-    .map(id => getProvider(id))
-    .filter((provider): provider is ProviderConfig => provider !== undefined)
+export function getHostingProvidersForModel(modelId: string): HostingProviderConfig[] {
+  const hostingProviderIds = getMappedProviders(modelId)
+  return hostingProviderIds
+    .map(id => getHostingProvider(id))
+    .filter((provider): provider is HostingProviderConfig => provider !== undefined)
 }
 
 /**
- * Get the provider-specific model ID
+ * Get the hosting provider-specific model ID
  */
-export function getProviderModelId(modelId: string, providerId: string): string | undefined {
-  return getMappedModelId(modelId, providerId)
+export function getHostingProviderModelId(modelId: string, hostingProviderId: string): string | undefined {
+  return getMappedModelId(modelId, hostingProviderId)
 }
 
 /**
@@ -132,12 +132,28 @@ export function getModelsGroupedByCategory(): Record<string, ModelDefinition[]> 
 }
 
 /**
- * Get all providers grouped by their primary auth method
+ * Get all models grouped by vendor
  */
-export function getProvidersGroupedByAuth(): Record<string, ProviderConfig[]> {
-  const grouped: Record<string, ProviderConfig[]> = {}
+export function getModelsGroupedByVendor(): Record<ModelVendor, ModelDefinition[]> {
+  const grouped: Partial<Record<ModelVendor, ModelDefinition[]>> = {}
   
-  Object.values(PROVIDERS).forEach(provider => {
+  Object.values(MODELS).forEach(model => {
+    if (!grouped[model.modelVendor]) {
+      grouped[model.modelVendor] = []
+    }
+    grouped[model.modelVendor]!.push(model)
+  })
+  
+  return grouped as Record<ModelVendor, ModelDefinition[]>
+}
+
+/**
+ * Get all hosting providers grouped by their primary auth method
+ */
+export function getHostingProvidersGroupedByAuth(): Record<string, HostingProviderConfig[]> {
+  const grouped: Record<string, HostingProviderConfig[]> = {}
+  
+  Object.values(HOSTING_PROVIDERS).forEach(provider => {
     const authMethod = provider.defaultAuthMethod
     if (!grouped[authMethod]) {
       grouped[authMethod] = []
@@ -153,25 +169,33 @@ export function getProvidersGroupedByAuth(): Record<string, ProviderConfig[]> {
  */
 export function validateModelConnection(
   modelId: string, 
-  providerId: string
+  hostingProviderId: string
 ): { valid: boolean; error?: string } {
   const model = getModel(modelId)
   if (!model) {
     return { valid: false, error: `Model ${modelId} not found` }
   }
   
-  const provider = getProvider(providerId)
-  if (!provider) {
-    return { valid: false, error: `Provider ${providerId} not found` }
+  const hostingProvider = getHostingProvider(hostingProviderId)
+  if (!hostingProvider) {
+    return { valid: false, error: `Hosting provider ${hostingProviderId} not found` }
   }
   
-  const providerModelId = getMappedModelId(modelId, providerId)
-  if (!providerModelId) {
+  const hostingProviderModelId = getMappedModelId(modelId, hostingProviderId)
+  if (!hostingProviderModelId) {
     return { 
       valid: false, 
-      error: `Model ${model.displayName} is not available on ${provider.displayName}` 
+      error: `Model ${model.displayName} is not available on ${hostingProvider.displayName}` 
     }
   }
   
   return { valid: true }
+}
+
+// Re-export with clearer names for compatibility
+export {
+  getHostingProvidersForModel as getProvidersForModel,
+  getHostingProviderModelId as getProviderModelId,
+  getHostingProvider as getProvider,
+  type HostingProviderConfig as ProviderConfig
 }

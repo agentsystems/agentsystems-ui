@@ -7,14 +7,14 @@ import Card from '@components/common/Card'
 import Toast from '@components/Toast'
 import { ModelConnectionForm } from '../../types/config'
 import { 
-  getAllModelIds,
   getModel,
-  getProvidersForModel,
-  getProviderModelId,
-  getProvider,
+  getModelsGroupedByVendor,
+  getHostingProvidersForModel,
+  getHostingProviderModelId,
+  getHostingProvider,
   AUTH_METHODS,
   type AuthFieldConfig,
-  type ProviderConfig
+  type HostingProviderConfig
 } from '../../data/catalog'
 import {
   CpuChipIcon,
@@ -26,25 +26,25 @@ import styles from './ModelConnectionsPage.module.css'
 
 const initialFormData: Omit<ModelConnectionForm, 'id'> = {
   model_id: '',
-  provider: '',
+  hosting_provider: '' as any,
   enabled: true,
-  provider_model_id: '',
+  hosting_provider_model_id: '',
   endpoint: '',
   authMethod: 'none',
   apiKeyEnv: '',
   awsAccessKeyEnv: '',
   awsSecretKeyEnv: '',
   awsRegion: 'us-east-1',
-  azureEndpoint: '',
-  azureDeployment: '',
-  azureApiVersion: '2024-02-01'
+  gcpServiceAccountKeyEnv: '',
+  gcpProjectId: '',
+  gcpRegion: 'us-central1'
 }
 
 export default function ModelConnectionsPage() {
   const [formData, setFormData] = useState<Omit<ModelConnectionForm, 'id'>>(initialFormData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [availableProviders, setAvailableProviders] = useState<ProviderConfig[]>([])
+  const [availableHostingProviders, setAvailableHostingProviders] = useState<HostingProviderConfig[]>([])
   const formRef = useRef<HTMLDivElement>(null)
   
   const { 
@@ -66,47 +66,47 @@ export default function ModelConnectionsPage() {
 
   // Update available providers when model_id changes
   const handleModelIdChange = (modelId: string) => {
-    const providers = getProvidersForModel(modelId)
-    setAvailableProviders(providers)
+    const hostingProviders = getHostingProvidersForModel(modelId)
+    setAvailableHostingProviders(hostingProviders)
     
     // Always reset provider to empty when model changes
     setFormData(prev => ({
       ...prev,
       model_id: modelId,
-      provider: '', // Always reset to "Select a provider..."
-      provider_model_id: '',
+      hosting_provider: '' as any, // Always reset to "Select a hosting provider..."
+      hosting_provider_model_id: '',
       authMethod: 'none',
       apiKeyEnv: '',
       awsAccessKeyEnv: '',
       awsSecretKeyEnv: '',
-      azureEndpoint: '',
-      azureDeployment: '',
-      azureApiKeyEnv: ''
+      gcpServiceAccountKeyEnv: '',
+      gcpProjectId: '',
+      gcpRegion: 'us-central1'
     }))
     
     // Clear any existing errors
-    setErrors(prev => ({ ...prev, model_id: '', provider: '' }))
+    setErrors(prev => ({ ...prev, model_id: '', hosting_provider: '' }))
   }
 
   // Update provider_model_id and auth method when provider changes
-  const handleProviderChange = (providerId: string) => {
+  const handleHostingProviderChange = (hostingProviderId: string) => {
     const modelId = formData.model_id
-    const providerModelId = getProviderModelId(modelId, providerId) || ''
-    const provider = getProvider(providerId)
+    const hostingProviderModelId = getHostingProviderModelId(modelId, hostingProviderId) || ''
+    const hostingProvider = getHostingProvider(hostingProviderId)
     
-    if (provider) {
+    if (hostingProvider) {
       setFormData(prev => ({
         ...prev,
-        provider: providerId,
-        provider_model_id: providerModelId,
-        authMethod: provider.defaultAuthMethod,
+        hosting_provider: hostingProviderId as any,
+        hosting_provider_model_id: hostingProviderModelId,
+        authMethod: hostingProvider.defaultAuthMethod,
         // Clear auth fields when switching providers
         apiKeyEnv: '',
         awsAccessKeyEnv: '',
         awsSecretKeyEnv: '',
-        azureEndpoint: '',
-        azureDeployment: '',
-        azureApiKeyEnv: ''
+        gcpServiceAccountKeyEnv: '',
+        gcpProjectId: '',
+        gcpRegion: 'us-central1'
       }))
     }
   }
@@ -118,17 +118,17 @@ export default function ModelConnectionsPage() {
       newErrors.model_id = 'Model is required'
     }
     
-    if (!data.provider) {
-      newErrors.provider = 'Provider is required'
+    if (!data.hosting_provider) {
+      newErrors.hosting_provider = 'Hosting provider is required'
     }
     
-    // Get provider config for validation
-    const provider = getProvider(data.provider)
+    // Get hosting provider config for validation
+    const hostingProvider = getHostingProvider(data.hosting_provider)
     
-    // Provider-specific validation
-    if (provider?.requiresEndpoint) {
+    // Hosting provider-specific validation
+    if (hostingProvider?.requiresEndpoint) {
       if (!data.endpoint?.trim()) {
-        newErrors.endpoint = `Endpoint is required for ${provider.displayName}`
+        newErrors.endpoint = `Endpoint is required for ${hostingProvider.displayName}`
       } else if (!data.endpoint.match(/^https?:\/\//)) {
         newErrors.endpoint = 'Endpoint must be a valid HTTP/HTTPS URL'
       }
@@ -182,7 +182,7 @@ export default function ModelConnectionsPage() {
       setFormData(initialFormData)
       setEditingId(null)
       setErrors({})
-      setAvailableProviders([])
+      setAvailableHostingProviders([])
       
       // Save to file
       await saveConfig()
@@ -196,25 +196,24 @@ export default function ModelConnectionsPage() {
   const handleEdit = (connection: ModelConnectionForm) => {
     playClickSound()
     
-    // Set available providers for the model
-    const providers = getProvidersForModel(connection.model_id)
-    setAvailableProviders(providers)
+    // Set available hosting providers for the model
+    const hostingProviders = getHostingProvidersForModel(connection.model_id)
+    setAvailableHostingProviders(hostingProviders)
     
     setFormData({
       model_id: connection.model_id,
-      provider: connection.provider,
+      hosting_provider: connection.hosting_provider,
       enabled: connection.enabled,
-      provider_model_id: connection.provider_model_id,
+      hosting_provider_model_id: connection.hosting_provider_model_id,
       endpoint: connection.endpoint,
       authMethod: connection.authMethod,
       apiKeyEnv: connection.apiKeyEnv,
       awsAccessKeyEnv: connection.awsAccessKeyEnv,
       awsSecretKeyEnv: connection.awsSecretKeyEnv,
       awsRegion: connection.awsRegion,
-      azureEndpoint: connection.azureEndpoint,
-      azureDeployment: connection.azureDeployment,
-      azureApiVersion: connection.azureApiVersion,
-      azureApiKeyEnv: connection.azureApiKeyEnv
+      gcpServiceAccountKeyEnv: connection.gcpServiceAccountKeyEnv,
+      gcpProjectId: connection.gcpProjectId,
+      gcpRegion: connection.gcpRegion
     })
     setEditingId(connection.id)
     setErrors({})
@@ -241,7 +240,7 @@ export default function ModelConnectionsPage() {
           setFormData(initialFormData)
           setEditingId(null)
           setErrors({})
-          setAvailableProviders([])
+          setAvailableHostingProviders([])
         }
         
         // Save to file
@@ -259,7 +258,7 @@ export default function ModelConnectionsPage() {
     setFormData(initialFormData)
     setEditingId(null)
     setErrors({})
-    setAvailableProviders([])
+    setAvailableHostingProviders([])
   }
 
   const handleFieldChange = (fieldName: string, value: string) => {
@@ -343,7 +342,7 @@ export default function ModelConnectionsPage() {
   }
 
   const renderAuthFields = () => {
-    if (!formData.provider || formData.authMethod === 'none') {
+    if (!formData.hosting_provider || formData.authMethod === 'none') {
       if (formData.authMethod === 'none') {
         return (
           <div className={styles.hint}>
@@ -366,16 +365,14 @@ export default function ModelConnectionsPage() {
       rows.push(fields.slice(0, 2)) // Access key and secret key
       fields.slice(2).forEach(field => rows.push([field])) // Region on its own
     } 
-    // Special handling for Azure - endpoint and deployment side by side
-    else if (formData.authMethod === 'azure_ad') {
-      const apiKeyField = fields.find(f => f.name === 'azureApiKeyEnv')
-      const endpointField = fields.find(f => f.name === 'azureEndpoint')
-      const deploymentField = fields.find(f => f.name === 'azureDeployment')
-      const versionField = fields.find(f => f.name === 'azureApiVersion')
+    // Special handling for GCP OAuth - service account key on its own, project ID and region side by side
+    else if (formData.authMethod === 'gcp_oauth') {
+      const serviceAccountField = fields.find(f => f.name === 'gcpServiceAccountKeyEnv')
+      const projectIdField = fields.find(f => f.name === 'gcpProjectId')
+      const regionField = fields.find(f => f.name === 'gcpRegion')
       
-      if (apiKeyField) rows.push([apiKeyField])
-      if (endpointField && deploymentField) rows.push([endpointField, deploymentField])
-      if (versionField) rows.push([versionField])
+      if (serviceAccountField) rows.push([serviceAccountField])
+      if (projectIdField && regionField) rows.push([projectIdField, regionField])
     }
     // Default: each field on its own row
     else {
@@ -441,14 +438,15 @@ export default function ModelConnectionsPage() {
                 required
               >
                 <option value="">Select a model...</option>
-                {getAllModelIds().map(modelId => {
-                  const model = getModel(modelId)
-                  return (
-                    <option key={modelId} value={modelId}>
-                      {model?.displayName || modelId}
-                    </option>
-                  )
-                })}
+                {Object.entries(getModelsGroupedByVendor()).map(([vendor, models]) => (
+                  <optgroup key={vendor} label={vendor.charAt(0).toUpperCase() + vendor.slice(1)}>
+                    {models.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.displayName}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
               {errors.model_id && (
                 <span className={styles.errorText}>{errors.model_id}</span>
@@ -459,35 +457,35 @@ export default function ModelConnectionsPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="provider">Provider</label>
+              <label htmlFor="hosting-provider">Hosting Provider</label>
               <select
-                id="provider"
-                value={formData.provider}
-                onChange={(e) => handleProviderChange(e.target.value)}
-                className={`${styles.input} ${errors.provider ? styles.inputError : ''}`}
+                id="hosting-provider"
+                value={formData.hosting_provider}
+                onChange={(e) => handleHostingProviderChange(e.target.value)}
+                className={`${styles.input} ${errors.hosting_provider ? styles.inputError : ''}`}
                 disabled={!formData.model_id}
                 required
               >
-                <option value="">Select a provider...</option>
-                {availableProviders.map(provider => (
-                  <option key={provider.id} value={provider.id}>
-                    {provider.displayName}
+                <option value="">Select a hosting provider...</option>
+                {availableHostingProviders.map(hostingProvider => (
+                  <option key={hostingProvider.id} value={hostingProvider.id}>
+                    {hostingProvider.displayName}
                   </option>
                 ))}
               </select>
-              {errors.provider && (
-                <span className={styles.errorText}>{errors.provider}</span>
+              {errors.hosting_provider && (
+                <span className={styles.errorText}>{errors.hosting_provider}</span>
               )}
               <span className={styles.hint}>
-                {availableProviders.length === 0 && formData.model_id ? 
+                {availableHostingProviders.length === 0 && formData.model_id ? 
                   'Select a model first' : 
-                  'Provider to use for this model'}
+                  'Hosting provider to use for this model'}
               </span>
             </div>
           </div>
 
-          {/* Show endpoint field for providers that require it */}
-          {formData.provider && getProvider(formData.provider)?.requiresEndpoint && (
+          {/* Show endpoint field for hosting providers that require it */}
+          {formData.hosting_provider && getHostingProvider(formData.hosting_provider)?.requiresEndpoint && (
             <div className={styles.formGroup}>
               <label htmlFor="endpoint">Endpoint URL</label>
               <input
@@ -495,7 +493,7 @@ export default function ModelConnectionsPage() {
                 type="url"
                 value={formData.endpoint}
                 onChange={(e) => handleFieldChange('endpoint', e.target.value)}
-                placeholder={getProvider(formData.provider)?.endpointPlaceholder || 'https://your-api.com/v1'}
+                placeholder={getHostingProvider(formData.hosting_provider)?.endpointPlaceholder || 'https://your-api.com/v1'}
                 className={`${styles.input} ${errors.endpoint ? styles.inputError : ''}`}
                 required
               />
@@ -542,7 +540,7 @@ export default function ModelConnectionsPage() {
           <div className={styles.list}>
             {modelConnections.map((connection) => {
               const model = getModel(connection.model_id)
-              const provider = getProvider(connection.provider)
+              const hostingProvider = getHostingProvider(connection.hosting_provider)
               const authMethod = AUTH_METHODS[connection.authMethod]
               
               return (
@@ -554,7 +552,7 @@ export default function ModelConnectionsPage() {
                         {model?.displayName || connection.model_id}
                       </span>
                       <span className={styles.referencedBadge}>
-                        {provider?.displayName || connection.provider}
+                        {hostingProvider?.displayName || connection.hosting_provider}
                       </span>
                     </div>
                     
@@ -584,8 +582,8 @@ export default function ModelConnectionsPage() {
                         ` ${connection.apiKeyEnv}` :
                        connection.authMethod === 'aws_credentials' ? 
                         ` ${connection.awsAccessKeyEnv} (${connection.awsRegion})` :
-                       connection.authMethod === 'azure_ad' ? 
-                        ` ${connection.azureDeployment}` :
+                       connection.authMethod === 'gcp_oauth' ? 
+                        ` ${connection.gcpProjectId} (${connection.gcpRegion})` :
                        connection.authMethod === 'none' ? 
                         ' No authentication' : 
                         ' Configuration required'}

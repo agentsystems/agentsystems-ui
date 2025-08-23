@@ -256,9 +256,9 @@ export const configUtils = {
    */
   modelFormToConfig: (form: import('@/types/config').ModelConnectionForm): import('@/types/config').ModelConnection => ({
     model_id: form.model_id,
-    provider: form.provider,
+    hosting_provider: form.hosting_provider,
     enabled: form.enabled,
-    provider_model_id: form.provider_model_id,
+    hosting_provider_model_id: form.hosting_provider_model_id,
     ...(form.endpoint && {
       endpoint: form.endpoint
     }),
@@ -272,10 +272,10 @@ export const configUtils = {
         aws_secret_key_env: form.awsSecretKeyEnv,
         aws_region: form.awsRegion
       }),
-      ...(form.authMethod === 'azure_ad' && {
-        azure_endpoint: form.azureEndpoint,
-        azure_deployment: form.azureDeployment,
-        azure_api_version: form.azureApiVersion
+      ...(form.authMethod === 'gcp_oauth' && {
+        gcp_service_account_key_env: form.gcpServiceAccountKeyEnv,
+        gcp_project_id: form.gcpProjectId,
+        gcp_region: form.gcpRegion
       })
     }
   }),
@@ -286,17 +286,17 @@ export const configUtils = {
   configToModelForm: (id: string, config: import('@/types/config').ModelConnection): import('@/types/config').ModelConnectionForm => ({
     id,
     model_id: config.model_id,
-    provider: config.provider,
+    hosting_provider: config.hosting_provider,
     enabled: config.enabled,
-    provider_model_id: config.provider_model_id,
+    hosting_provider_model_id: config.hosting_provider_model_id,
     endpoint: config.endpoint || '',
     authMethod: config.auth.method,
     apiKeyEnv: config.auth.api_key_env || '',
     awsAccessKeyEnv: config.auth.aws_access_key_env || '',
     awsSecretKeyEnv: config.auth.aws_secret_key_env || '',
-    awsRegion: config.auth.aws_region || '',
-    azureEndpoint: config.auth.azure_endpoint || '',
-    azureDeployment: config.auth.azure_deployment || '',
-    azureApiVersion: config.auth.azure_api_version || ''
+    awsRegion: config.auth.aws_region || 'us-east-1',
+    gcpServiceAccountKeyEnv: config.auth.gcp_service_account_key_env || '',
+    gcpProjectId: config.auth.gcp_project_id || '',
+    gcpRegion: config.auth.gcp_region || ''
   })
 }
