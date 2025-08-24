@@ -199,15 +199,15 @@ export const useConfigStore = create<ConfigState>()(
       },
 
       addModelConnection: (model) => {
-        const id = model.model_id.toLowerCase().replace(/[^a-z0-9]/g, '_')
-        const connection = configUtils.modelFormToConfig({ ...model, id })
+        // Use model_id directly as the key to preserve standard naming (claude-sonnet-4)
+        const connection = configUtils.modelFormToConfig({ ...model, id: model.model_id })
         
         set((state) => ({
           config: {
             ...state.config,
             model_connections: {
               ...state.config.model_connections,
-              [id]: connection
+              [model.model_id]: connection
             }
           },
           hasUnsavedChanges: true
