@@ -9,6 +9,7 @@ import ModelSelector from '@components/configuration/ModelSelector'
 import HostingProviderSelector from '@components/configuration/HostingProviderSelector'
 import AuthFieldsRenderer from '@components/configuration/AuthFieldsRenderer'
 import ModelConnectionsList from '@components/configuration/ModelConnectionsList'
+import { ModelConnectionForm } from '../../types/config'
 import {
   ChevronLeftIcon,
   PlusIcon,
@@ -51,7 +52,7 @@ export default function ModelConnectionsPage() {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const onEdit = (connection: any) => {
+  const onEdit = (connection: ModelConnectionForm) => {
     handleEdit(connection, scrollToForm)
   }
 

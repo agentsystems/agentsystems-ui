@@ -5,7 +5,7 @@ import styles from './AuthFieldsRenderer.module.css'
 interface AuthFieldsRendererProps {
   authFields: AuthFieldConfig[]
   authConfig: AuthMethodConfig | null
-  formData: Record<string, any>
+  formData: Record<string, string | boolean>
   errors: Record<string, string>
   onFieldChange: (fieldName: string, value: string) => void
 }
@@ -22,7 +22,7 @@ export default function AuthFieldsRenderer({
   const availableEnvVars = envVars.map(env => env.key)
 
   const renderAuthField = (field: AuthFieldConfig) => {
-    const value = formData[field.name] || ''
+    const value = String(formData[field.name] || '')
     const error = errors[field.name]
     
     switch (field.type) {

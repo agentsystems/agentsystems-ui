@@ -5,10 +5,10 @@
 export type AuthMethod = 'none' | 'basic' | 'token'
 
 // Model Connection Types for LLM routing
-export type ModelProvider = 'anthropic' | 'aws_bedrock' | 'gcp_vertex'
+export type ModelProvider = 'anthropic' | 'aws_bedrock' | 'gcp_vertex' | 'openai' | 'azure_openai' | 'huggingface'
 
 export interface ModelAuth {
-  method: 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'none'
+  method: 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'azure_ad' | 'none'
   api_key_env?: string
   // AWS Bedrock
   aws_access_key_env?: string  
@@ -18,6 +18,9 @@ export interface ModelAuth {
   gcp_service_account_key_env?: string
   gcp_project_id?: string
   gcp_region?: string
+  // Azure AD
+  azure_api_key_env?: string
+  azure_endpoint?: string
   // Custom headers for self-hosted
   custom_headers?: Record<string, string>
 }
@@ -98,7 +101,7 @@ export interface ModelConnectionForm {
   enabled: boolean
   hosting_provider_model_id: string // Auto-populated from catalog
   endpoint: string // For custom/ollama
-  authMethod: 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'none'
+  authMethod: 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'azure_ad' | 'none'
   apiKeyEnv: string
   awsAccessKeyEnv: string
   awsSecretKeyEnv: string

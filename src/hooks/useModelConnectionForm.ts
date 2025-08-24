@@ -2,18 +2,17 @@ import { useState, useCallback } from 'react'
 import { useConfigStore } from '@stores/configStore'
 import { useToast } from '@hooks/useToast'
 import { 
-  getModel,
   getHostingProvidersForModel,
   getHostingProviderModelId,
   AUTH_METHODS,
   type HostingProviderSupport,
   type AuthFieldConfig
 } from '../data/modelCatalogUnified'
-import { ModelConnectionForm } from '../types/config'
+import { ModelConnectionForm, type ModelProvider } from '../types/config'
 
 const initialFormData: Omit<ModelConnectionForm, 'id'> = {
   model_id: '',
-  hosting_provider: '' as any,
+  hosting_provider: '' as ModelProvider,
   enabled: true,
   hosting_provider_model_id: '',
   endpoint: '',
@@ -75,7 +74,7 @@ export function useModelConnectionForm() {
     if (authConfig) {
       authConfig.fields.forEach(field => {
         if (field.required) {
-          const value = (data as any)[field.name]
+          const value = (data as Record<string, string | boolean>)[field.name]
           if (!value || (typeof value === 'string' && !value.trim())) {
             newErrors[field.name] = `${field.label} is required`
           }
@@ -94,7 +93,7 @@ export function useModelConnectionForm() {
     setFormData(prev => ({
       ...prev,
       model_id: modelId,
-      hosting_provider: '' as any,
+      hosting_provider: '' as ModelProvider,
       hosting_provider_model_id: '',
       authMethod: 'none',
       apiKeyEnv: '',
@@ -112,14 +111,14 @@ export function useModelConnectionForm() {
 
   const handleHostingProviderChange = useCallback((hostingProviderId: string) => {
     const modelId = formData.model_id
-    const hostingProviderModelId = getHostingProviderModelId(modelId, hostingProviderId as any) || ''
+    const hostingProviderModelId = getHostingProviderModelId(modelId, hostingProviderId as ModelProvider) || ''
     const hostingProviders = getHostingProvidersForModel(modelId)
     const hostingProvider = hostingProviders.find(p => p.id === hostingProviderId)
     
     if (hostingProvider) {
       setFormData(prev => ({
         ...prev,
-        hosting_provider: hostingProviderId as any,
+        hosting_provider: hostingProviderId as ModelProvider,
         hosting_provider_model_id: hostingProviderModelId,
         authMethod: hostingProvider.authMethod,
         endpoint: hostingProvider.requiresEndpoint ? hostingProvider.endpointPlaceholder || '' : '',

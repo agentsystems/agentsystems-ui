@@ -144,19 +144,11 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
     displayName: 'Azure AD',
     fields: [
       {
-        name: 'azureApiKeyEnv',
+        name: 'apiKeyEnv',
         label: 'Azure API Key Environment Variable',
         type: 'env_select',
         placeholder: 'Select Azure API key variable...',
         required: true
-      },
-      {
-        name: 'azureEndpoint',
-        label: 'Azure Endpoint',
-        type: 'url',
-        placeholder: 'https://your-resource.openai.azure.com/',
-        required: true,
-        helpText: 'Your Azure OpenAI resource endpoint'
       }
     ]
   },
@@ -570,14 +562,4 @@ export function searchModels(query: string): ModelDefinition[] {
   )
 }
 
-// Export types for external use
-export type { 
-  ModelDefinition, 
-  HostingProviderSupport, 
-  AuthMethodConfig, 
-  AuthFieldConfig,
-  ModelVendor,
-  ModelCategory,
-  HostingProviderId,
-  AuthMethodType
-}
+// Types are already exported above, no need to re-export
