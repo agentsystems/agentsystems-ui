@@ -4,6 +4,38 @@
 
 export type AuthMethod = 'none' | 'basic' | 'token'
 
+// Model Connection Types for LLM routing
+export type ModelProvider = 'anthropic' | 'aws_bedrock' | 'gcp_vertex' | 'openai' | 'azure_openai' | 'huggingface'
+
+export interface ModelAuth {
+  method: 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'azure_ad' | 'none'
+  api_key_env?: string
+  // AWS Bedrock
+  aws_access_key_env?: string  
+  aws_secret_key_env?: string
+  aws_region?: string
+  // GCP Vertex AI
+  gcp_service_account_key_env?: string
+  gcp_project_id?: string
+  gcp_region?: string
+  // Azure AD
+  azure_api_key_env?: string
+  azure_endpoint?: string
+  // Custom headers for self-hosted
+  custom_headers?: Record<string, string>
+}
+
+export interface ModelConnection {
+  model_id: string // Standardized ID like 'claude-sonnet-4', 'gpt-4o', 'llama-3.1-8b'
+  hosting_provider: ModelProvider
+  enabled: boolean
+  // Hosting provider-specific model identifier (automatically populated from catalog)
+  hosting_provider_model_id: string // e.g., 'claude-sonnet-4-20250514', 'anthropic.claude-sonnet-4-20250514-v1:0'
+  endpoint?: string // For custom/self-hosted models or Ollama
+  auth: ModelAuth
+  // No config section - agent controls temperature, max_tokens, etc.
+}
+
 export interface RegistryAuth {
   method: AuthMethod
   username_env?: string
@@ -22,6 +54,7 @@ export interface AgentConfig {
   repo: string
   tag: string
   registry_connection: string
+  model_dependencies?: string[] // List of required model_ids (from agent.yaml)
   egress_allowlist?: string[]
   labels?: Record<string, string>
   artifact_permissions?: {
@@ -38,6 +71,7 @@ export interface AgentConfig {
 export interface AgentSystemsConfig {
   config_version: number
   registry_connections: Record<string, RegistryConnection>
+  model_connections?: Record<string, ModelConnection>
   agents: AgentConfig[]
 }
 
@@ -58,6 +92,23 @@ export interface RegistryConnectionForm {
   usernameEnv?: string
   passwordEnv?: string
   tokenEnv?: string
+}
+
+export interface ModelConnectionForm {
+  id: string
+  model_id: string
+  hosting_provider: ModelProvider
+  enabled: boolean
+  hosting_provider_model_id: string // Auto-populated from catalog
+  endpoint: string // For custom/ollama
+  authMethod: 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'azure_ad' | 'none'
+  apiKeyEnv: string
+  awsAccessKeyEnv: string
+  awsSecretKeyEnv: string
+  awsRegion: string
+  gcpServiceAccountKeyEnv: string
+  gcpProjectId: string
+  gcpRegion: string
 }
 
 export interface AgentConfigForm extends Omit<AgentConfig, 'egress_allowlist' | 'overrides'> {

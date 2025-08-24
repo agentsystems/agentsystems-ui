@@ -18,6 +18,7 @@ const RegistriesPage = lazy(() => import('@pages/configuration/RegistriesPage'))
 const AgentsPage = lazy(() => import('@pages/configuration/AgentsPage'))
 const ConnectionPage = lazy(() => import('@pages/configuration/ConnectionPage'))
 const AppearancePage = lazy(() => import('@pages/configuration/AppearancePage'))
+const ModelConnectionsPage = lazy(() => import('@pages/configuration/ModelConnectionsPage'))
 const AgentDetail = lazy(() => import('@pages/AgentDetail'))
 
 function App() {
@@ -102,6 +103,11 @@ function App() {
             <Route path="configuration/appearance" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <AppearancePage />
+              </Suspense>
+            } />
+            <Route path="configuration/models" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ModelConnectionsPage />
               </Suspense>
             } />
           </Route>

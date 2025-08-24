@@ -170,7 +170,7 @@ export default function CredentialsPage() {
 
       <div className={styles.header}>
         <div>
-          <h1>Environment Variables</h1>
+          <h1>Credentials</h1>
           <p>Manage credentials and environment variables for registry connections</p>
         </div>
       </div>

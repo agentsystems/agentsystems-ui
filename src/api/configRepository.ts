@@ -26,6 +26,7 @@ export class FileConfigRepository implements ConfigRepository {
       return {
         config_version: 1,
         registry_connections: {},
+        model_connections: {},
         agents: []
       }
     }
@@ -242,10 +243,60 @@ export const configUtils = {
     repo: config.repo,
     tag: config.tag,
     registry_connection: config.registry_connection,
+    model_dependencies: config.model_dependencies,
     egressAllowlist: config.egress_allowlist?.join(', ') || '',
     labels: config.labels || {},
     artifact_permissions: config.artifact_permissions,
     envVariables: config.overrides?.env || {},
     exposePorts: config.overrides?.expose?.join(', ') || ''
+  }),
+
+  /**
+   * Convert model form data to config format
+   */
+  modelFormToConfig: (form: import('@/types/config').ModelConnectionForm): import('@/types/config').ModelConnection => ({
+    model_id: form.model_id,
+    hosting_provider: form.hosting_provider,
+    enabled: form.enabled,
+    hosting_provider_model_id: form.hosting_provider_model_id,
+    ...(form.endpoint && {
+      endpoint: form.endpoint
+    }),
+    auth: {
+      method: form.authMethod,
+      ...(form.authMethod === 'api_key' && {
+        api_key_env: form.apiKeyEnv
+      }),
+      ...(form.authMethod === 'aws_credentials' && {
+        aws_access_key_env: form.awsAccessKeyEnv,
+        aws_secret_key_env: form.awsSecretKeyEnv,
+        aws_region: form.awsRegion
+      }),
+      ...(form.authMethod === 'gcp_oauth' && {
+        gcp_service_account_key_env: form.gcpServiceAccountKeyEnv,
+        gcp_project_id: form.gcpProjectId,
+        gcp_region: form.gcpRegion
+      })
+    }
+  }),
+
+  /**
+   * Convert config format to model form data
+   */
+  configToModelForm: (id: string, config: import('@/types/config').ModelConnection): import('@/types/config').ModelConnectionForm => ({
+    id,
+    model_id: config.model_id,
+    hosting_provider: config.hosting_provider,
+    enabled: config.enabled,
+    hosting_provider_model_id: config.hosting_provider_model_id,
+    endpoint: config.endpoint || '',
+    authMethod: config.auth.method,
+    apiKeyEnv: config.auth.api_key_env || '',
+    awsAccessKeyEnv: config.auth.aws_access_key_env || '',
+    awsSecretKeyEnv: config.auth.aws_secret_key_env || '',
+    awsRegion: config.auth.aws_region || 'us-east-1',
+    gcpServiceAccountKeyEnv: config.auth.gcp_service_account_key_env || '',
+    gcpProjectId: config.auth.gcp_project_id || '',
+    gcpRegion: config.auth.gcp_region || ''
   })
 }

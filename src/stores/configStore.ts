@@ -3,7 +3,8 @@ import { persist } from 'zustand/middleware'
 import { 
   AgentSystemsConfig, 
   RegistryConnectionForm, 
-  AgentConfigForm
+  AgentConfigForm,
+  ModelConnectionForm
 } from '../types/config'
 import { configRepository, configUtils } from '@api/configRepository'
 
@@ -29,6 +30,12 @@ interface ConfigState {
   updateRegistryConnection: (id: string, updates: Partial<RegistryConnectionForm>) => void
   deleteRegistryConnection: (id: string) => void
   
+  // Model connection management
+  getModelConnections: () => ModelConnectionForm[]
+  addModelConnection: (model: Omit<ModelConnectionForm, 'id'>) => void
+  updateModelConnection: (id: string, updates: Partial<ModelConnectionForm>) => void
+  deleteModelConnection: (id: string) => void
+  
   // Agent management  
   getAgents: () => AgentConfigForm[]
   addAgent: (agent: Omit<AgentConfigForm, 'id'>) => void
@@ -49,6 +56,7 @@ interface ConfigState {
 const defaultConfig: AgentSystemsConfig = {
   config_version: 1,
   registry_connections: {},
+  model_connections: {},
   agents: []
 }
 
@@ -180,6 +188,71 @@ export const useConfigStore = create<ConfigState>()(
         })
       },
 
+      // Model connection management
+      getModelConnections: () => {
+        const state = get()
+        if (!state.config.model_connections) return []
+        
+        return Object.entries(state.config.model_connections).map(([id, connection]) =>
+          configUtils.configToModelForm(id, connection)
+        )
+      },
+
+      addModelConnection: (model) => {
+        const id = model.model_id.toLowerCase().replace(/[^a-z0-9]/g, '_')
+        const connection = configUtils.modelFormToConfig({ ...model, id })
+        
+        set((state) => ({
+          config: {
+            ...state.config,
+            model_connections: {
+              ...state.config.model_connections,
+              [id]: connection
+            }
+          },
+          hasUnsavedChanges: true
+        }))
+      },
+
+      updateModelConnection: (id, updates) => {
+        set((state) => {
+          const existing = state.config.model_connections?.[id]
+          if (!existing) return state
+
+          const currentForm = configUtils.configToModelForm(id, existing)
+          const updatedForm = { ...currentForm, ...updates }
+          const updatedConnection = configUtils.modelFormToConfig(updatedForm)
+
+          return {
+            config: {
+              ...state.config,
+              model_connections: {
+                ...state.config.model_connections,
+                [id]: updatedConnection
+              }
+            },
+            hasUnsavedChanges: true
+          }
+        })
+      },
+
+      deleteModelConnection: (id) => {
+        set((state) => {
+          if (!state.config.model_connections) return state
+          
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [id]: _, ...remainingConnections } = state.config.model_connections
+          
+          return {
+            config: {
+              ...state.config,
+              model_connections: remainingConnections
+            },
+            hasUnsavedChanges: true
+          }
+        })
+      },
+
       // Agent management
       getAgents: () => {
         const state = get()
@@ -279,11 +352,21 @@ export const useConfigStore = create<ConfigState>()(
         const state = get()
         const referenced = new Set<string>()
         
+        // Registry connection env vars
         Object.values(state.config.registry_connections).forEach(connection => {
           if (connection.auth.username_env) referenced.add(connection.auth.username_env)
           if (connection.auth.password_env) referenced.add(connection.auth.password_env)
           if (connection.auth.token_env) referenced.add(connection.auth.token_env)
         })
+        
+        // Model connection env vars
+        if (state.config.model_connections) {
+          Object.values(state.config.model_connections).forEach(connection => {
+            if (connection.auth.api_key_env) referenced.add(connection.auth.api_key_env)
+            if (connection.auth.aws_access_key_env) referenced.add(connection.auth.aws_access_key_env)
+            if (connection.auth.aws_secret_key_env) referenced.add(connection.auth.aws_secret_key_env)
+          })
+        }
         
         return referenced
       },
