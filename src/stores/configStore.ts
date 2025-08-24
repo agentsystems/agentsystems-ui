@@ -207,7 +207,7 @@ export const useConfigStore = create<ConfigState>()(
             ...state.config,
             model_connections: {
               ...state.config.model_connections,
-              [id]: connection
+              [model.model_id]: connection
             }
           },
           hasUnsavedChanges: true
