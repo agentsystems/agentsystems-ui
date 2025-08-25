@@ -149,7 +149,9 @@ export const useConfigStore = create<ConfigState>()(
               [id]: connection
             }
           },
-          hasUnsavedChanges: true
+          hasUnsavedChanges: true,
+          restartRequired: true,
+          changesSinceRestart: [...state.changesSinceRestart, `Added registry: ${registry.name}`]
         }))
       },
 
@@ -170,7 +172,9 @@ export const useConfigStore = create<ConfigState>()(
                 [id]: updatedConnection
               }
             },
-            hasUnsavedChanges: true
+            hasUnsavedChanges: true,
+            restartRequired: true,
+            changesSinceRestart: [...state.changesSinceRestart, `Updated registry: ${id}`]
           }
         })
       },
@@ -191,7 +195,9 @@ export const useConfigStore = create<ConfigState>()(
               registry_connections: remainingConnections,
               agents: filteredAgents
             },
-            hasUnsavedChanges: true
+            hasUnsavedChanges: true,
+            restartRequired: true,
+            changesSinceRestart: [...state.changesSinceRestart, `Deleted registry: ${id}`]
           }
         })
       },
@@ -241,7 +247,9 @@ export const useConfigStore = create<ConfigState>()(
                 [id]: updatedConnection
               }
             },
-            hasUnsavedChanges: true
+            hasUnsavedChanges: true,
+            restartRequired: true,
+            changesSinceRestart: [...state.changesSinceRestart, `Updated model connection: ${id}`]
           }
         })
       },
@@ -258,7 +266,9 @@ export const useConfigStore = create<ConfigState>()(
               ...state.config,
               model_connections: remainingConnections
             },
-            hasUnsavedChanges: true
+            hasUnsavedChanges: true,
+            restartRequired: true,
+            changesSinceRestart: [...state.changesSinceRestart, `Deleted model connection: ${id}`]
           }
         })
       },
@@ -277,7 +287,9 @@ export const useConfigStore = create<ConfigState>()(
             ...state.config,
             agents: [...state.config.agents, agentConfig]
           },
-          hasUnsavedChanges: true
+          hasUnsavedChanges: true,
+          restartRequired: true,
+          changesSinceRestart: [...state.changesSinceRestart, `Added agent: ${agent.name}`]
         }))
       },
 
@@ -299,7 +311,9 @@ export const useConfigStore = create<ConfigState>()(
               ...state.config,
               agents: newAgents
             },
-            hasUnsavedChanges: true
+            hasUnsavedChanges: true,
+            restartRequired: true,
+            changesSinceRestart: [...state.changesSinceRestart, `Updated agent: ${name}`]
           }
         })
       },
@@ -310,7 +324,9 @@ export const useConfigStore = create<ConfigState>()(
             ...state.config,
             agents: state.config.agents.filter(agent => agent.name !== name)
           },
-          hasUnsavedChanges: true
+          hasUnsavedChanges: true,
+          restartRequired: true,
+          changesSinceRestart: [...state.changesSinceRestart, `Deleted agent: ${name}`]
         }))
       },
 
@@ -327,22 +343,41 @@ export const useConfigStore = create<ConfigState>()(
       },
 
       setEnvVar: (key, value) => {
-        set((state) => ({
-          envVars: {
-            ...state.envVars,
-            [key]: value
-          },
-          hasUnsavedChanges: true
-        }))
+        set((state) => {
+          // Determine if this env var change requires restart
+          const requiresRestart = key.includes('TOKEN') || key.includes('KEY') || key.includes('PASSWORD') ||
+                                 key.includes('URL') || key.includes('HOST') || key.includes('API')
+          
+          return {
+            envVars: {
+              ...state.envVars,
+              [key]: value
+            },
+            hasUnsavedChanges: true,
+            ...(requiresRestart && {
+              restartRequired: true,
+              changesSinceRestart: [...state.changesSinceRestart, `Updated credential: ${key}`]
+            })
+          }
+        })
       },
 
       deleteEnvVar: (key) => {
         set((state) => {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { [key]: _, ...remaining } = state.envVars
+          
+          // Determine if this env var deletion requires restart
+          const requiresRestart = key.includes('TOKEN') || key.includes('KEY') || key.includes('PASSWORD') ||
+                                 key.includes('URL') || key.includes('HOST') || key.includes('API')
+          
           return {
             envVars: remaining,
-            hasUnsavedChanges: true
+            hasUnsavedChanges: true,
+            ...(requiresRestart && {
+              restartRequired: true,
+              changesSinceRestart: [...state.changesSinceRestart, `Deleted credential: ${key}`]
+            })
           }
         })
       },
