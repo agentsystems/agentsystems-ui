@@ -34,6 +34,7 @@
       "@types/*": ["src/types/*"],
       "@constants/*": ["src/constants/*"],
       "@config/*": ["src/config/*"],
+      "@data/*": ["src/data/*"],
       "@test/*": ["src/test/*"]
     }
   },

@@ -1,0 +1,650 @@
+/* Marketplace Container */
+.marketplace {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Header Section */
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.betaBanner {
+  background: var(--warning-bg);
+  color: var(--warning);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+/* Search Section */
+.searchSection {
+  margin-bottom: 16px;
+}
+
+.searchBar {
+  position: relative;
+  width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--text-secondary);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
+
+.filterToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.filterToggle:hover {
+  background: var(--surface-3);
+}
+
+.filterIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 150px;
+}
+
+.filterGroup label {
+  font-weight: 500;
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.filterGroup select {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.filterGroup select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
+
+/* Active Filters */
+.activeFilters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.activeFilters > span {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.activeFilter {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.clearFilters {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clearFilters:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+/* Filter Info */
+.filterInfo {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0.5rem 0 1.5rem 0;
+  font-style: italic;
+}
+
+/* Featured Sections */
+.featuredSections {
+  margin-bottom: 32px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section h2 {
+  margin-bottom: 16px;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Agent Grid */
+.agentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.agentCard {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: fit-content;
+}
+
+.agentCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cardTitle h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.publisherInfo {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.publisherName {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.verifiedBadge {
+  color: var(--success);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.newBadge {
+  background: var(--success-bg);
+  color: var(--success);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stars {
+  display: flex;
+  gap: 0.1rem;
+}
+
+.starFilled, .starEmpty {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.starFilled {
+  color: var(--warning);
+}
+
+.starEmpty {
+  color: var(--border);
+}
+
+.ratingText {
+  color: var(--text-secondary);
+}
+
+.downloads {
+  color: var(--text-secondary);
+}
+
+.cardTags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.categoryTag {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.subcategoryTag {
+  background: var(--surface-3);
+  color: var(--text);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+
+.industryTag {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.pricing {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.addButton {
+  padding: 0.5rem 1rem;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.addButton:hover {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* No Results */
+.noResults {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.noResults p {
+  margin: 0.5rem 0;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.modalContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modalHeader h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.modalPublisher {
+  color: var(--text-secondary);
+  margin: 0.5rem 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  color: var(--text);
+  background: var(--surface-3);
+  border-radius: 0.375rem;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalDescription {
+  margin-bottom: 2rem;
+}
+
+.modalDescription p {
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.modalSpecs {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.specGroup h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.specGroup ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.specGroup li {
+  padding: 0.5rem 0;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.specGroup li:last-child {
+  border-bottom: none;
+}
+
+.specGroup li strong {
+  color: var(--text);
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.modalPricing {
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cancelButton {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.cancelButton:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.addButtonLarge {
+  padding: 0.75rem 1.5rem;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.addButtonLarge:hover {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Theme-specific button adjustments */
+.theme-light .addButton:hover,
+.theme-light .addButtonLarge:hover {
+  background: rgba(8, 145, 178, 0.1);
+}
+
+.theme-cyber .addButton:hover,
+.theme-cyber .addButtonLarge:hover {
+  background: var(--surface-3);
+  color: var(--accent);
+  border-color: var(--accent-3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .marketplace {
+    padding: 1rem;
+  }
+  
+  .headerContent {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .stats {
+    justify-content: space-around;
+    width: 100%;
+  }
+  
+  .agentGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filters {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .cardHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .publisherInfo {
+    text-align: left;
+  }
+  
+  .modalContent {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  .modalSpecs {
+    grid-template-columns: 1fr;
+  }
+  
+  .modalFooter {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .modalActions {
+    justify-content: stretch;
+  }
+  
+  .cancelButton,
+  .addButtonLarge {
+    flex: 1;
+  }
+}

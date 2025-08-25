@@ -10,6 +10,7 @@ import { useScanline } from '@hooks/useScanline'
 // Lazy-loaded components for code splitting
 const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Agents = lazy(() => import('@pages/Agents'))
+const Marketplace = lazy(() => import('@pages/Marketplace'))
 const Executions = lazy(() => import('@pages/Executions'))
 const Logs = lazy(() => import('@pages/Logs'))
 const ConfigurationOverview = lazy(() => import('@pages/ConfigurationOverview'))
@@ -63,6 +64,11 @@ function App() {
             <Route path="agents/:agentName" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <AgentDetail />
+              </Suspense>
+            } />
+            <Route path="marketplace" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Marketplace />
               </Suspense>
             } />
             <Route path="executions" element={
