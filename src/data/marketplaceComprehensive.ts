@@ -15,10 +15,9 @@ import { BUSINESS_AGENTS } from './industries/business'
 import { PERSONAL_AGENTS } from './industries/personal'
 import type { 
   MarketplaceAgent, 
-  MarketplacePublisher, 
-  AgentCategory, 
-  Industry, 
-  PricingModel 
+  MarketplacePublisher,
+  AgentCategory,
+  Industry
 } from './types'
 
 // Enhanced Publishers for Professional Marketplace
@@ -441,8 +440,7 @@ export function getAgentsByCategory(category: AgentCategory): MarketplaceAgent[]
 
 export function getAgentsByIndustry(industry: Industry): MarketplaceAgent[] {
   return MOCK_AGENTS.filter(agent => 
-    agent.targetIndustries.includes(industry) || 
-    agent.targetIndustries.includes('any')
+    agent.targetIndustries.includes(industry)
   )
 }
 

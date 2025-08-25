@@ -260,8 +260,16 @@
   font-size: 0.75rem;
 }
 
-.trendingBadge {
-  font-size: 0.9rem;
+.newBadge {
+  background: var(--success-bg);
+  color: var(--success);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .description {

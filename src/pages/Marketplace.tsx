@@ -1,22 +1,14 @@
 import { useState, useMemo } from 'react'
-import { MagnifyingGlassIcon, FunnelIcon, StarIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, StarIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid'
 import Card from '@components/common/Card'
-import StatusBadge from '@components/common/StatusBadge'
 import { 
   MOCK_AGENTS, 
   MOCK_PUBLISHERS,
   MARKETPLACE_CATEGORIES,
-  getFeaturedAgents,
-  getTrendingAgents,
-  getNewAgents,
-  searchAgents,
-  getMarketplaceStats,
-  type MarketplaceAgent,
-  type AgentCategory,
-  type Industry,
-  type PricingModel
+  searchAgents
 } from '@data/marketplaceComprehensive'
+import type { MarketplaceAgent, AgentCategory, Industry, PricingModel } from '@data/types'
 import styles from './Marketplace.module.css'
 
 export default function Marketplace() {
@@ -61,7 +53,6 @@ export default function Marketplace() {
     return agents
   }, [searchQuery, selectedCategory, selectedIndustry, selectedPricing])
 
-  const stats = getMarketplaceStats()
 
   const handleAgentClick = (agent: MarketplaceAgent) => {
     setSelectedAgent(agent)
@@ -158,7 +149,7 @@ export default function Marketplace() {
             )}
             {selectedCategory !== 'all' && (
               <span className={styles.activeFilter}>
-                Category: {MARKETPLACE_CATEGORIES[selectedCategory as AgentCategory].name}
+                Category: {MARKETPLACE_CATEGORIES[selectedCategory as keyof typeof MARKETPLACE_CATEGORIES]?.name}
               </span>
             )}
             {selectedPricing !== 'all' && (
@@ -237,7 +228,7 @@ function AgentCard({ agent, onClick, onAddToDeployment }: AgentCardProps) {
       <div className={styles.cardHeader}>
         <div className={styles.cardTitle}>
           <h3>{agent.displayName}</h3>
-          {agent.new && <StatusBadge status="new" text="NEW" />}
+          {agent.new && <span className={styles.newBadge}>NEW</span>}
         </div>
         
         <div className={styles.publisherInfo}>
@@ -278,7 +269,7 @@ function AgentCard({ agent, onClick, onAddToDeployment }: AgentCardProps) {
             {agent.subcategory}
           </span>
         )}
-        {agent.targetIndustries.slice(0, 1).map(industry => (
+        {agent.targetIndustries.slice(0, 1).map((industry: string) => (
           <span key={industry} className={styles.industryTag}>
             {industry}
           </span>

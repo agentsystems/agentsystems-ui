@@ -219,7 +219,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     category: 'specialized',
     subcategory: 'Personal Development',
     
-    targetIndustries: ['education'],
+    targetIndustries: ['personal'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'api-access'],
     modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],

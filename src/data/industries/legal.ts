@@ -385,7 +385,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     category: 'analysis-insights',
     subcategory: 'Trademark Law',
     
-    targetIndustries: ['legal', 'retail', 'technology'],
+    targetIndustries: ['legal'],
     complianceStandards: ['USPTO Rules', 'Trademark Law'],
     dataRequirements: ['api-access'],
     modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
@@ -669,7 +669,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     category: 'analysis-insights',
     subcategory: 'Real Estate Law',
     
-    targetIndustries: ['legal', 'finance', 'retail'],
+    targetIndustries: ['legal'],
     complianceStandards: ['Real Estate Law', 'Zoning Regulations'],
     dataRequirements: ['documents', 'api-access'],
     modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],

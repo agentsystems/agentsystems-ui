@@ -13,7 +13,19 @@ import { APP_NAME, ROUTES } from '@constants/app'
 import { useVersions } from '@hooks/useVersions'
 import styles from './Sidebar.module.css'
 
-const navigationSections = [
+interface NavigationItem {
+  name: string
+  href: string
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  badge?: string
+}
+
+interface NavigationSection {
+  title: string
+  items: NavigationItem[]
+}
+
+const navigationSections: NavigationSection[] = [
   {
     title: 'Main',
     items: [
