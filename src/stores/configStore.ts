@@ -19,6 +19,8 @@ interface ConfigState {
   error: string | null
   lastSaved: Date | null
   hasUnsavedChanges: boolean
+  restartRequired: boolean
+  changesSinceRestart: string[]
   
   // Actions
   loadConfig: () => Promise<void>
@@ -47,6 +49,10 @@ interface ConfigState {
   setEnvVar: (key: string, value: string) => void
   deleteEnvVar: (key: string) => void
   
+  // Restart management
+  markRestartRequired: (changeDescription: string) => void
+  clearRestartRequired: () => void
+  
   // Utility
   reset: () => void
   getReferencedEnvVars: () => Set<string>
@@ -71,6 +77,8 @@ export const useConfigStore = create<ConfigState>()(
       error: null,
       lastSaved: null,
       hasUnsavedChanges: false,
+      restartRequired: false,
+      changesSinceRestart: [],
 
       // Load configuration from files
       loadConfig: async () => {
@@ -210,7 +218,9 @@ export const useConfigStore = create<ConfigState>()(
               [model.model_id]: connection
             }
           },
-          hasUnsavedChanges: true
+          hasUnsavedChanges: true,
+          restartRequired: true,
+          changesSinceRestart: [...state.changesSinceRestart, `Added model connection: ${model.model_id}`]
         }))
       },
 
@@ -382,6 +392,21 @@ export const useConfigStore = create<ConfigState>()(
         })
         
         return referenced
+      },
+
+      // Restart management functions
+      markRestartRequired: (changeDescription) => {
+        set((state) => ({
+          restartRequired: true,
+          changesSinceRestart: [...state.changesSinceRestart, changeDescription]
+        }))
+      },
+
+      clearRestartRequired: () => {
+        set({
+          restartRequired: false,
+          changesSinceRestart: []
+        })
       }
     }),
     {
