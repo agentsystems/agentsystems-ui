@@ -21,6 +21,7 @@ const initialFormData: Omit<ModelConnectionForm, 'id'> = {
   awsAccessKeyEnv: '',
   awsSecretKeyEnv: '',
   awsRegion: 'us-east-1',
+  regionPrefix: '',
   gcpServiceAccountKeyEnv: '',
   gcpProjectId: '',
   gcpRegion: 'us-central1'
@@ -99,6 +100,7 @@ export function useModelConnectionForm() {
       apiKeyEnv: '',
       awsAccessKeyEnv: '',
       awsSecretKeyEnv: '',
+      regionPrefix: '',
       gcpServiceAccountKeyEnv: '',
       gcpProjectId: '',
       gcpRegion: 'us-central1',
@@ -126,6 +128,7 @@ export function useModelConnectionForm() {
         apiKeyEnv: '',
         awsAccessKeyEnv: '',
         awsSecretKeyEnv: '',
+        regionPrefix: '',
         gcpServiceAccountKeyEnv: '',
         gcpProjectId: '',
         gcpRegion: 'us-central1'
@@ -198,6 +201,7 @@ export function useModelConnectionForm() {
       awsAccessKeyEnv: connection.awsAccessKeyEnv,
       awsSecretKeyEnv: connection.awsSecretKeyEnv,
       awsRegion: connection.awsRegion,
+      regionPrefix: connection.regionPrefix || '',
       gcpServiceAccountKeyEnv: connection.gcpServiceAccountKeyEnv,
       gcpProjectId: connection.gcpProjectId,
       gcpRegion: connection.gcpRegion

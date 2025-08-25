@@ -270,7 +270,8 @@ export const configUtils = {
       ...(form.authMethod === 'aws_credentials' && {
         aws_access_key_env: form.awsAccessKeyEnv,
         aws_secret_key_env: form.awsSecretKeyEnv,
-        aws_region: form.awsRegion
+        aws_region: form.awsRegion,
+        ...(form.regionPrefix && { region_prefix: form.regionPrefix })
       }),
       ...(form.authMethod === 'gcp_oauth' && {
         gcp_service_account_key_env: form.gcpServiceAccountKeyEnv,
@@ -295,6 +296,7 @@ export const configUtils = {
     awsAccessKeyEnv: config.auth.aws_access_key_env || '',
     awsSecretKeyEnv: config.auth.aws_secret_key_env || '',
     awsRegion: config.auth.aws_region || 'us-east-1',
+    regionPrefix: config.auth.region_prefix || '',
     gcpServiceAccountKeyEnv: config.auth.gcp_service_account_key_env || '',
     gcpProjectId: config.auth.gcp_project_id || '',
     gcpRegion: config.auth.gcp_region || ''

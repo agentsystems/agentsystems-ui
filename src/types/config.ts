@@ -14,6 +14,7 @@ export interface ModelAuth {
   aws_access_key_env?: string  
   aws_secret_key_env?: string
   aws_region?: string
+  region_prefix?: string
   // GCP Vertex AI
   gcp_service_account_key_env?: string
   gcp_project_id?: string
@@ -106,6 +107,7 @@ export interface ModelConnectionForm {
   awsAccessKeyEnv: string
   awsSecretKeyEnv: string
   awsRegion: string
+  regionPrefix: string
   gcpServiceAccountKeyEnv: string
   gcpProjectId: string
   gcpRegion: string

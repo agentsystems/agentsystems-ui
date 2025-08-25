@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { 
   HomeIcon, 
   CpuChipIcon,
-  ShoppingCartIcon,
+  RectangleStackIcon,
   BoltIcon,
   DocumentTextIcon,
   WrenchScrewdriverIcon,
@@ -38,9 +38,9 @@ const navigationSections: NavigationSection[] = [
   {
     title: 'Platform',
     items: [
-      { name: 'Marketplace', href: '/marketplace', icon: ShoppingCartIcon, badge: 'BETA' },
-      { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
+      { name: 'Agent Hub', href: '/hub', icon: RectangleStackIcon, badge: 'BETA' },
       { name: 'Configuration', href: ROUTES.CONFIGURATION, icon: WrenchScrewdriverIcon },
+      { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
       { name: 'Support', href: '/support', icon: QuestionMarkCircleIcon },
     ]
   }

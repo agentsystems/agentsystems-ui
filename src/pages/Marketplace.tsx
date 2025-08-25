@@ -66,15 +66,15 @@ export default function Marketplace() {
   return (
     <div className={styles.marketplace}>
       <div className={styles.header}>
-        <h1>Marketplace</h1>
+        <h1>Agent Hub</h1>
         <p className={styles.subtitle}>
-          Professional workflow automation agents for business, personal, and regulated industries
+          Discover and deploy workflow automation agents for business, personal, and regulated industries
         </p>
       </div>
       
       <div className={styles.betaBanner}>
-        🚧 <strong>Beta Preview:</strong> Professional agent marketplace mockup showcasing industry-specific workflow automation. 
-        Each agent represents a real job function with measurable business value.
+        🚧 <strong>Beta Preview:</strong> Agent Hub showcasing the future of open agent infrastructure. 
+        Discover professional workflow automation - most agents are free and open source.
       </div>
 
       {/* Search and Filters */}

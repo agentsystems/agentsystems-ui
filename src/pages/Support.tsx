@@ -82,10 +82,10 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('mailto:support@agentsystems.ai')}
+              onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
             >
               <LinkIcon className={styles.buttonIcon} />
-              support@agentsystems.ai
+              contact@agentsystems.ai
             </button>
           </Card>
         </section>
@@ -107,7 +107,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://docs.agentsystems.ai/quickstart')}
+              onClick={() => handleExternalLink('https://agentsystems.mintlify.app/quickstart')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Quick Start
@@ -124,7 +124,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://docs.agentsystems.ai/api-reference')}
+              onClick={() => handleExternalLink('https://agentsystems.mintlify.app/api-reference')}
             >
               <LinkIcon className={styles.buttonIcon} />
               API Docs
@@ -141,7 +141,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://docs.agentsystems.ai/troubleshooting')}
+              onClick={() => handleExternalLink('https://agentsystems.mintlify.app/troubleshooting')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Troubleshooting
@@ -158,7 +158,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://docs.agentsystems.ai/guides/add-agent')}
+              onClick={() => handleExternalLink('https://agentsystems.mintlify.app/guides/add-agent')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Development Guide
@@ -183,7 +183,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://github.com/agentsystems/agentsystems/discussions/categories/agent-requests')}
+              onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Request Agent
@@ -259,7 +259,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('mailto:enterprise@agentsystems.ai')}
+              onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Contact Enterprise
@@ -276,7 +276,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('mailto:consulting@agentsystems.ai')}
+              onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Custom Development
@@ -371,7 +371,7 @@ export default function Support() {
           </div>
           <button 
             className={styles.feedbackButton}
-            onClick={() => handleExternalLink('https://github.com/agentsystems/agentsystems/discussions/categories/beta-feedback')}
+            onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
           >
             Provide Feedback
           </button>
