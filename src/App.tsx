@@ -21,6 +21,7 @@ const ConnectionPage = lazy(() => import('@pages/configuration/ConnectionPage'))
 const AppearancePage = lazy(() => import('@pages/configuration/AppearancePage'))
 const ModelConnectionsPage = lazy(() => import('@pages/configuration/ModelConnectionsPage'))
 const AgentDetail = lazy(() => import('@pages/AgentDetail'))
+const Support = lazy(() => import('@pages/Support'))
 
 function App() {
   const { theme, scanlineEnabled, initTheme } = useThemeStore()
@@ -114,6 +115,11 @@ function App() {
             <Route path="configuration/models" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <ModelConnectionsPage />
+              </Suspense>
+            } />
+            <Route path="support" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Support />
               </Suspense>
             } />
           </Route>
