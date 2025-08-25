@@ -5,7 +5,8 @@ import {
   ShoppingCartIcon,
   BoltIcon,
   DocumentTextIcon,
-  WrenchScrewdriverIcon
+  WrenchScrewdriverIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
 import { useThemeStore } from '@stores/themeStore'
@@ -31,15 +32,16 @@ const navigationSections: NavigationSection[] = [
     items: [
       { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: HomeIcon },
       { name: 'Agents', href: ROUTES.AGENTS, icon: CpuChipIcon },
-      { name: 'Marketplace', href: '/marketplace', icon: ShoppingCartIcon, badge: 'BETA' },
       { name: 'Executions', href: ROUTES.EXECUTIONS, icon: BoltIcon },
     ]
   },
   {
     title: 'Platform',
     items: [
+      { name: 'Marketplace', href: '/marketplace', icon: ShoppingCartIcon, badge: 'BETA' },
       { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
       { name: 'Configuration', href: ROUTES.CONFIGURATION, icon: WrenchScrewdriverIcon },
+      { name: 'Support', href: '/support', icon: QuestionMarkCircleIcon },
     ]
   }
 ]

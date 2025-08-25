@@ -1,0 +1,286 @@
+/* Support Page */
+.support {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Header */
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Main Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+/* Section Styling */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.sectionIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+/* Resource Cards */
+.resourceCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.resourceCard:hover {
+  transform: translateY(-2px);
+}
+
+.resourceHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.resourceIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.resourceHeader h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 4px 0;
+}
+
+.resourceHeader p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.resourceButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.resourceButton:hover {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.buttonIcon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Platform Status Footer */
+.statusFooter {
+  margin-top: 32px;
+  margin-bottom: 32px;
+}
+
+.statusCard {
+  padding: 20px;
+}
+
+.statusCard h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 16px 0;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.statusIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusIndicator[data-status="operational"] {
+  background: var(--success);
+  box-shadow: 0 0 4px var(--success);
+}
+
+.statusIndicator[data-status="beta"] {
+  background: var(--warning);
+  box-shadow: 0 0 4px var(--warning);
+}
+
+.statusIndicator[data-status="degraded"] {
+  background: var(--error);
+  box-shadow: 0 0 4px var(--error);
+}
+
+.statusText {
+  color: var(--text-secondary);
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.statusFooterLinks {
+  display: flex;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.statusLink {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.statusLink:hover {
+  color: var(--accent);
+}
+
+/* Beta Feedback Banner */
+.betaFeedbackBanner {
+  background: var(--warning-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 32px;
+}
+
+.feedbackContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.feedbackContent h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--warning);
+  margin: 0 0 8px 0;
+}
+
+.feedbackContent p {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.feedbackButton {
+  padding: 10px 16px;
+  background: var(--warning);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.feedbackButton:hover {
+  background: var(--warning);
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Theme-specific adjustments */
+.theme-light .resourceButton:hover {
+  background: rgba(8, 145, 178, 0.1);
+}
+
+.theme-cyber .resourceButton:hover {
+  background: var(--surface-3);
+  color: var(--accent);
+  border-color: var(--accent-3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .statusGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .feedbackContent {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .statusFooterLinks {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
