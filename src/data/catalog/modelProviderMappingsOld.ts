@@ -1,19 +1,18 @@
 /**
  * Mappings between models and hosting providers
  * Maps which hosting providers can serve which models, with provider-specific model IDs
- * Limited to Anthropic, OpenAI, and AWS Bedrock hosting providers
  */
 
 export interface ModelHostingMapping {
   modelId: string  // Standardized model ID
-  hostingProviderId: string  // Hosting Provider ID (anthropic, openai, aws_bedrock)
+  hostingProviderId: string  // Hosting Provider ID (anthropic, aws_bedrock, gcp_vertex)
   hostingProviderModelId: string  // Provider-specific model identifier
   notes?: string  // Any special notes about this availability
 }
 
-// Model to hosting provider mappings - Anthropic, OpenAI, AWS only
+// Model to hosting provider mappings with exact IDs from the table
 export const MODEL_HOSTING_MAPPINGS: ModelHostingMapping[] = [
-  // Claude models - Available on Anthropic and AWS Bedrock
+  // Claude Opus 4.1
   {
     modelId: 'claude-opus-4.1',
     hostingProviderId: 'anthropic',
@@ -24,7 +23,13 @@ export const MODEL_HOSTING_MAPPINGS: ModelHostingMapping[] = [
     hostingProviderId: 'aws_bedrock',
     hostingProviderModelId: 'anthropic.claude-opus-4-1-20250805-v1:0'
   },
+  {
+    modelId: 'claude-opus-4.1',
+    hostingProviderId: 'gcp_vertex',
+    hostingProviderModelId: 'claude-opus-4-1@20250805'
+  },
   
+  // Claude Opus 4
   {
     modelId: 'claude-opus-4',
     hostingProviderId: 'anthropic',
@@ -35,7 +40,13 @@ export const MODEL_HOSTING_MAPPINGS: ModelHostingMapping[] = [
     hostingProviderId: 'aws_bedrock',
     hostingProviderModelId: 'anthropic.claude-opus-4-20250514-v1:0'
   },
+  {
+    modelId: 'claude-opus-4',
+    hostingProviderId: 'gcp_vertex',
+    hostingProviderModelId: 'claude-opus-4@20250514'
+  },
   
+  // Claude Sonnet 4
   {
     modelId: 'claude-sonnet-4',
     hostingProviderId: 'anthropic',
@@ -46,40 +57,49 @@ export const MODEL_HOSTING_MAPPINGS: ModelHostingMapping[] = [
     hostingProviderId: 'aws_bedrock',
     hostingProviderModelId: 'anthropic.claude-sonnet-4-20250514-v1:0'
   },
-  
   {
-    modelId: 'claude-3-5-sonnet',
+    modelId: 'claude-sonnet-4',
+    hostingProviderId: 'gcp_vertex',
+    hostingProviderModelId: 'claude-sonnet-4@20250514'
+  },
+  
+  // Claude Sonnet 3.7
+  {
+    modelId: 'claude-sonnet-3.7',
     hostingProviderId: 'anthropic',
-    hostingProviderModelId: 'claude-3-5-sonnet-20241022'
+    hostingProviderModelId: 'claude-3-7-sonnet-20250219',
+    notes: 'Also available as claude-3-7-sonnet-latest'
   },
   {
-    modelId: 'claude-3-5-sonnet',
+    modelId: 'claude-sonnet-3.7',
     hostingProviderId: 'aws_bedrock',
-    hostingProviderModelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0'
+    hostingProviderModelId: 'anthropic.claude-3-7-sonnet-20250219-v1:0'
+  },
+  {
+    modelId: 'claude-sonnet-3.7',
+    hostingProviderId: 'gcp_vertex',
+    hostingProviderModelId: 'claude-3-7-sonnet@20250219'
   },
   
-  {
-    modelId: 'claude-3-5-haiku',
-    hostingProviderId: 'anthropic',
-    hostingProviderModelId: 'claude-3-5-haiku-20241022'
-  },
-  {
-    modelId: 'claude-3-5-haiku',
-    hostingProviderId: 'aws_bedrock',
-    hostingProviderModelId: 'anthropic.claude-3-5-haiku-20241022-v1:0'
-  },
-  
+  // Claude Haiku 3.5
   {
     modelId: 'claude-haiku-3.5',
     hostingProviderId: 'anthropic',
-    hostingProviderModelId: 'claude-3-5-haiku-20241022'
+    hostingProviderModelId: 'claude-3-5-haiku-20241022',
+    notes: 'Also available as claude-3-5-haiku-latest'
   },
   {
     modelId: 'claude-haiku-3.5',
     hostingProviderId: 'aws_bedrock',
     hostingProviderModelId: 'anthropic.claude-3-5-haiku-20241022-v1:0'
   },
+  {
+    modelId: 'claude-haiku-3.5',
+    hostingProviderId: 'gcp_vertex',
+    hostingProviderModelId: 'claude-3-5-haiku@20241022'
+  },
   
+  // Claude Haiku 3
   {
     modelId: 'claude-haiku-3',
     hostingProviderId: 'anthropic',
@@ -90,63 +110,20 @@ export const MODEL_HOSTING_MAPPINGS: ModelHostingMapping[] = [
     hostingProviderId: 'aws_bedrock',
     hostingProviderModelId: 'anthropic.claude-3-haiku-20240307-v1:0'
   },
-
-  // OpenAI models - Available on OpenAI and AWS Bedrock
   {
-    modelId: 'gpt-5',
-    hostingProviderId: 'openai',
-    hostingProviderModelId: 'gpt-5'
-  },
-  
-  {
-    modelId: 'gpt-4o',
-    hostingProviderId: 'openai',
-    hostingProviderModelId: 'gpt-4o'
-  },
-  
-  {
-    modelId: 'gpt-4o-mini',
-    hostingProviderId: 'openai',
-    hostingProviderModelId: 'gpt-4o-mini'
-  },
-  
-  {
-    modelId: 'gpt-4-turbo',
-    hostingProviderId: 'openai',
-    hostingProviderModelId: 'gpt-4-turbo'
-  },
-
-  // Meta Llama models - Available on AWS Bedrock only
-  {
-    modelId: 'llama-3.1-405b',
-    hostingProviderId: 'aws_bedrock',
-    hostingProviderModelId: 'meta.llama3-1-405b-instruct-v1:0'
-  },
-  
-  {
-    modelId: 'llama-3.1-70b',
-    hostingProviderId: 'aws_bedrock',
-    hostingProviderModelId: 'meta.llama3-1-70b-instruct-v1:0'
-  },
-  
-  {
-    modelId: 'llama-3.1-8b',
-    hostingProviderId: 'aws_bedrock',
-    hostingProviderModelId: 'meta.llama3-1-8b-instruct-v1:0'
+    modelId: 'claude-haiku-3',
+    hostingProviderId: 'gcp_vertex',
+    hostingProviderModelId: 'claude-3-haiku@20240307'
   }
 ]
 
-// Helper functions
+// Helper functions for efficient lookups
 export function getHostingProvidersForModel(modelId: string): string[] {
-  return MODEL_HOSTING_MAPPINGS
-    .filter(mapping => mapping.modelId === modelId)
-    .map(mapping => mapping.hostingProviderId)
-}
-
-export function getModelsForHostingProvider(hostingProviderId: string): string[] {
-  return MODEL_HOSTING_MAPPINGS
-    .filter(mapping => mapping.hostingProviderId === hostingProviderId)
-    .map(mapping => mapping.modelId)
+  return [...new Set(
+    MODEL_HOSTING_MAPPINGS
+      .filter(mapping => mapping.modelId === modelId)
+      .map(mapping => mapping.hostingProviderId)
+  )]
 }
 
 export function getHostingProviderModelId(modelId: string, hostingProviderId: string): string | undefined {
@@ -154,4 +131,18 @@ export function getHostingProviderModelId(modelId: string, hostingProviderId: st
     m => m.modelId === modelId && m.hostingProviderId === hostingProviderId
   )
   return mapping?.hostingProviderModelId
+}
+
+export function getModelsForHostingProvider(hostingProviderId: string): string[] {
+  return [...new Set(
+    MODEL_HOSTING_MAPPINGS
+      .filter(mapping => mapping.hostingProviderId === hostingProviderId)
+      .map(mapping => mapping.modelId)
+  )]
+}
+
+export function isModelAvailableOnHostingProvider(modelId: string, hostingProviderId: string): boolean {
+  return MODEL_HOSTING_MAPPINGS.some(
+    m => m.modelId === modelId && m.hostingProviderId === hostingProviderId
+  )
 }

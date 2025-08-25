@@ -4,7 +4,7 @@
  * This is different from ModelVendor which is who created the model (e.g., Anthropic, Meta, OpenAI)
  */
 
-export type AuthMethodType = 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'none'
+export type AuthMethodType = 'api_key' | 'aws_credentials' | 'none'
 
 export interface AuthMethodConfig {
   type: AuthMethodType
@@ -89,44 +89,6 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
     helpText: 'AWS credentials for accessing Bedrock models'
   },
   
-  gcp_oauth: {
-    type: 'gcp_oauth',
-    displayName: 'Google Cloud OAuth',
-    fields: [
-      {
-        name: 'gcpServiceAccountKeyEnv',
-        label: 'Service Account Key Environment Variable',
-        type: 'env_select',
-        placeholder: 'Select service account key variable...',
-        required: true,
-        helpText: 'Environment variable containing the GCP service account JSON key'
-      },
-      {
-        name: 'gcpProjectId',
-        label: 'GCP Project ID',
-        type: 'text',
-        placeholder: 'my-project-id',
-        required: true,
-        helpText: 'Your Google Cloud project ID'
-      },
-      {
-        name: 'gcpRegion',
-        label: 'GCP Region',
-        type: 'select',
-        required: true,
-        options: [
-          { value: 'us-central1', label: 'US Central (Iowa)' },
-          { value: 'us-east1', label: 'US East (South Carolina)' },
-          { value: 'us-west1', label: 'US West (Oregon)' },
-          { value: 'europe-west1', label: 'Europe West (Belgium)' },
-          { value: 'europe-west4', label: 'Europe West (Netherlands)' },
-          { value: 'asia-southeast1', label: 'Asia Southeast (Singapore)' },
-          { value: 'asia-northeast1', label: 'Asia Northeast (Tokyo)' }
-        ]
-      }
-    ]
-  },
-  
   none: {
     type: 'none',
     displayName: 'No Authentication',
@@ -135,7 +97,7 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
   }
 }
 
-// Hosting Provider configurations - Limited to Anthropic API, AWS Bedrock, and GCP Vertex AI
+// Hosting Provider configurations - Limited to Anthropic API, OpenAI API, and AWS Bedrock
 export const HOSTING_PROVIDERS: Record<string, HostingProviderConfig> = {
   anthropic: {
     id: 'anthropic',
@@ -147,24 +109,24 @@ export const HOSTING_PROVIDERS: Record<string, HostingProviderConfig> = {
     documentation: 'https://docs.anthropic.com'
   },
   
+  openai: {
+    id: 'openai',
+    name: 'openai',
+    displayName: 'OpenAI',
+    description: 'GPT models via OpenAI API',
+    authMethods: ['api_key'],
+    defaultAuthMethod: 'api_key',
+    documentation: 'https://platform.openai.com/docs'
+  },
+  
   aws_bedrock: {
     id: 'aws_bedrock',
     name: 'aws_bedrock',
     displayName: 'AWS Bedrock',
-    description: 'Claude models via AWS Bedrock',
+    description: 'Claude, Llama, and other models via AWS Bedrock',
     authMethods: ['aws_credentials'],
     defaultAuthMethod: 'aws_credentials',
     documentation: 'https://docs.aws.amazon.com/bedrock'
-  },
-  
-  gcp_vertex: {
-    id: 'gcp_vertex',
-    name: 'gcp_vertex',
-    displayName: 'Google Cloud Vertex AI',
-    description: 'Claude models via GCP Vertex AI',
-    authMethods: ['gcp_oauth'],
-    defaultAuthMethod: 'gcp_oauth',
-    documentation: 'https://cloud.google.com/vertex-ai'
   }
 }
 
