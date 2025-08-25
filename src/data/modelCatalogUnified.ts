@@ -6,7 +6,7 @@
  */
 
 export type ModelVendor = 'anthropic' | 'openai' | 'meta' | 'amazon'
-export type ModelCategory = 'text' | 'multimodal' | 'code' | 'vision' | 'audio'
+export type ModelCategory = 'text' | 'multimodal' | 'code' | 'vision' | 'audio' | 'fast'
 export type HostingProviderId = 'anthropic' | 'amazon_bedrock' | 'openai'
 export type AuthMethodType = 'api_key' | 'aws_credentials' | 'none'
 

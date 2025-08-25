@@ -72,6 +72,12 @@ function App() {
                 <Marketplace />
               </Suspense>
             } />
+            {/* Legacy marketplace route for backward compatibility */}
+            <Route path="marketplace" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Marketplace />
+              </Suspense>
+            } />
             <Route path="executions" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <Executions />
