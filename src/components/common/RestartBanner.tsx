@@ -7,10 +7,7 @@
 
 import { useState } from 'react'
 import { useConfigStore } from '@stores/configStore'
-import { api } from '@api/client'
-import { useToast } from '@hooks/useToast'
 import { useAudio } from '@hooks/useAudio'
-import LoadingSpinner from '@components/LoadingSpinner'
 import {
   ArrowPathIcon,
   XMarkIcon,
@@ -22,48 +19,11 @@ export default function RestartBanner() {
   const { restartRequired, changesSinceRestart, clearRestartRequired } = useConfigStore()
   const [isRestarting, setIsRestarting] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
-  const { showSuccess, showError } = useToast()
   const { playClickSound } = useAudio()
 
-  const handleRestart = async () => {
+  const handleRestart = () => {
     playClickSound()
-    setIsRestarting(true)
-    
-    try {
-      // Trigger automatic platform restart
-      await api.post('/system/restart')
-      showSuccess('Platform restart initiated')
-      
-      // Poll until gateway comes back online
-      let attempts = 0
-      const maxAttempts = 60 // 2 minutes max
-      
-      while (attempts < maxAttempts) {
-        try {
-          await new Promise(resolve => setTimeout(resolve, 2000)) // Wait 2 seconds
-          await api.get('/health') // Test if gateway is back
-          
-          // Gateway is back - restart complete!
-          clearRestartRequired()
-          showSuccess('Platform restart completed successfully!')
-          setIsRestarting(false)
-          return
-          
-        } catch (error) {
-          attempts++
-          // Continue polling - gateway is expected to be down during restart
-        }
-      }
-      
-      // Timeout reached
-      showError('Restart may have completed but gateway is not responding. Please check manually.')
-      setIsRestarting(false)
-      
-    } catch (error) {
-      console.error('Restart failed:', error)
-      showError('Failed to initiate restart. Please try: agentsystems restart')
-      setIsRestarting(false)
-    }
+    setIsRestarting(true) // Use this state to show the command modal
   }
 
   const handleDismiss = () => {
@@ -79,11 +39,44 @@ export default function RestartBanner() {
     return (
       <div className={styles.restartBanner} role="alert" aria-live="polite">
         <div className={styles.restartingContent}>
-          <LoadingSpinner />
           <div className={styles.restartingText}>
-            <h3>Restarting Platform</h3>
-            <p>Applying {changesSinceRestart.length} configuration change{changesSinceRestart.length !== 1 ? 's' : ''}...</p>
-            <p className={styles.restartingHint}>This may take 30-60 seconds</p>
+            <h3>Platform Restart Required</h3>
+            <p>To apply {changesSinceRestart.length} configuration change{changesSinceRestart.length !== 1 ? 's' : ''}, please run:</p>
+            
+            <div style={{ 
+              background: 'var(--surface-2)', 
+              padding: '1rem', 
+              borderRadius: 'var(--radius)', 
+              border: '1px solid var(--border)',
+              margin: '1rem 0',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.875rem'
+            }}>
+              <code>agentsystems restart</code>
+            </div>
+            
+            <p className={styles.restartingHint}>Run this command in your deployment directory</p>
+            
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  clearRestartRequired()
+                  setIsRestarting(false)
+                }}
+                className="btn btn-sm btn-bright"
+              >
+                I've run the restart command
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setIsRestarting(false)}
+                className="btn btn-sm btn-ghost"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       </div>
