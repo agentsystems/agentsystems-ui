@@ -67,6 +67,12 @@ function App() {
                 <AgentDetail />
               </Suspense>
             } />
+            <Route path="hub" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Marketplace />
+              </Suspense>
+            } />
+            {/* Legacy marketplace route for backward compatibility */}
             <Route path="marketplace" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <Marketplace />

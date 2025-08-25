@@ -230,7 +230,7 @@ export default function ConfigurationOverview() {
         />
         
         <ConfigCard
-          title="Models"
+          title="Model Connections"
           icon={CpuChipIcon}
           status={modelsStatus.status}
           statusText={modelsStatus.text}

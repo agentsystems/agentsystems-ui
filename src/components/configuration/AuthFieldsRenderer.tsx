@@ -112,15 +112,6 @@ export default function AuthFieldsRenderer({
   if (authConfig?.type === 'aws_credentials') {
     rows.push(authFields.slice(0, 2)) // Access key and secret key
     authFields.slice(2).forEach(field => rows.push([field])) // Region on its own
-  } 
-  // Special handling for GCP OAuth - service account key on its own, project ID and region side by side
-  else if (authConfig?.type === 'gcp_oauth') {
-    const serviceAccountField = authFields.find(f => f.name === 'gcpServiceAccountKeyEnv')
-    const projectIdField = authFields.find(f => f.name === 'gcpProjectId')
-    const regionField = authFields.find(f => f.name === 'gcpRegion')
-    
-    if (serviceAccountField) rows.push([serviceAccountField])
-    if (projectIdField && regionField) rows.push([projectIdField, regionField])
   }
   // Default: each field on its own row
   else {

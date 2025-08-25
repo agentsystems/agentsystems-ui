@@ -34,8 +34,8 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.4,
     reviewCount: 127,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$2 per lead analyzed',
+    pricingModel: 'free',
+    pricingDescription: 'Free and open source',
     
     egressAllowlist: ['https://api.salesforce.com', 'https://api.hubspot.com'],
     requiredPorts: ['8000'],
@@ -74,8 +74,8 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.3,
     reviewCount: 89,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$15 per proposal generated',
+    pricingModel: 'free',
+    pricingDescription: 'Free and open source',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -114,8 +114,8 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 78,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$100/month per product manager',
+    pricingModel: 'free',
+    pricingDescription: 'Free and open source',
     
     egressAllowlist: ['https://api.trustpilot.com', 'https://api.zendesk.com'],
     requiredPorts: ['8000'],
@@ -155,8 +155,8 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.2,
     reviewCount: 234,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$99/month per brand',
+    pricingModel: 'free',
+    pricingDescription: 'Free and open source',
     
     egressAllowlist: ['https://api.instagram.com', 'https://api.twitter.com', 'https://graph.facebook.com'],
     requiredPorts: ['8000'],
@@ -195,8 +195,8 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.3,
     reviewCount: 94,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$0.01 per email optimized',
+    pricingModel: 'free',
+    pricingDescription: 'Free and open source',
     
     egressAllowlist: ['https://api.sendgrid.com', 'https://api.mailchimp.com'],
     requiredPorts: ['8000'],
@@ -235,8 +235,8 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.1,
     reviewCount: 112,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$79/month per website',
+    pricingModel: 'free',
+    pricingDescription: 'Free and open source',
     
     egressAllowlist: ['https://api.semrush.com', 'https://api.ahrefs.com'],
     requiredPorts: ['8000'],
@@ -276,7 +276,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.4,
     reviewCount: 56,
     
-    pricingModel: 'subscription',
+    pricingModel: 'free',
     pricingDescription: '$150/month + $0.05 per SKU',
     
     egressAllowlist: [],
@@ -316,7 +316,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.3,
     reviewCount: 67,
     
-    pricingModel: 'subscription',
+    pricingModel: 'free',
     pricingDescription: '$200/month per pricing manager',
     
     egressAllowlist: ['https://api.shopify.com', 'https://api.amazon.com'],
@@ -356,7 +356,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.1,
     reviewCount: 178,
     
-    pricingModel: 'subscription',
+    pricingModel: 'free',
     pricingDescription: '$150/month per support agent replaced',
     
     egressAllowlist: ['https://api.zendesk.com', 'https://api.intercom.com'],
@@ -437,7 +437,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.2,
     reviewCount: 45,
     
-    pricingModel: 'subscription',
+    pricingModel: 'free',
     pricingDescription: '$50/month per manager',
     
     egressAllowlist: [],
@@ -478,7 +478,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 156,
     
-    pricingModel: 'usage-based',
+    pricingModel: 'free',
     pricingDescription: '$0.50 per invoice processed',
     
     egressAllowlist: [],
@@ -518,7 +518,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     rating: 4.2,
     reviewCount: 67,
     
-    pricingModel: 'subscription',
+    pricingModel: 'free',
     pricingDescription: '$100/month per finance manager',
     
     egressAllowlist: [],

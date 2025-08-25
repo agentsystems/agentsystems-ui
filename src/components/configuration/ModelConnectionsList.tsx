@@ -86,8 +86,6 @@ export default function ModelConnectionsList({
                       ` ${connection.apiKeyEnv}` :
                      connection.authMethod === 'aws_credentials' ? 
                       ` ${connection.awsAccessKeyEnv} (${connection.awsRegion})` :
-                     connection.authMethod === 'gcp_oauth' ? 
-                      ` ${connection.gcpProjectId} (${connection.gcpRegion})` :
                      connection.authMethod === 'none' ? 
                       ' No authentication' : 
                       ' Configuration required'}

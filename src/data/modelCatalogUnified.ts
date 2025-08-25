@@ -5,10 +5,10 @@
  * into one maintainable data structure while preserving the existing UX flow.
  */
 
-export type ModelVendor = 'anthropic' | 'openai' | 'meta' | 'amazon' | 'deepseek' | 'google'
-export type ModelCategory = 'text' | 'multimodal' | 'code' | 'vision' | 'audio'
-export type HostingProviderId = 'anthropic' | 'aws_bedrock' | 'gcp_vertex' | 'openai' | 'azure_openai' | 'huggingface'
-export type AuthMethodType = 'api_key' | 'aws_credentials' | 'gcp_oauth' | 'azure_ad' | 'none'
+export type ModelVendor = 'anthropic' | 'openai' | 'meta' | 'amazon'
+export type ModelCategory = 'text' | 'multimodal' | 'code' | 'vision' | 'audio' | 'fast'
+export type HostingProviderId = 'anthropic' | 'amazon_bedrock' | 'openai'
+export type AuthMethodType = 'api_key' | 'aws_credentials' | 'none'
 
 export interface AuthFieldConfig {
   name: string
@@ -30,7 +30,7 @@ export interface AuthMethodConfig {
 export interface HostingProviderSupport {
   id: HostingProviderId
   displayName: string
-  providerModelId: string
+  hostingProviderModelId: string
   authMethod: AuthMethodType
   requiresEndpoint?: boolean
   endpointPlaceholder?: string
@@ -83,75 +83,25 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
         required: true
       },
       {
-        name: 'awsRegion',
-        label: 'AWS Region',
-        type: 'select',
+        name: 'awsRegionEnv',
+        label: 'AWS Region Environment Variable',
+        type: 'env_select',
+        placeholder: 'Select region variable...',
         required: true,
-        options: [
-          { value: 'us-east-1', label: 'US East (N. Virginia)' },
-          { value: 'us-west-2', label: 'US West (Oregon)' },
-          { value: 'eu-west-1', label: 'Europe (Ireland)' },
-          { value: 'eu-central-1', label: 'Europe (Frankfurt)' },
-          { value: 'ap-southeast-1', label: 'Asia Pacific (Singapore)' },
-          { value: 'ap-southeast-2', label: 'Asia Pacific (Sydney)' },
-          { value: 'ap-northeast-1', label: 'Asia Pacific (Tokyo)' }
-        ]
+        helpText: 'Environment variable containing your AWS region (e.g., us-east-1, us-west-2)'
+      },
+      {
+        name: 'regionPrefix',
+        label: 'Region Prefix',
+        type: 'text',
+        placeholder: 'us (optional)',
+        required: false,
+        helpText: 'Region prefix for model IDs (e.g., "us", "eu") - leave blank if not needed'
       }
     ],
     helpText: 'AWS credentials for accessing Bedrock models'
   },
   
-  gcp_oauth: {
-    type: 'gcp_oauth',
-    displayName: 'Google Cloud OAuth',
-    fields: [
-      {
-        name: 'gcpServiceAccountKeyEnv',
-        label: 'Service Account Key Environment Variable',
-        type: 'env_select',
-        placeholder: 'Select service account key variable...',
-        required: true,
-        helpText: 'Environment variable containing the GCP service account JSON key'
-      },
-      {
-        name: 'gcpProjectId',
-        label: 'GCP Project ID',
-        type: 'text',
-        placeholder: 'my-project-id',
-        required: true,
-        helpText: 'Your Google Cloud project ID'
-      },
-      {
-        name: 'gcpRegion',
-        label: 'GCP Region',
-        type: 'select',
-        required: true,
-        options: [
-          { value: 'us-central1', label: 'US Central (Iowa)' },
-          { value: 'us-east1', label: 'US East (South Carolina)' },
-          { value: 'us-west1', label: 'US West (Oregon)' },
-          { value: 'europe-west1', label: 'Europe West (Belgium)' },
-          { value: 'europe-west4', label: 'Europe West (Netherlands)' },
-          { value: 'asia-southeast1', label: 'Asia Southeast (Singapore)' },
-          { value: 'asia-northeast1', label: 'Asia Northeast (Tokyo)' }
-        ]
-      }
-    ]
-  },
-
-  azure_ad: {
-    type: 'azure_ad',
-    displayName: 'Azure AD',
-    fields: [
-      {
-        name: 'apiKeyEnv',
-        label: 'Azure API Key Environment Variable',
-        type: 'env_select',
-        placeholder: 'Select Azure API key variable...',
-        required: true
-      }
-    ]
-  },
   
   none: {
     type: 'none',
@@ -164,6 +114,28 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
 // Comprehensive model catalog with hosting provider support
 export const MODELS: Record<string, ModelDefinition> = {
   // Claude Models
+  'claude-opus-4.1': {
+    id: 'claude-opus-4.1',
+    displayName: 'Claude Opus 4.1',
+    vendor: 'anthropic',
+    category: 'multimodal',
+    description: 'Most advanced Claude model with enhanced reasoning capabilities',
+    hostingProviders: [
+      {
+        id: 'anthropic',
+        displayName: 'Anthropic',
+        hostingProviderModelId: 'claude-opus-4-1-20250805',
+        authMethod: 'api_key'
+      },
+      {
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'anthropic.claude-opus-4-1-20250805-v1:0',
+        authMethod: 'aws_credentials'
+      }
+    ]
+  },
+
   'claude-sonnet-4': {
     id: 'claude-sonnet-4',
     displayName: 'Claude Sonnet 4',
@@ -174,24 +146,16 @@ export const MODELS: Record<string, ModelDefinition> = {
       {
         id: 'anthropic',
         displayName: 'Anthropic',
-        providerModelId: 'claude-sonnet-4-20250514',
+        hostingProviderModelId: 'claude-sonnet-4-20250514',
         authMethod: 'api_key',
         documentation: 'https://docs.anthropic.com'
       },
       {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'anthropic.claude-sonnet-4-20250514-v1:0',
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'anthropic.claude-sonnet-4-20250514-v1:0',
         authMethod: 'aws_credentials',
         documentation: 'https://docs.aws.amazon.com/bedrock'
-      },
-      {
-        id: 'gcp_vertex',
-        displayName: 'Google Cloud Vertex AI',
-        providerModelId: 'publishers/anthropic/models/claude-sonnet-4',
-        authMethod: 'gcp_oauth',
-        notes: 'Use claude-sonnet-4@20250514 as provider_model_id',
-        documentation: 'https://cloud.google.com/vertex-ai'
       }
     ]
   },
@@ -206,21 +170,36 @@ export const MODELS: Record<string, ModelDefinition> = {
       {
         id: 'anthropic',
         displayName: 'Anthropic',
-        providerModelId: 'claude-opus-4-20250514',
+        hostingProviderModelId: 'claude-opus-4-20250514',
         authMethod: 'api_key'
       },
       {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'anthropic.claude-opus-4-20250514-v1:0',
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'anthropic.claude-opus-4-20250514-v1:0',
         authMethod: 'aws_credentials'
+      }
+    ]
+  },
+
+  'claude-sonnet-3.7': {
+    id: 'claude-sonnet-3.7',
+    displayName: 'Claude Sonnet 3.7',
+    vendor: 'anthropic',
+    category: 'text',
+    description: 'Enhanced Claude 3.5 with improved capabilities',
+    hostingProviders: [
+      {
+        id: 'anthropic',
+        displayName: 'Anthropic',
+        hostingProviderModelId: 'claude-3-7-sonnet-20250219',
+        authMethod: 'api_key'
       },
       {
-        id: 'gcp_vertex',
-        displayName: 'Google Cloud Vertex AI',
-        providerModelId: 'publishers/anthropic/models/claude-opus-4',
-        authMethod: 'gcp_oauth',
-        notes: 'Use claude-opus-4@20250514 as provider_model_id'
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'anthropic.claude-3-7-sonnet-20250219-v1:0',
+        authMethod: 'aws_credentials'
       }
     ]
   },
@@ -235,21 +214,14 @@ export const MODELS: Record<string, ModelDefinition> = {
       {
         id: 'anthropic',
         displayName: 'Anthropic',
-        providerModelId: 'claude-3-5-sonnet-20241022',
+        hostingProviderModelId: 'claude-3-5-sonnet-20241022',
         authMethod: 'api_key'
       },
       {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
         authMethod: 'aws_credentials'
-      },
-      {
-        id: 'gcp_vertex',
-        displayName: 'Google Cloud Vertex AI',
-        providerModelId: 'publishers/anthropic/models/claude-3-5-sonnet-v2',
-        authMethod: 'gcp_oauth',
-        notes: 'Use claude-3-5-sonnet-v2@20241022 as provider_model_id'
       }
     ]
   },
@@ -264,79 +236,100 @@ export const MODELS: Record<string, ModelDefinition> = {
       {
         id: 'anthropic',
         displayName: 'Anthropic',
-        providerModelId: 'claude-3-5-haiku-20241022',
+        hostingProviderModelId: 'claude-3-5-haiku-20241022',
         authMethod: 'api_key'
       },
       {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'anthropic.claude-3-5-haiku-20241022-v1:0',
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'anthropic.claude-3-5-haiku-20241022-v1:0',
         authMethod: 'aws_credentials'
       }
     ]
   },
 
-  // GPT Models
-  'gpt-4o': {
-    id: 'gpt-4o',
-    displayName: 'GPT-4o',
+  'claude-haiku-3': {
+    id: 'claude-haiku-3',
+    displayName: 'Claude Haiku 3',
+    vendor: 'anthropic',
+    category: 'text',
+    description: 'Original fast Claude model',
+    hostingProviders: [
+      {
+        id: 'anthropic',
+        displayName: 'Anthropic',
+        hostingProviderModelId: 'claude-3-haiku-20240307',
+        authMethod: 'api_key'
+      },
+      {
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'anthropic.claude-3-haiku-20240307-v1:0',
+        authMethod: 'aws_credentials'
+      }
+    ]
+  },
+
+  // OpenAI Frontier Models
+  'gpt-5': {
+    id: 'gpt-5',
+    displayName: 'GPT-5',
     vendor: 'openai',
     category: 'multimodal',
-    description: 'OpenAI\'s flagship multimodal model',
+    description: 'The best model for coding and agentic tasks across domains',
     hostingProviders: [
       {
         id: 'openai',
-        displayName: 'OpenAI Direct',
-        providerModelId: 'gpt-4o',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'gpt-5',
         authMethod: 'api_key'
-      },
-      {
-        id: 'azure_openai',
-        displayName: 'Azure OpenAI',
-        providerModelId: 'gpt-4o',
-        authMethod: 'azure_ad',
-        notes: 'Requires deployment name configuration',
-        requiresEndpoint: true,
-        endpointPlaceholder: 'https://your-resource.openai.azure.com/'
       }
     ]
   },
 
-  'gpt-4o-mini': {
-    id: 'gpt-4o-mini',
-    displayName: 'GPT-4o Mini',
+  'gpt-5-mini': {
+    id: 'gpt-5-mini',
+    displayName: 'GPT-5 mini',
     vendor: 'openai',
     category: 'text',
-    description: 'Smaller, faster version of GPT-4o',
+    description: 'A faster, cost-efficient version of GPT-5 for well-defined tasks',
     hostingProviders: [
       {
         id: 'openai',
-        displayName: 'OpenAI Direct',
-        providerModelId: 'gpt-4o-mini',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'gpt-5-mini',
         authMethod: 'api_key'
-      },
-      {
-        id: 'azure_openai',
-        displayName: 'Azure OpenAI',
-        providerModelId: 'gpt-4o-mini',
-        authMethod: 'azure_ad',
-        requiresEndpoint: true,
-        endpointPlaceholder: 'https://your-resource.openai.azure.com/'
       }
     ]
   },
 
-  'o1': {
-    id: 'o1',
-    displayName: 'OpenAI o1',
+  'gpt-5-nano': {
+    id: 'gpt-5-nano',
+    displayName: 'GPT-5 nano',
     vendor: 'openai',
-    category: 'text',
-    description: 'Reasoning-focused model for complex problems',
+    category: 'fast',
+    description: 'Fastest, most cost-efficient version of GPT-5',
     hostingProviders: [
       {
         id: 'openai',
-        displayName: 'OpenAI Direct',
-        providerModelId: 'o1',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'gpt-5-nano',
+        authMethod: 'api_key'
+      }
+    ]
+  },
+
+  'gpt-4.1': {
+    id: 'gpt-4.1',
+    displayName: 'GPT-4.1',
+    vendor: 'openai',
+    category: 'text',
+    description: 'Smartest non-reasoning model',
+    hostingProviders: [
+      {
+        id: 'openai',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'gpt-4.1',
         authMethod: 'api_key'
       }
     ]
@@ -351,9 +344,25 @@ export const MODELS: Record<string, ModelDefinition> = {
     description: 'Amazon\'s flagship multimodal model',
     hostingProviders: [
       {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'amazon.nova-pro-v1:0',
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'amazon.nova-pro-v1:0',
+        authMethod: 'aws_credentials'
+      }
+    ]
+  },
+
+  'nova-premier': {
+    id: 'nova-premier',
+    displayName: 'Amazon Nova Premier',
+    vendor: 'amazon',
+    category: 'multimodal',
+    description: 'Amazon\'s most advanced multimodal model',
+    hostingProviders: [
+      {
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'amazon.nova-premier-v1:0',
         authMethod: 'aws_credentials'
       }
     ]
@@ -367,9 +376,25 @@ export const MODELS: Record<string, ModelDefinition> = {
     description: 'Fast and cost-effective Amazon model',
     hostingProviders: [
       {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'amazon.nova-lite-v1:0',
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'amazon.nova-lite-v1:0',
+        authMethod: 'aws_credentials'
+      }
+    ]
+  },
+
+  'nova-micro': {
+    id: 'nova-micro',
+    displayName: 'Amazon Nova Micro',
+    vendor: 'amazon',
+    category: 'text',
+    description: 'Most cost-efficient Amazon model for simple tasks',
+    hostingProviders: [
+      {
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'amazon.nova-micro-v1:0',
         authMethod: 'aws_credentials'
       }
     ]
@@ -378,124 +403,36 @@ export const MODELS: Record<string, ModelDefinition> = {
   // Llama Models
   'llama-3-3-70b': {
     id: 'llama-3-3-70b',
-    displayName: 'Llama 3.3 70B',
+    displayName: 'Llama 3.3 70B Instruct',
     vendor: 'meta',
     category: 'text',
-    description: 'Meta\'s latest large language model',
+    description: 'Meta\'s latest large language model with instruction tuning',
     hostingProviders: [
       {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'meta.llama3-3-70b-instruct-v1:0',
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'meta.llama3-3-70b-instruct-v1:0',
         authMethod: 'aws_credentials'
-      },
-      {
-        id: 'gcp_vertex',
-        displayName: 'Google Cloud Vertex AI',
-        providerModelId: 'publishers/meta/models/llama3-3',
-        authMethod: 'gcp_oauth',
-        notes: 'Use Llama-3-3-70B-Instruct as provider_model_id'
       }
     ]
   },
 
   'llama-3-1-8b': {
     id: 'llama-3-1-8b',
-    displayName: 'Llama 3.1 8B',
+    displayName: 'Llama 3.1 8B Instruct',
     vendor: 'meta',
     category: 'text',
-    description: 'Efficient Llama model for general use',
+    description: 'Efficient instruction-tuned Llama model for general use',
     hostingProviders: [
       {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'meta.llama3-1-8b-instruct-v1:0',
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'meta.llama3-1-8b-instruct-v1:0',
         authMethod: 'aws_credentials'
-      },
-      {
-        id: 'gcp_vertex',
-        displayName: 'Google Cloud Vertex AI',
-        providerModelId: 'publishers/meta/models/llama3_1',
-        authMethod: 'gcp_oauth',
-        notes: 'Use Llama-3-1-8B-Instruct as provider_model_id'
-      },
-      {
-        id: 'huggingface',
-        displayName: 'Hugging Face',
-        providerModelId: 'meta-llama/llama-3.2-3b',
-        authMethod: 'api_key',
-        requiresEndpoint: true,
-        endpointPlaceholder: 'https://api-inference.huggingface.co/models/'
       }
     ]
   },
 
-  // DeepSeek Models
-  'deepseek-r1': {
-    id: 'deepseek-r1',
-    displayName: 'DeepSeek R1',
-    vendor: 'deepseek',
-    category: 'text',
-    description: 'DeepSeek\'s reasoning model',
-    hostingProviders: [
-      {
-        id: 'aws_bedrock',
-        displayName: 'AWS Bedrock',
-        providerModelId: 'deepseek.r1-v1:0',
-        authMethod: 'aws_credentials'
-      },
-      {
-        id: 'gcp_vertex',
-        displayName: 'Google Cloud Vertex AI',
-        providerModelId: 'publishers/deepseek-ai/models/deepseek-r1',
-        authMethod: 'gcp_oauth',
-        notes: 'Use deepseek-ai/DeepSeek-R1-0528 as provider_model_id'
-      }
-    ]
-  },
-
-  // Google Models
-  'gemini-pro': {
-    id: 'gemini-pro',
-    displayName: 'Gemini Pro',
-    vendor: 'google',
-    category: 'multimodal',
-    description: 'Google\'s flagship multimodal model',
-    hostingProviders: [
-      {
-        id: 'gcp_vertex',
-        displayName: 'Google Cloud Vertex AI',
-        providerModelId: 'publishers/google/models/gemini-pro',
-        authMethod: 'gcp_oauth',
-        notes: 'Use google/gemini-1.0-pro as provider_model_id'
-      }
-    ]
-  },
-
-  'gemma-7b': {
-    id: 'gemma-7b',
-    displayName: 'Gemma 7B',
-    vendor: 'google',
-    category: 'text',
-    description: 'Google\'s open-source language model',
-    hostingProviders: [
-      {
-        id: 'gcp_vertex',
-        displayName: 'Google Cloud Vertex AI',
-        providerModelId: 'publishers/google/models/gemma',
-        authMethod: 'gcp_oauth',
-        notes: 'Use gemma-2b as provider_model_id'
-      },
-      {
-        id: 'huggingface',
-        displayName: 'Hugging Face',
-        providerModelId: 'google/gemma-7b-it',
-        authMethod: 'api_key',
-        requiresEndpoint: true,
-        endpointPlaceholder: 'https://api-inference.huggingface.co/models/'
-      }
-    ]
-  }
 }
 
 // Helper functions with simplified API
@@ -531,7 +468,7 @@ export function getHostingProviderModelId(modelId: string, hostingProviderId: Ho
   if (!model) return undefined
   
   const provider = model.hostingProviders.find(p => p.id === hostingProviderId)
-  return provider?.providerModelId
+  return provider?.hostingProviderModelId
 }
 
 export function getHostingProvider(hostingProviderId: HostingProviderId): HostingProviderSupport | undefined {
