@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => ({
       '@types': path.resolve(__dirname, './src/types'),
       '@constants': path.resolve(__dirname, './src/constants'),
       '@config': path.resolve(__dirname, './src/config'),
+      '@data': path.resolve(__dirname, './src/data'),
     },
   },
   server: {

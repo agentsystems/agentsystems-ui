@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { 
   HomeIcon, 
   CpuChipIcon,
+  ShoppingCartIcon,
   BoltIcon,
   DocumentTextIcon,
   WrenchScrewdriverIcon
@@ -18,6 +19,7 @@ const navigationSections = [
     items: [
       { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: HomeIcon },
       { name: 'Agents', href: ROUTES.AGENTS, icon: CpuChipIcon },
+      { name: 'Marketplace', href: '/marketplace', icon: ShoppingCartIcon, badge: 'BETA' },
       { name: 'Executions', href: ROUTES.EXECUTIONS, icon: BoltIcon },
     ]
   },
@@ -61,6 +63,7 @@ export default function Sidebar() {
               >
                 <item.icon className={styles.navIcon} aria-hidden="true" />
                 <span>{item.name}</span>
+                {item.badge && <span className={styles.navBadge}>{item.badge}</span>}
               </NavLink>
             ))}
           </div>

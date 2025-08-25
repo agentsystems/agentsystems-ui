@@ -199,3 +199,17 @@
   color: var(--accent-3);
   opacity: 0.6;
 }
+
+/* Navigation badge */
+.navBadge {
+  margin-left: auto;
+  padding: 2px 6px;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
