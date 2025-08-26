@@ -95,6 +95,45 @@
   margin: 16px 0 24px 0;
 }
 
+.imageInfo {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.imageInfo .metadataItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.imageInfo .metadataItem:first-child {
+  padding-top: 0;
+}
+
+.imageInfo .metadataItem:last-child {
+  padding-bottom: 0;
+}
+
+.configSection, .runtimeSection {
+  margin-bottom: 20px;
+}
+
+.configSection:last-child, .runtimeSection:last-child {
+  margin-bottom: 0;
+}
+
+.sectionHeader {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 12px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

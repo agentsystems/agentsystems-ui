@@ -30,6 +30,9 @@ import styles from './AgentGrid.module.css'
 interface Agent {
   name: string
   state: 'running' | 'stopped' | 'not-created'
+  repo?: string
+  tag?: string
+  image?: string
 }
 
 interface AgentGridProps {

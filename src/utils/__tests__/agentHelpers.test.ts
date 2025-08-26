@@ -1,35 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { getAgentImage, getStatusVariant, formatUptime, getAgentErrorMessage } from '../agentHelpers'
+import { getStatusVariant, formatUptime, getAgentErrorMessage } from '../agentHelpers'
 
 describe('Agent Helpers', () => {
-  describe('getAgentImage', () => {
-    it('returns correct image for known agents', () => {
-      expect(getAgentImage('hello-world-agent'))
-        .toBe('agentsystems/hello-world-agent:latest')
-      
-      expect(getAgentImage('agent-template'))
-        .toBe('agentsystems/agent-template:latest')
-      
-      expect(getAgentImage('historical-events-jokes'))
-        .toBe('private-repository-examples/historical-events-jokes:0.1.0')
-    })
-
-    it('handles partial name matches', () => {
-      expect(getAgentImage('hello-world-agent-v2'))
-        .toBe('agentsystems/hello-world-agent:latest')
-      
-      expect(getAgentImage('ibl-agent-hello-there-custom'))
-        .toBe('ironbirdlabs/ibl-agent-hello-there:latest')
-    })
-
-    it('returns generic format for unknown agents', () => {
-      expect(getAgentImage('completely-unknown-agent'))
-        .toBe('completely-unknown-agent:latest')
-      
-      expect(getAgentImage('custom-ml-processing-agent'))
-        .toBe('custom-ml-processing-agent:latest')
-    })
-  })
 
   describe('getStatusVariant', () => {
     it('maps agent states to CSS variants', () => {
