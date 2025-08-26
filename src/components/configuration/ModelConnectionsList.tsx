@@ -1,6 +1,6 @@
 import { TrashIcon, CpuChipIcon } from '@heroicons/react/24/outline'
 import Card from '@components/common/Card'
-import { getModel, AUTH_METHODS } from '../../data/modelCatalogUnified'
+import { getModel } from '../../data/modelCatalogUnified'
 import { type ModelConnectionForm } from '../../types/config'
 import { useAudio } from '@hooks/useAudio'
 import styles from './ModelConnectionsList.module.css'
@@ -45,7 +45,6 @@ export default function ModelConnectionsList({
           {connections.map((connection) => {
             const model = getModel(connection.model_id)
             const hostingProvider = model?.hostingProviders.find(p => p.id === connection.hosting_provider)
-            const authMethod = AUTH_METHODS[connection.authMethod]
             
             return (
               <div key={connection.id} className={styles.listItem}>
