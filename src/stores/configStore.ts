@@ -57,6 +57,7 @@ interface ConfigState {
   reset: () => void
   getReferencedEnvVars: () => Set<string>
   getReferencedRegistries: () => Set<string>
+  getRegistryUsage: () => Map<string, string[]>
 }
 
 const defaultConfig: AgentSystemsConfig = {
@@ -427,6 +428,22 @@ export const useConfigStore = create<ConfigState>()(
         })
         
         return referenced
+      },
+
+      getRegistryUsage: () => {
+        const state = get()
+        const usage = new Map<string, string[]>()
+        
+        state.config.agents.forEach(agent => {
+          if (agent.registry_connection) {
+            if (!usage.has(agent.registry_connection)) {
+              usage.set(agent.registry_connection, [])
+            }
+            usage.get(agent.registry_connection)!.push(agent.name)
+          }
+        })
+        
+        return usage
       },
 
       // Restart management functions

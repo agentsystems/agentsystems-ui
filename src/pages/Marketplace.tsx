@@ -60,7 +60,7 @@ export default function Marketplace() {
 
   const handleAddToDeployment = (agent: MarketplaceAgent) => {
     // TODO: Integrate with actual deployment configuration
-    alert(`Adding ${agent.displayName} to your deployment configuration...`)
+    alert(`Agent Hub is currently in beta - this is a demonstration of the planned Agent Hub feature. ${agent.displayName} is not actually being deployed to your platform.`)
   }
 
   return (
