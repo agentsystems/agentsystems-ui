@@ -28,12 +28,15 @@ import Card from '@components/common/Card'
 import StatusBadge from '@components/common/StatusBadge'
 import { PowerIcon, EyeIcon } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
-import { getAgentImage, getAgentVersion, getAgentButtonText } from '@utils/agentHelpers'
+import { getAgentButtonText } from '@utils/agentHelpers'
 import styles from './AgentCard.module.css'
 
 interface Agent {
   name: string
   state: 'running' | 'stopped' | 'not-created'
+  repo?: string
+  tag?: string
+  image?: string
 }
 
 interface AgentCardProps {
@@ -85,10 +88,10 @@ export default function AgentCard({
             {agent.name.length > 23 ? `${agent.name.substring(0, 23)}..` : agent.name}
           </h3>
           <div className={styles.agentVersion}>
-            {getAgentVersion(agent.name)}
+            {agent.tag || 'latest'}
           </div>
           <div className={styles.agentImage}>
-            {getAgentImage(agent.name)}
+            {agent.image || agent.name}
           </div>
         </div>
         <StatusBadge 

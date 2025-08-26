@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
+import { useConfigStore } from '@stores/configStore'
 import AgentFilters from '@components/agents/AgentFilters'
 import AgentGrid from '@components/agents/AgentGrid'
 import ErrorMessage from '@components/ErrorMessage'
@@ -33,6 +34,10 @@ export default function Agents() {
   const [searchQuery, setSearchQuery] = useState('')
   const [operatingAgent, setOperatingAgent] = useState<string | null>(null)
   const { toasts, removeToast, showSuccess, showError } = useToast()
+  
+  // Get agent configurations for image/tag information
+  const { getAgents } = useConfigStore()
+  const agentConfigs = getAgents()
 
   // Initialize filter from URL parameter
   useEffect(() => {
@@ -102,8 +107,19 @@ export default function Agents() {
     )
   }
 
-  // Filter agents based on selected filter and search query
+  // Filter agents and enhance with config data (repo, tag, version)
   const filteredAgents = (data?.agents || [])
+    .map(agent => {
+      // Find matching config for this agent to get real image info
+      const config = agentConfigs.find(c => c.name === agent.name)
+      return {
+        ...agent,
+        // Add real image information from config
+        repo: config?.repo,
+        tag: config?.tag,
+        image: config ? `${config.repo}:${config.tag}` : agent.name
+      }
+    })
     .filter(agent => {
       // State filter
       if (selectedFilter === 'running') return agent.state === 'running'

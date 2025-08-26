@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
 import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
+import { useConfigStore } from '@stores/configStore'
 import { getAgentButtonText } from '@utils/agentHelpers'
 import Card from '@components/common/Card'
 import SystemStatusBanner from '@components/common/SystemStatusBanner'
@@ -35,6 +36,11 @@ export default function AgentDetail() {
   })
 
   const currentAgent = agentsData?.agents.find(a => a.name === agentName)
+  
+  // Get agent configuration for image/tag information
+  const { getAgents } = useConfigStore()
+  const agentConfigs = getAgents()
+  const agentConfig = agentConfigs.find(c => c.name === agentName)
 
   // Watch for agent state changes and trigger metadata refresh
   useEffect(() => {
@@ -311,6 +317,28 @@ export default function AgentDetail() {
       <div className={styles.grid}>
         <Card>
           <h2>Agent Information</h2>
+          
+          {/* Container/Image Information from config */}
+          {agentConfig && (
+            <div className={styles.configSection}>
+              <h3 className={styles.sectionHeader}>Container Image</h3>
+              <div className={styles.metadataGrid}>
+                <div className={styles.metadataItem}>
+                  <label>Repository</label>
+                  <span className={styles.metadataValue}>{agentConfig.repo}</span>
+                </div>
+                <div className={styles.metadataItem}>
+                  <label>Tag</label>
+                  <span className={styles.metadataValue}>{agentConfig.tag}</span>
+                </div>
+                <div className={styles.metadataItem}>
+                  <label>Full Image</label>
+                  <span className={styles.metadataValue}>{agentConfig.repo}:{agentConfig.tag}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {currentAgent && (currentAgent.state === 'stopped' || currentAgent.state === 'not-created') ? (
             <div className={styles.unavailableState}>
               <div className={styles.placeholderIcon}>
@@ -333,11 +361,13 @@ export default function AgentDetail() {
               </p>
             </div>
           ) : metadata ? (
-            <div className={styles.metadataGrid}>
-              <div className={styles.metadataItem}>
-                <label>Name</label>
-                <span className={styles.metadataValue}>{metadata.name}</span>
-              </div>
+            <div className={styles.runtimeSection}>
+              <h3 className={styles.sectionHeader}>Runtime Metadata</h3>
+              <div className={styles.metadataGrid}>
+                <div className={styles.metadataItem}>
+                  <label>Name</label>
+                  <span className={styles.metadataValue}>{metadata.name}</span>
+                </div>
               
               <div className={styles.metadataItem}>
                 <label>Namespace</label>
@@ -399,6 +429,7 @@ export default function AgentDetail() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
           ) : (
             <div className={styles.errorState}>
@@ -465,8 +496,7 @@ export default function AgentDetail() {
         <Card>
           <h2>Execute Agent</h2>
           <p className={styles.instructions}>
-            Enter a JSON payload to execute the agent. Make sure you have configured your auth token in{' '}
-            <a href="/settings" className={styles.settingsLink}>Settings</a> first.
+            Enter a JSON payload to execute the agent.
           </p>
           <div className={styles.invokeForm}>
             <label>
