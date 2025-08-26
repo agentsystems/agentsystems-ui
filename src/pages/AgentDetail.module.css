@@ -91,6 +91,10 @@
   text-decoration: underline;
 }
 
+.agentControls {
+  margin: 16px 0 24px 0;
+}
+
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
