@@ -83,7 +83,7 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
         required: true
       },
       {
-        name: 'awsRegionEnv',
+        name: 'awsRegion',
         label: 'AWS Region Environment Variable',
         type: 'env_select',
         placeholder: 'Select region variable...',

@@ -55,9 +55,6 @@ export default function ModelConnectionsList({
                     <span className={styles.keyName}>
                       {model?.displayName || connection.model_id}
                     </span>
-                    <span className={styles.referencedBadge}>
-                      {hostingProvider?.displayName || connection.hosting_provider}
-                    </span>
                   </div>
                   
                   <div className={styles.itemActions}>
@@ -79,18 +76,65 @@ export default function ModelConnectionsList({
                   </div>
                 </div>
                 
-                <div className={styles.itemValue}>
-                  <code className={styles.value}>
-                    {authMethod?.displayName || 'Unknown'}: 
-                    {connection.authMethod === 'api_key' && connection.apiKeyEnv ? 
-                      ` ${connection.apiKeyEnv}` :
-                     connection.authMethod === 'aws_credentials' ? 
-                      ` ${connection.awsAccessKeyEnv} (${connection.awsRegion})` :
-                     connection.authMethod === 'none' ? 
-                      ' No authentication' : 
-                      ' Configuration required'}
-                    {connection.endpoint && ` → ${connection.endpoint}`}
-                  </code>
+                <div className={styles.itemDetails}>
+                  <div className={styles.detailBox}>
+                    <span className={styles.detailLabel}>Model ID:</span>
+                    <code className={styles.detailValue}>
+                      {connection.model_id}
+                    </code>
+                  </div>
+                  
+                  <div className={styles.detailBox}>
+                    <span className={styles.detailLabel}>Hosting Provider:</span>
+                    <code className={styles.detailValue}>
+                      {hostingProvider?.displayName || connection.hosting_provider}
+                    </code>
+                  </div>
+                  
+                  <div className={styles.detailBox}>
+                    <span className={styles.detailLabel}>Credentials:</span>
+                    <div className={styles.credentialsContainer}>
+                      {connection.authMethod === 'api_key' && connection.apiKeyEnv && (
+                        <code className={styles.detailValue}>
+                          API Key: {connection.apiKeyEnv}
+                        </code>
+                      )}
+                      {connection.authMethod === 'aws_credentials' && (
+                        <>
+                          {connection.awsAccessKeyEnv && (
+                            <code className={styles.detailValue}>
+                              Access Key: {connection.awsAccessKeyEnv}
+                            </code>
+                          )}
+                          {connection.awsSecretKeyEnv && (
+                            <code className={styles.detailValue}>
+                              Secret Key: {connection.awsSecretKeyEnv}
+                            </code>
+                          )}
+                          {connection.awsRegion && connection.awsRegion.trim() && (
+                            <code className={styles.detailValue}>
+                              Region Env: {connection.awsRegion}
+                            </code>
+                          )}
+                        </>
+                      )}
+                      {connection.authMethod === 'none' && (
+                        <code className={styles.detailValue}>
+                          No authentication required
+                        </code>
+                      )}
+                      {(!connection.authMethod || (connection.authMethod === 'api_key' && !connection.apiKeyEnv)) && (
+                        <code className={styles.detailValue}>
+                          Configuration required
+                        </code>
+                      )}
+                      {connection.endpoint && (
+                        <code className={styles.detailValue}>
+                          Endpoint: {connection.endpoint}
+                        </code>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )

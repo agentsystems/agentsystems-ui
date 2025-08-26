@@ -34,7 +34,7 @@ export default function ModelSelector({
           <optgroup key={vendor} label={vendor.charAt(0).toUpperCase() + vendor.slice(1)}>
             {models.map(model => (
               <option key={model.id} value={model.id}>
-                {model.displayName}
+                {model.displayName} ({model.id})
               </option>
             ))}
           </optgroup>

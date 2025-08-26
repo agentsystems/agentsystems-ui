@@ -290,7 +290,7 @@ export const configUtils = {
     apiKeyEnv: config.auth.api_key_env || '',
     awsAccessKeyEnv: config.auth.aws_access_key_env || '',
     awsSecretKeyEnv: config.auth.aws_secret_key_env || '',
-    awsRegion: config.auth.aws_region || 'us-east-1',
+    awsRegion: config.auth.aws_region || '',
     regionPrefix: config.auth.region_prefix || '',
     gcpServiceAccountKeyEnv: config.auth.gcp_service_account_key_env || '',
     gcpProjectId: config.auth.gcp_project_id || '',
