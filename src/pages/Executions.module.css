@@ -1185,6 +1185,9 @@
 
 .detailItem[data-content-type="result"] .detailValue {
   border-left-color: var(--info);
+  overflow-x: auto;
+  white-space: pre;
+  word-break: normal;
 }
 
 .detailItem[data-content-type="error"] .detailValue {

@@ -21,11 +21,10 @@ export default function AgentDetail() {
   const { toasts, removeToast, showError } = useToast()
   const { gatewayUrl } = useAuthStore()
   const queryClient = useQueryClient()
-  const [invokePayload, setInvokePayload] = useState('{\n  "message": "Hello, agent!",\n  "task": "process this request"\n}')
+  const [invokePayload, setInvokePayload] = useState('{\n  "date": "March 15"\n}')
   const [invocationResult, setInvocationResult] = useState<InvocationResult | null>(null)
   const [pollingStatus, setPollingStatus] = useState<string>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [syncMode, setSyncMode] = useState(false)
   const previousAgentState = useRef<string | undefined>()
 
   // Get agent state from agents list
@@ -247,10 +246,6 @@ export default function AgentDetail() {
       const sanitizedPayload = sanitizeJsonString(invokePayload)
       const payload = JSON.parse(sanitizedPayload)
       
-      // Add sync flag if enabled
-      if (syncMode) {
-        payload.sync = true
-      }
       
       // Update UI with sanitized payload if it was changed
       if (sanitizedPayload !== invokePayload) {
@@ -269,8 +264,21 @@ export default function AgentDetail() {
       <div className={styles.header}>
         <div className={styles.titleRow}>
           <h1>{agentName}</h1>
-          {currentAgent && (
-            <>
+        </div>
+        <p className={styles.subtitle}>
+          Agent details and invocation
+        </p>
+      </div>
+
+      {currentAgent && (
+          <>
+            <SystemStatusBanner
+              status={currentAgent.state === 'running' ? 'healthy' : 'warning'}
+              title="Agent Status"
+              message={`Agent is currently ${currentAgent.state === 'running' ? 'running and ready for requests' : currentAgent.state === 'stopped' ? 'stopped but will auto-start on first request' : 'not created yet'}`}
+            />
+            
+            <div className={styles.agentControls}>
               {currentAgent.state === 'stopped' || currentAgent.state === 'not-created' ? (
                 <button
                   className="btn btn-sm btn-subtle btn-success-color"
@@ -296,20 +304,8 @@ export default function AgentDetail() {
                   {stopMutation.isPending ? 'Turning Off...' : getAgentButtonText(currentAgent.state)}
                 </button>
               )}
-            </>
-          )}
-        </div>
-        <p className={styles.subtitle}>
-          Agent details and invocation
-        </p>
-      </div>
-
-      {currentAgent && (
-          <SystemStatusBanner
-            status={currentAgent.state === 'running' ? 'healthy' : 'warning'}
-            title="Agent Status"
-            message={`Agent is currently ${currentAgent.state === 'running' ? 'running and ready for requests' : currentAgent.state === 'stopped' ? 'stopped but will auto-start on first request' : 'not created yet'}`}
-          />
+            </div>
+          </>
         )}
 
       <div className={styles.grid}>
@@ -517,17 +513,6 @@ export default function AgentDetail() {
               )}
             </div>
 
-            <div className={styles.options}>
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={syncMode}
-                  onChange={(e) => setSyncMode(e.target.checked)}
-                  className={styles.checkbox}
-                />
-                Synchronous mode (wait for completion)
-              </label>
-            </div>
             
             <button
               className="btn btn-lg btn-bright"
