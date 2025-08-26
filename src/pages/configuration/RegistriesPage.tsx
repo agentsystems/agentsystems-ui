@@ -39,6 +39,7 @@ export default function RegistriesPage() {
     deleteRegistryConnection,
     getEnvVars,
     getReferencedRegistries,
+    getRegistryUsage,
     saveConfig
   } = useConfigStore()
 
@@ -46,6 +47,7 @@ export default function RegistriesPage() {
   const envVars = getEnvVars()
   const availableEnvVars = envVars.map(env => env.key)
   const referencedRegistries = getReferencedRegistries()
+  const registryUsage = getRegistryUsage()
 
   const validateForm = (data: Omit<RegistryConnectionForm, 'id'>): boolean => {
     const newErrors: Record<string, string> = {}
@@ -217,7 +219,7 @@ export default function RegistriesPage() {
                   if (errors.url) setErrors(prev => ({ ...prev, url: '' }))
                 }}
                 className={`${styles.input} ${errors.url ? styles.inputError : ''}`}
-                placeholder="https://registry.docker.io"
+                placeholder="docker.io"
                 required
               />
               {errors.url && (
@@ -388,6 +390,7 @@ export default function RegistriesPage() {
           <div className={styles.list}>
             {registries.map((registry) => {
               const isReferenced = referencedRegistries.has(registry.id)
+              const agentList = registryUsage.get(registry.id) || []
               
               return (
                 <div key={registry.id} className={styles.listItem}>
@@ -441,10 +444,34 @@ export default function RegistriesPage() {
                 </div>
 
                 {isReferenced && (
-                  <div className={styles.referencedWarning}>
-                    <ExclamationTriangleIcon />
-                    <span>This registry is referenced by agents and cannot be deleted</span>
-                  </div>
+                  <>
+                    <div style={{ marginTop: '1rem' }} />
+                    <div className={styles.referencedWarning}>
+                      <ExclamationTriangleIcon />
+                      <span>
+                        This registry is referenced by {agentList.length} agent{agentList.length !== 1 ? 's' : ''} and cannot be deleted
+                      </span>
+                    </div>
+                    {agentList.length > 0 && (
+                      <details className={styles.agentDetails}>
+                        <summary className={styles.agentSummary}>
+                          Show {Math.min(agentList.length, 10)} agent{agentList.length !== 1 ? 's' : ''}
+                        </summary>
+                        <div className={styles.agentList}>
+                          {agentList.slice(0, 10).map((agentName, index) => (
+                            <code key={index} className={styles.agentName}>
+                              {agentName}
+                            </code>
+                          ))}
+                          {agentList.length > 10 && (
+                            <span className={styles.moreAgents}>
+                              ...and {agentList.length - 10} more
+                            </span>
+                          )}
+                        </div>
+                      </details>
+                    )}
+                  </>
                 )}
               </div>
               )

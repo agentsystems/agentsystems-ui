@@ -185,7 +185,7 @@ export default function RegistriesTab() {
                   if (errors.url) setErrors(prev => ({ ...prev, url: '' }))
                 }}
                 className={`${styles.input} ${errors.url ? styles.inputError : ''}`}
-                placeholder="https://registry.docker.io"
+                placeholder="docker.io"
                 required
               />
               {errors.url && (
