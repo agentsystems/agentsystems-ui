@@ -83,27 +83,35 @@
   font-size: 0.875rem;
 }
 
-.referencedBadge {
-  background: var(--surface-3);
-  color: var(--text-secondary);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-}
-
 .itemActions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.itemValue {
+.itemDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
   margin-left: 1.625rem; /* Align with the text after the icon */
 }
 
-.value {
+.detailBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.detailValue {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--text-secondary);
@@ -111,9 +119,18 @@
   padding: 0.375rem 0.5rem;
   border-radius: 0.25rem;
   border: 1px solid var(--border);
-  display: inline-block;
-  max-width: 100%;
+  display: block;
   word-break: break-all;
+}
+
+.credentialsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.credentialsContainer .detailValue {
+  margin: 0;
 }
 
 /* Responsive design */
@@ -129,7 +146,7 @@
     justify-content: flex-end;
   }
 
-  .itemValue {
+  .itemDetails {
     margin-left: 0;
   }
 }
@@ -145,13 +162,13 @@
   box-shadow: 0 0 10px rgba(0, 255, 65, 0.1);
 }
 
-.theme-cyber .referencedBadge {
-  border-radius: 0;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-}
-
-.theme-cyber .value {
+.theme-cyber .detailValue {
   border-radius: 0;
   border-color: var(--border-strong);
+  font-family: var(--font-mono);
+}
+
+.theme-cyber .detailLabel {
+  font-family: var(--font-mono);
+  color: var(--accent);
 }
