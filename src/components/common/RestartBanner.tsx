@@ -63,10 +63,12 @@ export default function RestartBanner() {
                 onClick={() => {
                   clearRestartRequired()
                   setIsRestarting(false)
+                  // Force page refresh to pick up platform changes
+                  window.location.reload()
                 }}
                 className="btn btn-sm btn-bright"
               >
-                I've run the restart command
+                Restart executed and completed
               </button>
               
               <button
