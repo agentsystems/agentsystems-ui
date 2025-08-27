@@ -102,12 +102,13 @@ export interface ModelConnectionForm {
   enabled: boolean
   hosting_provider_model_id: string // Auto-populated from catalog
   endpoint: string // For custom/ollama
-  authMethod: 'api_key' | 'aws_credentials' | 'none'
+  authMethod: 'api_key' | 'aws_credentials' | 'ollama_auth' | 'none'
   apiKeyEnv: string
   awsAccessKeyEnv: string
   awsSecretKeyEnv: string
   awsRegion: string
   regionPrefix: string
+  baseUrl: string
   gcpServiceAccountKeyEnv: string
   gcpProjectId: string
   gcpRegion: string

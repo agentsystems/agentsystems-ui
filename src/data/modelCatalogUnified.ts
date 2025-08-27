@@ -5,10 +5,10 @@
  * into one maintainable data structure while preserving the existing UX flow.
  */
 
-export type ModelVendor = 'anthropic' | 'openai' | 'meta' | 'amazon'
+export type ModelVendor = 'anthropic' | 'openai' | 'meta' | 'amazon' | 'google'
 export type ModelCategory = 'text' | 'multimodal' | 'code' | 'vision' | 'audio' | 'fast'
-export type HostingProviderId = 'anthropic' | 'amazon_bedrock' | 'openai'
-export type AuthMethodType = 'api_key' | 'aws_credentials' | 'none'
+export type HostingProviderId = 'anthropic' | 'amazon_bedrock' | 'openai' | 'ollama'
+export type AuthMethodType = 'api_key' | 'aws_credentials' | 'ollama_auth' | 'none'
 
 export interface AuthFieldConfig {
   name: string
@@ -102,6 +102,29 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
     helpText: 'AWS credentials for accessing Bedrock models'
   },
   
+  ollama_auth: {
+    type: 'ollama_auth',
+    displayName: 'Ollama Authentication',
+    fields: [
+      {
+        name: 'baseUrl',
+        label: 'Ollama Server URL',
+        type: 'url',
+        placeholder: 'http://localhost:11434',
+        required: true,
+        helpText: 'URL of your Ollama server (local or remote)'
+      },
+      {
+        name: 'apiKeyEnv',
+        label: 'API Key Environment Variable (Optional)',
+        type: 'env_select',
+        placeholder: 'Leave empty for local/network Ollama...',
+        required: false,
+        helpText: 'Only needed for authenticated remote Ollama deployments behind reverse proxies'
+      }
+    ],
+    helpText: 'Configure connection to Ollama server with optional authentication'
+  },
   
   none: {
     type: 'none',
@@ -480,9 +503,9 @@ export const MODELS: Record<string, ModelDefinition> = {
     ]
   },
 
-  // Llama Models
-  'llama-3-3-70b': {
-    id: 'llama-3-3-70b',
+  // Llama Models (Ollama naming convention)
+  'llama3.3:70b': {
+    id: 'llama3.3:70b',
     displayName: 'Llama 3.3 70B Instruct',
     vendor: 'meta',
     category: 'text',
@@ -493,22 +516,83 @@ export const MODELS: Record<string, ModelDefinition> = {
         displayName: 'Amazon Bedrock',
         hostingProviderModelId: 'meta.llama3-3-70b-instruct-v1:0',
         authMethod: 'aws_credentials'
+      },
+      {
+        id: 'ollama',
+        displayName: 'Ollama',
+        hostingProviderModelId: 'llama3.3:70b',
+        authMethod: 'ollama_auth'
       }
     ]
   },
 
-  'llama-3-1-8b': {
-    id: 'llama-3-1-8b',
+  'llama3.2:3b': {
+    id: 'llama3.2:3b',
+    displayName: 'Llama 3.2 3B Instruct',
+    vendor: 'meta',
+    category: 'fast',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'ollama',
+        displayName: 'Ollama',
+        hostingProviderModelId: 'llama3.2:3b',
+        authMethod: 'ollama_auth'
+      }
+    ]
+  },
+
+  'llama3.2:1b': {
+    id: 'llama3.2:1b',
+    displayName: 'Llama 3.2 1B Instruct',
+    vendor: 'meta',
+    category: 'fast',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'ollama',
+        displayName: 'Ollama',
+        hostingProviderModelId: 'llama3.2:1b',
+        authMethod: 'ollama_auth'
+      }
+    ]
+  },
+
+  // Google Gemma Models
+  'gemma2:2b': {
+    id: 'gemma2:2b',
+    displayName: 'Gemma 2 2B Instruct',
+    vendor: 'google',
+    category: 'fast',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'ollama',
+        displayName: 'Ollama',
+        hostingProviderModelId: 'gemma2:2b',
+        authMethod: 'ollama_auth'
+      }
+    ]
+  },
+
+  'llama3.1:8b': {
+    id: 'llama3.1:8b',
     displayName: 'Llama 3.1 8B Instruct',
     vendor: 'meta',
     category: 'text',
-    description: 'Efficient instruction-tuned Llama model for general use',
+    description: '',
     hostingProviders: [
       {
         id: 'amazon_bedrock',
         displayName: 'Amazon Bedrock',
         hostingProviderModelId: 'meta.llama3-1-8b-instruct-v1:0',
         authMethod: 'aws_credentials'
+      },
+      {
+        id: 'ollama',
+        displayName: 'Ollama',
+        hostingProviderModelId: 'llama3.1:8b',
+        authMethod: 'ollama_auth'
       }
     ]
   },
