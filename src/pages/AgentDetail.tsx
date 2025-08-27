@@ -69,7 +69,7 @@ export default function AgentDetail() {
     enabled: !!agentName,
     refetchInterval: (query) => {
       const executions = query.state.data?.executions || []
-      const hasRunning = executions.some((e: any) => e.state === 'running' || e.state === 'queued')
+      const hasRunning = executions.some((e: Execution) => e.state === 'running' || e.state === 'queued')
       return hasRunning ? API_DEFAULTS.EXECUTIONS_FAST_INTERVAL : API_DEFAULTS.EXECUTIONS_SLOW_INTERVAL
     },
   })
