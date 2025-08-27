@@ -22,7 +22,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['UDAAP', 'Regulation DD', 'Regulation Z'],
     dataRequirements: ['documents', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'fintech-solutions/marketing-compliance',
@@ -34,8 +34,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 67,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$300/month per compliance reviewer',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cfpb.gov', 'https://www.federalregister.gov'],
     requiredPorts: ['8000'],
@@ -64,7 +64,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['Regulation DD', 'Truth in Savings'],
     dataRequirements: ['documents', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'fintech-solutions/reg-dd-validator',
@@ -76,8 +76,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 34,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$15 per disclosure review',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cfpb.gov'],
     requiredPorts: ['8000'],
@@ -104,7 +104,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['HMDA', 'CRA', 'Fair Lending'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/hmda-cra-validator',
@@ -116,8 +116,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 12,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$600/month per reporting specialist',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.census.gov'],
     requiredPorts: ['8000'],
@@ -144,7 +144,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['BSA', 'FinCEN SAR Requirements'],
     dataRequirements: ['database', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'security-first/sar-drafter',
@@ -156,8 +156,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 27,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$800/month per BSA analyst',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -184,7 +184,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['BSA', 'AML', 'OFAC Sanctions'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'local-llm'],
+    modelRequirements: ['gpt-4o-mini', 'o1-mini'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'security-first/wire-risk-assessor',
@@ -196,8 +196,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 45,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$2.50 per wire transfer analyzed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.ofac.treasury.gov'],
     requiredPorts: ['8000', '8443'],
@@ -224,7 +224,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['Lending Regulations', 'Documentation Standards'],
     dataRequirements: ['documents', 'images', 'api-access'],
-    modelRequirements: ['multimodal', 'gpt-4'],
+    modelRequirements: ['gpt-4o', 'claude-3-5-sonnet'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'fintech-solutions/loan-doc-verifier',
@@ -236,8 +236,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 56,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$8 per loan application processed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.workday.com', 'https://theworknumber.com'],
     requiredPorts: ['8000'],
@@ -264,7 +264,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['Lending Regulations', 'Credit Risk Management'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/covenant-monitor',
@@ -276,8 +276,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 16,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$200/month per portfolio manager',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -304,7 +304,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['Call Report Requirements', 'FFIEC Guidelines'],
     dataRequirements: ['database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/call-report-preparer',
@@ -316,8 +316,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 14,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$500/month per financial reporting team',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -344,7 +344,7 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['finance'],
     complianceStandards: ['Fair Housing Act', 'ECOA', 'Fair Lending'],
     dataRequirements: ['database'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'fintech-solutions/fair-lending-analyzer',
@@ -356,8 +356,8 @@ export const BANKING_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 11,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$800/month per fair lending analyst',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],

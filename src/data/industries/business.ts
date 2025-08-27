@@ -22,7 +22,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/lead-qualifier',
@@ -35,7 +35,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 127,
     
     pricingModel: 'free',
-    pricingDescription: 'Free and open source',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.salesforce.com', 'https://api.hubspot.com'],
     requiredPorts: ['8000'],
@@ -62,7 +62,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'documents'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/proposal-generator',
@@ -75,7 +75,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 89,
     
     pricingModel: 'free',
-    pricingDescription: 'Free and open source',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -102,7 +102,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/feedback-analyzer',
@@ -115,7 +115,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 78,
     
     pricingModel: 'free',
-    pricingDescription: 'Free and open source',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.trustpilot.com', 'https://api.zendesk.com'],
     requiredPorts: ['8000'],
@@ -143,7 +143,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'images', 'api-access'],
-    modelRequirements: ['multimodal', 'gpt-4'],
+    modelRequirements: ['gpt-4o', 'claude-3-5-sonnet'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/social-creator',
@@ -156,7 +156,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 234,
     
     pricingModel: 'free',
-    pricingDescription: 'Free and open source',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.instagram.com', 'https://api.twitter.com', 'https://graph.facebook.com'],
     requiredPorts: ['8000'],
@@ -183,7 +183,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/email-optimizer',
@@ -196,7 +196,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 94,
     
     pricingModel: 'free',
-    pricingDescription: 'Free and open source',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.sendgrid.com', 'https://api.mailchimp.com'],
     requiredPorts: ['8000'],
@@ -223,7 +223,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/seo-optimizer',
@@ -236,7 +236,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 112,
     
     pricingModel: 'free',
-    pricingDescription: 'Free and open source',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.semrush.com', 'https://api.ahrefs.com'],
     requiredPorts: ['8000'],
@@ -264,7 +264,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/inventory-forecaster',
@@ -277,7 +277,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 56,
     
     pricingModel: 'free',
-    pricingDescription: '$150/month + $0.05 per SKU',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -304,7 +304,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/price-monitor',
@@ -317,7 +317,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 67,
     
     pricingModel: 'free',
-    pricingDescription: '$200/month per pricing manager',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.shopify.com', 'https://api.amazon.com'],
     requiredPorts: ['8000'],
@@ -344,7 +344,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/cs-chatbot',
@@ -357,7 +357,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 178,
     
     pricingModel: 'free',
-    pricingDescription: '$150/month per support agent replaced',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.zendesk.com', 'https://api.intercom.com'],
     requiredPorts: ['8000'],
@@ -385,7 +385,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/onboarding-assistant',
@@ -398,7 +398,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 67,
     
     pricingModel: 'free',
-    pricingDescription: 'Free for small teams, paid tiers for larger organizations',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -425,7 +425,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['database', 'text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'openagents/performance-review',
@@ -438,7 +438,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 45,
     
     pricingModel: 'free',
-    pricingDescription: '$50/month per manager',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -466,7 +466,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['documents', 'images', 'database'],
-    modelRequirements: ['multimodal', 'gpt-4'],
+    modelRequirements: ['gpt-4o', 'claude-3-5-sonnet'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/invoice-processor',
@@ -479,7 +479,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 156,
     
     pricingModel: 'free',
-    pricingDescription: '$0.50 per invoice processed',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -506,7 +506,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['business'],
     complianceStandards: [],
     dataRequirements: ['database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'openagents/budget-analyzer',
@@ -519,7 +519,7 @@ export const BUSINESS_AGENTS: MarketplaceAgent[] = [
     reviewCount: 67,
     
     pricingModel: 'free',
-    pricingDescription: '$100/month per finance manager',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],

@@ -22,7 +22,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['personal'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/task-organizer',
@@ -35,7 +35,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     reviewCount: 456,
     
     pricingModel: 'free',
-    pricingDescription: 'Free for personal use, premium features available',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.google.com', 'https://api.microsoft.com'],
     requiredPorts: ['8000'],
@@ -62,7 +62,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['personal'],
     complianceStandards: [],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'openagents/finance-advisor',
@@ -75,7 +75,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     reviewCount: 189,
     
     pricingModel: 'free',
-    pricingDescription: 'Free basic version, premium features for $9.99/month',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.plaid.com'],
     requiredPorts: ['8000'],
@@ -102,7 +102,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['personal'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/meal-planner',
@@ -115,7 +115,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     reviewCount: 267,
     
     pricingModel: 'free',
-    pricingDescription: 'Free with optional premium recipe database',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.edamam.com', 'https://api.spoonacular.com'],
     requiredPorts: ['8000'],
@@ -142,7 +142,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['personal'],
     complianceStandards: [],
     dataRequirements: ['text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/fitness-planner',
@@ -155,7 +155,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     reviewCount: 234,
     
     pricingModel: 'free',
-    pricingDescription: 'Completely free and open source',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -182,7 +182,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['personal'],
     complianceStandards: [],
     dataRequirements: ['api-access', 'text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/travel-planner',
@@ -195,7 +195,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     reviewCount: 123,
     
     pricingModel: 'free',
-    pricingDescription: 'Free with booking commission model',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.expedia.com', 'https://api.booking.com'],
     requiredPorts: ['8000'],
@@ -222,7 +222,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['personal'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/learning-assistant',
@@ -235,7 +235,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     reviewCount: 198,
     
     pricingModel: 'free',
-    pricingDescription: 'Free with optional premium content access',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.coursera.org', 'https://api.udemy.com'],
     requiredPorts: ['8000'],
@@ -262,7 +262,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['personal'],
     complianceStandards: [],
     dataRequirements: ['text-only', 'images'],
-    modelRequirements: ['multimodal', 'gpt-4'],
+    modelRequirements: ['gpt-4o', 'claude-3-5-sonnet'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/home-organizer',
@@ -275,7 +275,7 @@ export const PERSONAL_AGENTS: MarketplaceAgent[] = [
     reviewCount: 89,
     
     pricingModel: 'free',
-    pricingDescription: 'Completely free for personal use',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],

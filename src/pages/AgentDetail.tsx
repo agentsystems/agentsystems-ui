@@ -13,6 +13,7 @@ import { useAudio } from '@hooks/useAudio'
 import { useToast } from '@hooks/useToast'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
+import { API_DEFAULTS } from '@constants/app'
 import type { InvocationResult, Execution } from '../types/api'
 import styles from './AgentDetail.module.css'
 
@@ -26,6 +27,7 @@ export default function AgentDetail() {
   const [invocationResult, setInvocationResult] = useState<InvocationResult | null>(null)
   const [pollingStatus, setPollingStatus] = useState<string>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [currentTime, setCurrentTime] = useState(new Date())
   const previousAgentState = useRef<string | undefined>()
 
   // Get agent state from agents list
@@ -36,6 +38,7 @@ export default function AgentDetail() {
   })
 
   const currentAgent = agentsData?.agents.find(a => a.name === agentName)
+  
   
   // Get agent configuration for image/tag information
   const { getAgents } = useConfigStore()
@@ -64,8 +67,24 @@ export default function AgentDetail() {
     queryKey: ['agent-executions', agentName],
     queryFn: () => agentsApi.listExecutions({ agent: agentName, limit: 100 }),
     enabled: !!agentName,
-    refetchInterval: 10000, // Refresh every 10 seconds
+    refetchInterval: (query) => {
+      const executions = query.state.data?.executions || []
+      const hasRunning = executions.some((e: Execution) => e.state === 'running' || e.state === 'queued')
+      return hasRunning ? API_DEFAULTS.EXECUTIONS_FAST_INTERVAL : API_DEFAULTS.EXECUTIONS_SLOW_INTERVAL
+    },
   })
+
+  // Live timer for running executions
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const executions = executionHistory?.executions || []
+      const hasRunning = executions.some((e: Execution) => e.state === 'running')
+      if (hasRunning) {
+        setCurrentTime(new Date())
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [executionHistory?.executions])
 
   // Calculate agent-specific performance metrics
   const performanceMetrics = (() => {
@@ -120,7 +139,8 @@ export default function AgentDetail() {
     enabled: !!agentName && currentAgent?.state === 'running',
     retry: 3, // Increased retries for newly started agents
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
-    refetchInterval: currentAgent?.state === 'running' ? 5000 : false,
+    refetchInterval: false, // Metadata is static - only refetch on agent state change
+    staleTime: Infinity, // Cache metadata until query key changes (agent state)
   })
 
   const invokeMutation = useMutation({
@@ -135,10 +155,14 @@ export default function AgentDetail() {
       }
     },
     onMutate: () => {
-      // Invalidate queries since invocation might trigger agent startup
+      // Invalidate agents query since invocation might trigger agent startup
       queryClient.invalidateQueries({ queryKey: ['agents'] })
     },
     onSuccess: async (response) => {
+      // Immediately refresh executions to show the new running execution
+      queryClient.invalidateQueries({ queryKey: ['agent-executions', agentName] })
+      queryClient.invalidateQueries({ queryKey: ['executions'] })
+      
       // Poll for status with proper error handling and timeout
       const pollStatus = async (attempts = 0) => {
         const maxAttempts = 120 // 2 minutes max polling
@@ -661,7 +685,7 @@ export default function AgentDetail() {
                   {(() => {
                     if (!execution.started_at) return '—'
                     const start = new Date(execution.started_at)
-                    const end = execution.ended_at ? new Date(execution.ended_at) : new Date()
+                    const end = execution.ended_at ? new Date(execution.ended_at) : currentTime
                     const duration = Math.round((end.getTime() - start.getTime()) / 1000)
                     return duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}m ${duration % 60}s`
                   })()}

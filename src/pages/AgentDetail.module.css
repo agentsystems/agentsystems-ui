@@ -224,7 +224,9 @@
   background-color: var(--surface-2);
   padding: 1rem;
   border-radius: var(--radius);
-  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
   font-family: var(--font-mono);
   font-size: 0.875rem;
   color: var(--text-secondary);

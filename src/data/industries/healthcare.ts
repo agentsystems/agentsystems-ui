@@ -23,7 +23,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'FDA Medical Device'],
     dataRequirements: ['text-only', 'documents'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'healthtech-ai/primary-care-cds',
@@ -35,8 +35,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 67,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$400/month per physician + usage fees',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.nih.gov', 'https://api.uptodate.com'],
     requiredPorts: ['8000'],
@@ -63,7 +63,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'EMTALA'],
     dataRequirements: ['text-only', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/ed-triage-assistant',
@@ -75,8 +75,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 28,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$800/month per emergency department',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.acep.org'],
     requiredPorts: ['8000', '8080'],
@@ -103,7 +103,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'DICOM Standards'],
     dataRequirements: ['text-only', 'documents'],
-    modelRequirements: ['claude-3-5-sonnet', 'multimodal'],
+    modelRequirements: ['claude-3-5-sonnet', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'healthtech-ai/radiology-structured-analyzer',
@@ -115,8 +115,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 21,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$3 per radiology report processed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.rsna.org'],
     requiredPorts: ['8000'],
@@ -144,7 +144,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CMS Coding Guidelines'],
     dataRequirements: ['text-only', 'documents'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/coding-qa',
@@ -156,8 +156,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 89,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$1.50 per coding review',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cms.gov'],
     requiredPorts: ['8000'],
@@ -184,7 +184,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CMS Documentation Guidelines'],
     dataRequirements: ['text-only', 'documents'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/cdi-agent',
@@ -196,8 +196,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 34,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$250/month per CDI specialist',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cms.gov'],
     requiredPorts: ['8000'],
@@ -224,7 +224,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'Insurance Regulations'],
     dataRequirements: ['documents', 'text-only', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'healthtech-ai/claims-denial-analyst',
@@ -236,8 +236,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 27,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$12 per denial analysis + appeal generation',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cms.gov', 'https://api.availity.com'],
     requiredPorts: ['8000'],
@@ -265,7 +265,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'FDA Drug Safety'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/drug-interaction-checker',
@@ -277,8 +277,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 78,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$300/month per pharmacy location',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.nlm.nih.gov', 'https://api.fda.gov'],
     requiredPorts: ['8000'],
@@ -305,7 +305,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'Joint Commission'],
     dataRequirements: ['database', 'text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/med-reconciliation',
@@ -317,8 +317,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 31,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$500/month per 100 beds',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -345,7 +345,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'Pediatric Safety Standards'],
     dataRequirements: ['database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'healthtech-ai/pediatric-dosing',
@@ -357,8 +357,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 15,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$400/month per pediatric unit',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -386,7 +386,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'Insurance Regulations'],
     dataRequirements: ['text-only', 'documents', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'healthtech-ai/prior-auth-specialist',
@@ -398,8 +398,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.4,
     reviewCount: 127,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$8 per prior authorization request',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.availity.com', 'https://api.change.com'],
     requiredPorts: ['8000'],
@@ -426,7 +426,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'Insurance Verification Standards'],
     dataRequirements: ['api-access', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'healthtech-ai/eligibility-verifier',
@@ -438,8 +438,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.3,
     reviewCount: 156,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$0.50 per eligibility verification',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.availity.com', 'https://api.change.com'],
     requiredPorts: ['8000'],
@@ -467,7 +467,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CMS Quality Measures'],
     dataRequirements: ['database', 'text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/quality-measures',
@@ -479,8 +479,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 23,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$600/month per quality analyst',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cms.gov'],
     requiredPorts: ['8000'],
@@ -507,7 +507,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CDC Surveillance Standards'],
     dataRequirements: ['database', 'text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/infection-surveillance',
@@ -519,8 +519,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 12,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$400/month per infection preventionist',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cdc.gov'],
     requiredPorts: ['8000'],
@@ -548,7 +548,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'GCP', 'FDA Clinical Trial Regulations'],
     dataRequirements: ['text-only', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/trial-screener',
@@ -560,8 +560,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 14,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$500/month per research site',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://clinicaltrials.gov'],
     requiredPorts: ['8000'],
@@ -588,7 +588,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'FDA MedWatch', 'Pharmacovigilance'],
     dataRequirements: ['text-only', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/adverse-event-reporter',
@@ -600,8 +600,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 8,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$300/month per safety officer',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.fda.gov'],
     requiredPorts: ['8000'],
@@ -629,7 +629,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CMS Sepsis Measures'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'local-llm'],
+    modelRequirements: ['gpt-4o-mini', 'o1-mini'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/sepsis-early-warning',
@@ -641,8 +641,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 9,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$1000/month per ICU + $200 per monitored bed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000', '8080'],
@@ -669,7 +669,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CMS Readmission Measures'],
     dataRequirements: ['text-only', 'database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/discharge-coordinator',
@@ -681,8 +681,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 18,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$300/month per discharge planner',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cms.gov'],
     requiredPorts: ['8000'],
@@ -710,7 +710,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'Joint Commission Documentation'],
     dataRequirements: ['text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/nursing-documentation',
@@ -722,8 +722,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 45,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$150/month per nurse',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -750,7 +750,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'Joint Commission Patient Safety'],
     dataRequirements: ['database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/fall-risk-assessor',
@@ -762,8 +762,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 16,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$200/month per nursing unit',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -791,7 +791,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CLIA', 'CAP Standards'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/lab-critical-monitor',
@@ -803,8 +803,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 22,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$400/month per laboratory',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000', '8443'],
@@ -831,7 +831,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CAP Standards'],
     dataRequirements: ['text-only', 'documents'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/pathology-extractor',
@@ -843,8 +843,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 11,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$5 per pathology report processed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.naaccr.org'],
     requiredPorts: ['8000'],
@@ -872,7 +872,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CMS Home Health'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'healthtech-ai/home-health-optimizer',
@@ -884,8 +884,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.4,
     reviewCount: 12,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$250/month per care coordinator',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cms.gov'],
     requiredPorts: ['8000'],
@@ -912,7 +912,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'CMS MDS Requirements'],
     dataRequirements: ['database', 'text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/nursing-home-assessor',
@@ -924,8 +924,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 6,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$300/month per nursing facility',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.cms.gov'],
     requiredPorts: ['8000'],
@@ -939,86 +939,6 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     demoAvailable: true
   },
 
-  // Mental Health and Behavioral Health
-  {
-    id: 'suicide-risk-assessment-agent',
-    name: 'suicide-risk-assessment-agent',
-    displayName: 'Suicide Risk Assessment Agent',
-    description: 'Evidence-based suicide risk screening with safety planning and intervention alerts',
-    longDescription: 'Conducts evidence-based suicide risk assessments using validated screening tools (PHQ-9, Columbia Scale) and clinical indicators. Analyzes patient responses, medical history, and behavioral patterns to identify suicide risk levels and generate safety planning recommendations. Provides real-time alerts for high-risk patients requiring immediate intervention.',
-    publisher: 'healthtech-ai',
-    category: 'analysis-insights',
-    subcategory: 'Behavioral Health',
-    
-    targetIndustries: ['healthcare'],
-    complianceStandards: ['HIPAA', 'Joint Commission Suicide Prevention'],
-    dataRequirements: ['text-only', 'database'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
-    deploymentTypes: ['on-premise', 'air-gapped'],
-    
-    containerImage: 'healthtech-ai/suicide-risk-assessor',
-    version: '1.3.1',
-    size: '680 MB',
-    lastUpdated: '2024-03-16',
-    
-    downloads: 234,
-    rating: 4.8,
-    reviewCount: 15,
-    
-    pricingModel: 'subscription',
-    pricingDescription: '$350/month per behavioral health unit',
-    
-    egressAllowlist: [],
-    requiredPorts: ['8000'],
-    securityNotes: 'Mental health data processed locally with crisis intervention protocols.',
-    
-    tags: ['healthcare', 'suicide-risk', 'behavioral-health', 'safety-planning', 'crisis-intervention'],
-    featured: false,
-    trending: false,
-    new: true,
-    
-    demoAvailable: false
-  },
-
-  {
-    id: 'substance-abuse-screening-agent',
-    name: 'substance-abuse-screening-agent',
-    displayName: 'Substance Abuse Screening Agent',
-    description: 'Automated substance abuse screening with intervention recommendations and treatment planning',
-    longDescription: 'Conducts comprehensive substance abuse screening using validated assessment tools (AUDIT, DAST-10, CAGE) and behavioral indicators. Identifies patients with substance use disorders, assesses severity levels, and provides treatment recommendations including referral options and medication-assisted treatment considerations.',
-    publisher: 'healthtech-ai',
-    category: 'analysis-insights',
-    subcategory: 'Addiction Medicine',
-    
-    targetIndustries: ['healthcare'],
-    complianceStandards: ['HIPAA', '42 CFR Part 2'],
-    dataRequirements: ['text-only', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
-    deploymentTypes: ['on-premise', 'air-gapped'],
-    
-    containerImage: 'healthtech-ai/substance-abuse-screener',
-    version: '1.4.0',
-    size: '720 MB',
-    lastUpdated: '2024-03-17',
-    
-    downloads: 167,
-    rating: 4.5,
-    reviewCount: 12,
-    
-    pricingModel: 'subscription',
-    pricingDescription: '$250/month per addiction counselor',
-    
-    egressAllowlist: [],
-    requiredPorts: ['8000'],
-    securityNotes: 'Substance abuse data processed with enhanced confidentiality protections.',
-    
-    tags: ['healthcare', 'substance-abuse', 'addiction-screening', 'behavioral-health', 'treatment-planning'],
-    featured: false,
-    trending: false,
-    new: false,
-    
-    demoAvailable: true
-  },
 
   // Regulatory Compliance and Quality
   {
@@ -1034,7 +954,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'HITECH Act'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'healthtech-ai/hipaa-audit-prep',
@@ -1046,8 +966,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 19,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$500/month per compliance officer',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -1074,7 +994,7 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['healthcare'],
     complianceStandards: ['HIPAA', 'FDA MDR', 'Medical Device Regulations'],
     dataRequirements: ['database', 'text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'healthtech-ai/device-event-tracker',
@@ -1086,8 +1006,8 @@ export const HEALTHCARE_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 8,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$350/month per biomedical engineer',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.fda.gov'],
     requiredPorts: ['8000'],

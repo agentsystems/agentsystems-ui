@@ -276,7 +276,7 @@ export const MODELS: Record<string, ModelDefinition> = {
     displayName: 'GPT-5',
     vendor: 'openai',
     category: 'multimodal',
-    description: 'The best model for coding and agentic tasks across domains',
+    description: '',
     hostingProviders: [
       {
         id: 'openai',
@@ -292,7 +292,7 @@ export const MODELS: Record<string, ModelDefinition> = {
     displayName: 'GPT-5 mini',
     vendor: 'openai',
     category: 'text',
-    description: 'A faster, cost-efficient version of GPT-5 for well-defined tasks',
+    description: '',
     hostingProviders: [
       {
         id: 'openai',
@@ -308,12 +308,92 @@ export const MODELS: Record<string, ModelDefinition> = {
     displayName: 'GPT-5 nano',
     vendor: 'openai',
     category: 'fast',
-    description: 'Fastest, most cost-efficient version of GPT-5',
+    description: '',
     hostingProviders: [
       {
         id: 'openai',
         displayName: 'OpenAI',
         hostingProviderModelId: 'gpt-5-nano',
+        authMethod: 'api_key'
+      }
+    ]
+  },
+
+  'gpt-4o': {
+    id: 'gpt-4o',
+    displayName: 'GPT-4o',
+    vendor: 'openai',
+    category: 'multimodal',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'openai',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'gpt-4o',
+        authMethod: 'api_key'
+      }
+    ]
+  },
+
+  'gpt-4o-mini': {
+    id: 'gpt-4o-mini',
+    displayName: 'GPT-4o mini',
+    vendor: 'openai',
+    category: 'fast',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'openai',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'gpt-4o-mini',
+        authMethod: 'api_key'
+      }
+    ]
+  },
+
+  'gpt-4-turbo': {
+    id: 'gpt-4-turbo',
+    displayName: 'GPT-4 Turbo',
+    vendor: 'openai',
+    category: 'text',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'openai',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'gpt-4-turbo',
+        authMethod: 'api_key'
+      }
+    ]
+  },
+
+  'o1': {
+    id: 'o1',
+    displayName: 'o1',
+    vendor: 'openai',
+    category: 'text',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'openai',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'o1',
+        authMethod: 'api_key'
+      }
+    ]
+  },
+
+  'o1-mini': {
+    id: 'o1-mini',
+    displayName: 'o1-mini',
+    vendor: 'openai',
+    category: 'fast',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'openai',
+        displayName: 'OpenAI',
+        hostingProviderModelId: 'o1-mini',
         authMethod: 'api_key'
       }
     ]
@@ -341,7 +421,7 @@ export const MODELS: Record<string, ModelDefinition> = {
     displayName: 'Amazon Nova Pro',
     vendor: 'amazon',
     category: 'multimodal',
-    description: 'Amazon\'s flagship multimodal model',
+    description: '',
     hostingProviders: [
       {
         id: 'amazon_bedrock',
@@ -357,7 +437,7 @@ export const MODELS: Record<string, ModelDefinition> = {
     displayName: 'Amazon Nova Premier',
     vendor: 'amazon',
     category: 'multimodal',
-    description: 'Amazon\'s most advanced multimodal model',
+    description: '',
     hostingProviders: [
       {
         id: 'amazon_bedrock',
@@ -373,7 +453,7 @@ export const MODELS: Record<string, ModelDefinition> = {
     displayName: 'Amazon Nova Lite',
     vendor: 'amazon',
     category: 'text',
-    description: 'Fast and cost-effective Amazon model',
+    description: '',
     hostingProviders: [
       {
         id: 'amazon_bedrock',
@@ -389,7 +469,7 @@ export const MODELS: Record<string, ModelDefinition> = {
     displayName: 'Amazon Nova Micro',
     vendor: 'amazon',
     category: 'text',
-    description: 'Most cost-efficient Amazon model for simple tasks',
+    description: '',
     hostingProviders: [
       {
         id: 'amazon_bedrock',
@@ -406,7 +486,7 @@ export const MODELS: Record<string, ModelDefinition> = {
     displayName: 'Llama 3.3 70B Instruct',
     vendor: 'meta',
     category: 'text',
-    description: 'Meta\'s latest large language model with instruction tuning',
+    description: '',
     hostingProviders: [
       {
         id: 'amazon_bedrock',
