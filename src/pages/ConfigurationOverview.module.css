@@ -232,11 +232,35 @@
   flex-shrink: 0;
 }
 
-.cardsGrid {
+.configCategories {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 32px;
+}
+
+.configCategory {
+  /* Category container styling */
+}
+
+.categoryTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.categoryDescription {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.categoryCards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
-  margin-bottom: 1rem;
 }
 
 .configCard {
