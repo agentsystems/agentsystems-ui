@@ -1181,13 +1181,16 @@
 /* Alternative approach using data attributes for better browser support */
 .detailItem[data-content-type="payload"] .detailValue {
   border-left-color: var(--info);
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .detailItem[data-content-type="result"] .detailValue {
   border-left-color: var(--info);
-  overflow-x: auto;
-  white-space: pre;
-  word-break: normal;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .detailItem[data-content-type="error"] .detailValue {
