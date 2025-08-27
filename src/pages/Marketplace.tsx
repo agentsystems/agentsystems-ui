@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { MagnifyingGlassIcon, StarIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, StarIcon, ShieldCheckIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid'
 import Card from '@components/common/Card'
 import { 
@@ -8,6 +8,7 @@ import {
   MARKETPLACE_CATEGORIES,
   searchAgents
 } from '@data/marketplaceComprehensive'
+import { getModel } from '@data/modelCatalogUnified'
 import type { MarketplaceAgent, AgentCategory, Industry, PricingModel } from '@data/types'
 import styles from './Marketplace.module.css'
 
@@ -16,7 +17,31 @@ export default function Marketplace() {
   const [selectedCategory, setSelectedCategory] = useState<AgentCategory | 'all'>('all')
   const [selectedIndustry, setSelectedIndustry] = useState<Industry | 'all'>('all')
   const [selectedPricing, setSelectedPricing] = useState<PricingModel | 'all'>('all')
+  const [selectedModels, setSelectedModels] = useState<string[]>([])
   const [selectedAgent, setSelectedAgent] = useState<MarketplaceAgent | null>(null)
+
+  // Calculate agent counts for each model and prepare display data
+  const modelOptions = useMemo(() => {
+    const supportedModelIds = [
+      'claude-sonnet-4', 'claude-3-5-sonnet', 'claude-3-5-haiku',
+      'gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo',
+      'o1', 'o1-mini', 'llama-3-3-70b'
+    ]
+    
+    return supportedModelIds.map(modelId => {
+      const modelDef = getModel(modelId)
+      const agentCount = MOCK_AGENTS.filter(agent => 
+        agent.modelRequirements.includes(modelId)
+      ).length
+      
+      return {
+        id: modelId,
+        displayName: modelDef?.displayName || modelId,
+        count: agentCount,
+        label: `${modelDef?.displayName || modelId} (${agentCount})`
+      }
+    }).filter(model => model.count > 0) // Only show models that have agents
+  }, [])
 
   // Filter and search logic
   const filteredAgents = useMemo(() => {
@@ -36,6 +61,12 @@ export default function Marketplace() {
       agents = agents.filter(agent => agent.pricingModel === selectedPricing)
     }
     
+    if (selectedModels.length > 0) {
+      agents = agents.filter(agent => 
+        selectedModels.some(model => agent.modelRequirements.includes(model))
+      )
+    }
+    
     // Sort by industry when all industries selected, otherwise by name
     if (selectedIndustry === 'all') {
       agents.sort((a, b) => {
@@ -51,7 +82,7 @@ export default function Marketplace() {
     }
     
     return agents
-  }, [searchQuery, selectedCategory, selectedIndustry, selectedPricing])
+  }, [searchQuery, selectedCategory, selectedIndustry, selectedPricing, selectedModels])
 
 
   const handleAgentClick = (agent: MarketplaceAgent) => {
@@ -137,9 +168,32 @@ export default function Marketplace() {
             <option value="enterprise">Enterprise</option>
           </select>
         </div>
+
+        <div className={styles.filterGroup}>
+          <label>Models ({selectedModels.length} selected)</label>
+          <div className={styles.multiSelect}>
+            {modelOptions.map(model => (
+              <label key={model.id} className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={selectedModels.includes(model.id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedModels(prev => [...prev, model.id])
+                    } else {
+                      setSelectedModels(prev => prev.filter(id => id !== model.id))
+                    }
+                  }}
+                  className={styles.checkbox}
+                />
+                {model.label}
+              </label>
+            ))}
+          </div>
+        </div>
         
         {/* Active Filters Display */}
-        {(selectedCategory !== 'all' || selectedIndustry !== 'all' || selectedPricing !== 'all') && (
+        {(selectedCategory !== 'all' || selectedIndustry !== 'all' || selectedPricing !== 'all' || selectedModels.length > 0) && (
           <div className={styles.activeFilters}>
             <span>Active filters:</span>
             {selectedIndustry !== 'all' && (
@@ -157,12 +211,18 @@ export default function Marketplace() {
                 Pricing: {selectedPricing}
               </span>
             )}
+            {selectedModels.length > 0 && (
+              <span className={styles.activeFilter}>
+                Models: {selectedModels.join(', ')}
+              </span>
+            )}
             <button 
               className={styles.clearFilters}
               onClick={() => {
                 setSelectedCategory('all')
                 setSelectedIndustry('all')
                 setSelectedPricing('all')
+                setSelectedModels([])
               }}
             >
               Clear All
@@ -228,15 +288,14 @@ function AgentCard({ agent, onClick, onAddToDeployment }: AgentCardProps) {
       <div className={styles.cardHeader}>
         <div className={styles.cardTitle}>
           <h3>{agent.displayName}</h3>
-          {agent.new && <span className={styles.newBadge}>NEW</span>}
         </div>
-        
-        <div className={styles.publisherInfo}>
-          <span className={styles.publisherName}>
-            {publisher?.displayName}
-            {publisher?.verified && <span className={styles.verifiedBadge}>✓</span>}
-          </span>
-        </div>
+      </div>
+      
+      <div className={styles.publisherInfo}>
+        <span className={styles.publisherName}>
+          by {publisher?.displayName}
+          {publisher?.verified && <ShieldCheckIcon className={styles.verifiedBadge} />}
+        </span>
       </div>
       
       <p className={styles.description}>{agent.description}</p>
@@ -284,12 +343,13 @@ function AgentCard({ agent, onClick, onAddToDeployment }: AgentCardProps) {
         </div>
         
         <button 
-          className={styles.addButton}
+          className="btn btn-sm btn-subtle"
           onClick={(e) => {
             e.stopPropagation()
             onAddToDeployment()
           }}
         >
+          <PlusIcon />
           Add to Deployment
         </button>
       </div>
@@ -315,7 +375,7 @@ function AgentDetailModal({ agent, onClose, onAddToDeployment }: AgentDetailModa
             <h2>{agent.displayName}</h2>
             <p className={styles.modalPublisher}>
               by {publisher?.displayName}
-              {publisher?.verified && <span className={styles.verifiedBadge}>✓ Verified</span>}
+              {publisher?.verified && <ShieldCheckIcon className={styles.verifiedBadge} />}
             </p>
           </div>
           <button className={styles.closeButton} onClick={onClose}>×</button>
@@ -365,10 +425,11 @@ function AgentDetailModal({ agent, onClose, onAddToDeployment }: AgentDetailModa
             <strong>{agent.pricingDescription || agent.pricingModel}</strong>
           </div>
           <div className={styles.modalActions}>
-            <button className={styles.cancelButton} onClick={onClose}>
+            <button className="btn btn-lg btn-ghost" onClick={onClose}>
               Close
             </button>
-            <button className={styles.addButtonLarge} onClick={onAddToDeployment}>
+            <button className="btn btn-lg btn-bright" onClick={onAddToDeployment}>
+              <PlusIcon />
               Add to Deployment
             </button>
           </div>

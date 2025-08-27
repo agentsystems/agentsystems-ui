@@ -23,7 +23,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['FOIA', 'Privacy Act'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'govtech-solutions/foia-processor',
@@ -35,8 +35,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 28,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$500/month per FOIA officer',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -63,7 +63,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['FAR', 'Government Contract Law'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'govtech-solutions/contract-compliance',
@@ -103,7 +103,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['Open Government', 'Public Records'],
     dataRequirements: ['text-only', 'database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'govtech-solutions/citizen-service-manager',
@@ -115,8 +115,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 34,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$200/month per 10,000 population served',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.usps.com'],
     requiredPorts: ['8000'],
@@ -143,7 +143,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['Uniform Guidance', 'Federal Grant Requirements'],
     dataRequirements: ['database', 'documents'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'govtech-solutions/grant-compliance',
@@ -155,8 +155,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 12,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$400/month per grants manager',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://sam.gov'],
     requiredPorts: ['8000'],
@@ -183,7 +183,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['CJIS Security Policy', 'Law Enforcement Standards'],
     dataRequirements: ['text-only', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'govtech-solutions/public-safety-analyzer',
@@ -223,7 +223,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['GASB Standards', 'Municipal Accounting'],
     dataRequirements: ['database', 'documents'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'govtech-solutions/budget-analyzer',
@@ -235,8 +235,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 9,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$300/month per finance director',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -263,7 +263,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['OMB Guidelines', 'Regulatory Analysis'],
     dataRequirements: ['documents', 'database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'govtech-solutions/regulatory-impact',
@@ -303,7 +303,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['Legislative Process', 'Government Operations'],
     dataRequirements: ['documents', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'govtech-solutions/legislative-analyzer',
@@ -315,8 +315,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 8,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$400/month per policy analyst',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.congress.gov'],
     requiredPorts: ['8000'],
@@ -343,7 +343,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['Security Executive Agent Directive', 'Adjudicative Guidelines'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['air-gapped'],
     
     containerImage: 'govtech-solutions/clearance-adjudicator',
@@ -383,7 +383,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['Government Paperwork Standards', 'Data Accuracy Requirements'],
     dataRequirements: ['documents', 'images', 'text-only'],
-    modelRequirements: ['multimodal', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-3-5-sonnet'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'agentsystems/gov-form-processor',
@@ -395,8 +395,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.4,
     reviewCount: 19,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$2 per form processed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -423,7 +423,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['Open Meeting Laws', 'Public Records'],
     dataRequirements: ['text-only', 'documents'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'govtech-solutions/meeting-analyzer',
@@ -435,8 +435,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.3,
     reviewCount: 14,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$150/month per clerk + $5 per meeting',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -463,7 +463,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['Voting Rights Act', 'Census Requirements'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'govtech-solutions/census-processor',
@@ -503,7 +503,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['FAR', 'Procurement Regulations'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'govtech-solutions/procurement-analyzer',
@@ -515,8 +515,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 12,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$450/month per procurement officer',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://sam.gov'],
     requiredPorts: ['8000'],
@@ -543,7 +543,7 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['government'],
     complianceStandards: ['EPA Regulations', 'Environmental Permits'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'govtech-solutions/environmental-tracker',
@@ -555,8 +555,8 @@ export const GOVERNMENT_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 8,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$350/month per environmental specialist',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.epa.gov'],
     requiredPorts: ['8000'],

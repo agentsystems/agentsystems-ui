@@ -23,7 +23,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Legal Ethics', 'Contract Law'],
     dataRequirements: ['documents', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'cloud'],
     
     containerImage: 'fintech-solutions/contract-risk-engine',
@@ -35,8 +35,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 156,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$15 per contract analyzed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -65,7 +65,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Legal Ethics', 'Professional Responsibility'],
     dataRequirements: ['text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'fintech-solutions/legal-drafter',
@@ -77,8 +77,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 123,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$25 per document generated',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -105,7 +105,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Securities Regulations', 'Antitrust Law'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'fintech-solutions/ma-due-diligence',
@@ -117,8 +117,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.9,
     reviewCount: 18,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$200 per due diligence package analyzed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.sec.gov'],
     requiredPorts: ['8000'],
@@ -146,7 +146,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Legal Research Standards', 'Citation Requirements'],
     dataRequirements: ['api-access', 'documents'],
-    modelRequirements: ['claude-3-opus', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/legal-research-specialist',
@@ -158,8 +158,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 234,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$35 per research request',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.westlaw.com', 'https://api.lexisnexis.com'],
     requiredPorts: ['8000'],
@@ -186,7 +186,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Citation Standards', 'Bluebook Rules'],
     dataRequirements: ['api-access', 'text-only'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/citation-validator',
@@ -198,8 +198,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 89,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$10 per document validated',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.westlaw.com', 'https://api.lexisnexis.com'],
     requiredPorts: ['8000'],
@@ -227,7 +227,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Attorney-Client Privilege', 'Discovery Rules'],
     dataRequirements: ['documents', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'fintech-solutions/litigation-reviewer',
@@ -239,8 +239,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 67,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$0.25 per document reviewed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -267,7 +267,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Court Rules', 'Evidence Rules'],
     dataRequirements: ['documents', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/deposition-analyzer',
@@ -279,8 +279,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 29,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$50 per deposition transcript analyzed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -307,7 +307,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Court Rules', 'Legal Writing Standards'],
     dataRequirements: ['text-only', 'api-access'],
-    modelRequirements: ['claude-3-opus', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/brief-writing-assistant',
@@ -319,8 +319,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.4,
     reviewCount: 78,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$200/month per attorney',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.westlaw.com', 'https://api.lexisnexis.com'],
     requiredPorts: ['8000'],
@@ -348,7 +348,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal', 'technology'],
     complianceStandards: ['USPTO Rules', 'Patent Law'],
     dataRequirements: ['api-access', 'documents'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/patent-prior-art',
@@ -360,8 +360,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 34,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$75 per comprehensive search',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.uspto.gov', 'https://api.epo.org', 'https://api.wipo.int'],
     requiredPorts: ['8000'],
@@ -388,7 +388,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['USPTO Rules', 'Trademark Law'],
     dataRequirements: ['api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud'],
     
     containerImage: 'openagents/trademark-clearance',
@@ -400,8 +400,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 52,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$40 per trademark search',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.uspto.gov'],
     requiredPorts: ['8000'],
@@ -429,7 +429,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['EEOC', 'FLSA', 'State Employment Laws'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/employment-compliance',
@@ -441,8 +441,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 41,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$400/month per HR legal specialist',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.eeoc.gov', 'https://api.dol.gov'],
     requiredPorts: ['8000'],
@@ -469,7 +469,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['EEOC Investigation Standards', 'Employment Law'],
     dataRequirements: ['documents', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'fintech-solutions/investigation-manager',
@@ -481,8 +481,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.7,
     reviewCount: 16,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$300/month per HR investigator',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -510,7 +510,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['SEC Regulations', 'Corporate Filing Requirements'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/regulatory-filing',
@@ -522,8 +522,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 12,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$500/month per corporate secretary',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.sec.gov'],
     requiredPorts: ['8000'],
@@ -550,7 +550,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal', 'manufacturing'],
     complianceStandards: ['EPA Regulations', 'Environmental Permits'],
     dataRequirements: ['database', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/environmental-compliance',
@@ -562,8 +562,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 8,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$400/month per environmental lawyer',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.epa.gov'],
     requiredPorts: ['8000'],
@@ -591,7 +591,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['SEC Regulations', 'Securities Exchange Act'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-opus'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/securities-disclosure',
@@ -603,8 +603,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.8,
     reviewCount: 18,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$800/month per securities lawyer',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.sec.gov'],
     requiredPorts: ['8000'],
@@ -631,7 +631,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Corporate Law', 'Fiduciary Duties'],
     dataRequirements: ['documents', 'database'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['on-premise'],
     
     containerImage: 'fintech-solutions/governance-compliance',
@@ -643,8 +643,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.6,
     reviewCount: 13,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$500/month per corporate secretary',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],
@@ -672,7 +672,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Real Estate Law', 'Zoning Regulations'],
     dataRequirements: ['documents', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'fintech-solutions/real-estate-dd',
@@ -684,8 +684,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.4,
     reviewCount: 27,
     
-    pricingModel: 'usage-based',
-    pricingDescription: '$100 per transaction analyzed',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.county-records.gov'],
     requiredPorts: ['8000'],
@@ -713,7 +713,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['USCIS Regulations', 'Immigration Law'],
     dataRequirements: ['documents', 'api-access'],
-    modelRequirements: ['gpt-4', 'claude-3-5-sonnet'],
+    modelRequirements: ['gpt-4o', 'claude-sonnet-4'],
     deploymentTypes: ['cloud', 'on-premise'],
     
     containerImage: 'openagents/immigration-manager',
@@ -725,8 +725,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.3,
     reviewCount: 34,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$250/month per immigration attorney',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: ['https://api.uscis.gov'],
     requiredPorts: ['8000'],
@@ -754,7 +754,7 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     targetIndustries: ['legal'],
     complianceStandards: ['Brady Obligations', 'Criminal Procedure Rules'],
     dataRequirements: ['documents', 'text-only'],
-    modelRequirements: ['claude-3-5-sonnet', 'gpt-4'],
+    modelRequirements: ['claude-sonnet-4', 'gpt-4o'],
     deploymentTypes: ['on-premise', 'air-gapped'],
     
     containerImage: 'openagents/criminal-discovery',
@@ -766,8 +766,8 @@ export const LEGAL_AGENTS: MarketplaceAgent[] = [
     rating: 4.5,
     reviewCount: 15,
     
-    pricingModel: 'subscription',
-    pricingDescription: '$300/month per criminal defense attorney',
+    pricingModel: 'free',
+    pricingDescription: 'Free to use',
     
     egressAllowlist: [],
     requiredPorts: ['8000'],

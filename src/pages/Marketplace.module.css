@@ -135,6 +135,38 @@
   box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
 }
 
+.multiSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  background: var(--surface-2);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.checkboxLabel:hover {
+  color: var(--accent);
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
 /* Active Filters */
 .activeFilters {
   display: flex;
@@ -220,10 +252,7 @@
 }
 
 .cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .cardTitle {
@@ -242,35 +271,25 @@
 }
 
 .publisherInfo {
-  text-align: right;
-  flex-shrink: 0;
+  margin-bottom: 0.75rem;
 }
 
 .publisherName {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
+  font-style: italic;
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
 .verifiedBadge {
+  width: 1rem;
+  height: 1rem;
   color: var(--success);
-  font-weight: 600;
-  font-size: 0.75rem;
+  margin-left: 0.25rem;
 }
 
-.newBadge {
-  background: var(--success-bg);
-  color: var(--success);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
 
 .description {
   color: var(--text-secondary);
@@ -327,30 +346,47 @@
 }
 
 .categoryTag {
-  background: rgba(0, 217, 255, 0.1);
-  color: var(--accent);
-  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--info);
+  border-color: rgba(6, 182, 212, 0.2);
 }
 
 .subcategoryTag {
-  background: var(--surface-3);
-  color: var(--text);
-  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-secondary);
 }
 
 .industryTag {
-  background: var(--surface-2);
-  color: var(--text-secondary);
-  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-muted);
+  border-color: rgba(100, 116, 139, 0.2);
 }
 
 .cardActions {
