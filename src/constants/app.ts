@@ -14,7 +14,9 @@ export const API_DEFAULTS = {
   WS_URL: 'ws://localhost:18080',
   TIMEOUT: 30000,
   RETRY_COUNT: 2,
-  REFETCH_INTERVAL: 5000,
+  REFETCH_INTERVAL: 2000, // 2s for general queries
+  EXECUTIONS_FAST_INTERVAL: 1000, // 1s when executions are running
+  EXECUTIONS_SLOW_INTERVAL: 10000, // 10s when no executions are running
 } as const
 
 export const ROUTES = {

@@ -58,6 +58,7 @@ export default function Executions() {
   const [previewLoading, setPreviewLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'artifacts' | 'data' | 'audit'>('overview')
   const [copiedThreadId, setCopiedThreadId] = useState<string | null>(null)
+  const [currentTime, setCurrentTime] = useState(new Date())
 
   const retryMutation = useMutation({
     mutationFn: (execution: Execution) => {
@@ -75,14 +76,18 @@ export default function Executions() {
     }
   })
 
-  // Real API query
+  // Real API query with dynamic polling
   const { data: executionsResponse, isLoading, error } = useQuery({
     queryKey: ['executions'],
     queryFn: () => agentsApi.listExecutions({ 
       limit: 100
       // Always fetch all executions - filter on client side
     }),
-    refetchInterval: API_DEFAULTS.REFETCH_INTERVAL,
+    refetchInterval: (query) => {
+      const executions = query.state.data?.executions || []
+      const hasRunning = executions.some((e: Execution) => e.state === 'running' || e.state === 'queued')
+      return hasRunning ? API_DEFAULTS.EXECUTIONS_FAST_INTERVAL : API_DEFAULTS.EXECUTIONS_SLOW_INTERVAL
+    },
   })
 
   const executions = useMemo(() => executionsResponse?.executions || [], [executionsResponse?.executions])
@@ -176,10 +181,22 @@ export default function Executions() {
     }
   }
 
+  // Live timer for running executions
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const hasRunning = executions.some(e => e.state === 'running')
+      if (hasRunning) {
+        setCurrentTime(new Date())
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [executions])
+
   const getDuration = (execution: Execution) => {
     if (!execution.started_at) return '—'
     const start = new Date(execution.started_at)
-    const end = execution.ended_at ? new Date(execution.ended_at) : new Date()
+    // Use currentTime for running executions to get live updates
+    const end = execution.ended_at ? new Date(execution.ended_at) : currentTime
     const duration = Math.round((end.getTime() - start.getTime()) / 1000)
     return duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}m ${duration % 60}s`
   }

@@ -13,6 +13,7 @@ import { useAudio } from '@hooks/useAudio'
 import { useToast } from '@hooks/useToast'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
+import { API_DEFAULTS } from '@constants/app'
 import type { InvocationResult, Execution } from '../types/api'
 import styles from './AgentDetail.module.css'
 
@@ -64,7 +65,11 @@ export default function AgentDetail() {
     queryKey: ['agent-executions', agentName],
     queryFn: () => agentsApi.listExecutions({ agent: agentName, limit: 100 }),
     enabled: !!agentName,
-    refetchInterval: 10000, // Refresh every 10 seconds
+    refetchInterval: (query) => {
+      const executions = query.state.data?.executions || []
+      const hasRunning = executions.some((e: any) => e.state === 'running' || e.state === 'queued')
+      return hasRunning ? API_DEFAULTS.EXECUTIONS_FAST_INTERVAL : API_DEFAULTS.EXECUTIONS_SLOW_INTERVAL
+    },
   })
 
   // Calculate agent-specific performance metrics
@@ -120,7 +125,8 @@ export default function AgentDetail() {
     enabled: !!agentName && currentAgent?.state === 'running',
     retry: 3, // Increased retries for newly started agents
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
-    refetchInterval: currentAgent?.state === 'running' ? 5000 : false,
+    refetchInterval: false, // Metadata is static - only refetch on agent state change
+    staleTime: Infinity, // Cache metadata until query key changes (agent state)
   })
 
   const invokeMutation = useMutation({
