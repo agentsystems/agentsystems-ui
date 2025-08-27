@@ -207,6 +207,7 @@ export function useModelConnectionForm() {
       awsSecretKeyEnv: connection.awsSecretKeyEnv,
       awsRegion: connection.awsRegion,
       regionPrefix: connection.regionPrefix || '',
+      baseUrl: connection.baseUrl,
       gcpServiceAccountKeyEnv: connection.gcpServiceAccountKeyEnv,
       gcpProjectId: connection.gcpProjectId,
       gcpRegion: connection.gcpRegion

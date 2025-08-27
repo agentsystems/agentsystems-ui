@@ -117,6 +117,24 @@ export default function ModelConnectionsList({
                           )}
                         </>
                       )}
+                      {connection.authMethod === 'ollama_auth' && (
+                        <>
+                          {connection.baseUrl && (
+                            <code className={styles.detailValue}>
+                              Base URL Env: {connection.baseUrl}
+                            </code>
+                          )}
+                          {connection.apiKeyEnv ? (
+                            <code className={styles.detailValue}>
+                              API Key: {connection.apiKeyEnv}
+                            </code>
+                          ) : (
+                            <code className={styles.detailValue}>
+                              No authentication (local/network)
+                            </code>
+                          )}
+                        </>
+                      )}
                       {connection.authMethod === 'none' && (
                         <code className={styles.detailValue}>
                           No authentication required

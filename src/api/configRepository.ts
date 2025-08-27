@@ -272,6 +272,10 @@ export const configUtils = {
         aws_secret_key_env: form.awsSecretKeyEnv,
         aws_region: form.awsRegion,
         ...(form.regionPrefix && { region_prefix: form.regionPrefix })
+      }),
+      ...(form.authMethod === 'ollama_auth' && {
+        base_url: form.baseUrl,
+        ...(form.apiKeyEnv && { api_key_env: form.apiKeyEnv })
       })
     }
   }),
@@ -292,6 +296,7 @@ export const configUtils = {
     awsSecretKeyEnv: config.auth.aws_secret_key_env || '',
     awsRegion: config.auth.aws_region || '',
     regionPrefix: config.auth.region_prefix || '',
+    baseUrl: config.auth.base_url || '',
     gcpServiceAccountKeyEnv: config.auth.gcp_service_account_key_env || '',
     gcpProjectId: config.auth.gcp_project_id || '',
     gcpRegion: config.auth.gcp_region || ''

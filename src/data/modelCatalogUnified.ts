@@ -109,10 +109,10 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
       {
         name: 'baseUrl',
         label: 'Ollama Server URL',
-        type: 'url',
-        placeholder: 'http://localhost:11434',
+        type: 'env_select',
+        placeholder: 'Select URL variable...',
         required: true,
-        helpText: 'URL of your Ollama server (local or remote)'
+        helpText: 'Environment variable containing your Ollama server URL'
       },
       {
         name: 'apiKeyEnv',
@@ -570,6 +570,38 @@ export const MODELS: Record<string, ModelDefinition> = {
         id: 'ollama',
         displayName: 'Ollama',
         hostingProviderModelId: 'gemma2:2b',
+        authMethod: 'ollama_auth'
+      }
+    ]
+  },
+
+  'gemma3:4b': {
+    id: 'gemma3:4b',
+    displayName: 'Gemma 3 4B',
+    vendor: 'google',
+    category: 'text',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'ollama',
+        displayName: 'Ollama',
+        hostingProviderModelId: 'gemma3:4b',
+        authMethod: 'ollama_auth'
+      }
+    ]
+  },
+
+  'gemma3:1b': {
+    id: 'gemma3:1b',
+    displayName: 'Gemma 3 1B',
+    vendor: 'google',
+    category: 'fast',
+    description: '',
+    hostingProviders: [
+      {
+        id: 'ollama',
+        displayName: 'Ollama',
+        hostingProviderModelId: 'gemma3:1b',
         authMethod: 'ollama_auth'
       }
     ]
