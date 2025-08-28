@@ -5,11 +5,13 @@
 export type AuthMethod = 'none' | 'basic' | 'token'
 
 // Model Connection Types for LLM routing
-export type ModelProvider = 'anthropic' | 'amazon_bedrock' | 'openai'
+export type ModelProvider = 'anthropic' | 'amazon_bedrock' | 'openai' | 'ollama'
 
 export interface ModelAuth {
-  method: 'api_key' | 'aws_credentials' | 'none'
+  method: 'api_key' | 'aws_credentials' | 'ollama_auth' | 'none'
   api_key_env?: string
+  // Ollama
+  base_url?: string
   // AWS Bedrock
   aws_access_key_env?: string  
   aws_secret_key_env?: string
@@ -102,12 +104,13 @@ export interface ModelConnectionForm {
   enabled: boolean
   hosting_provider_model_id: string // Auto-populated from catalog
   endpoint: string // For custom/ollama
-  authMethod: 'api_key' | 'aws_credentials' | 'none'
+  authMethod: 'api_key' | 'aws_credentials' | 'ollama_auth' | 'none'
   apiKeyEnv: string
   awsAccessKeyEnv: string
   awsSecretKeyEnv: string
   awsRegion: string
   regionPrefix: string
+  baseUrl: string
   gcpServiceAccountKeyEnv: string
   gcpProjectId: string
   gcpRegion: string
