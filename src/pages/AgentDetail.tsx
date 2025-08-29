@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
-import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { useConfigStore } from '@stores/configStore'
 import { getAgentButtonText } from '@utils/agentHelpers'
@@ -21,7 +21,7 @@ export default function AgentDetail() {
   const { agentName } = useParams<{ agentName: string }>()
   const { playClickSound } = useAudio()
   const { toasts, removeToast, showError } = useToast()
-  const { gatewayUrl } = useAuthStore()
+  const { gatewayUrl, isAuthenticated } = useAuthStore()
   const queryClient = useQueryClient()
   const [invokePayload, setInvokePayload] = useState('{\n  "date": "March 15"\n}')
   const [invocationResult, setInvocationResult] = useState<InvocationResult | null>(null)
@@ -571,11 +571,27 @@ export default function AgentDetail() {
             <button
               className="btn btn-lg btn-bright"
               onClick={handleInvoke}
-              disabled={invokeMutation.isPending || !!pollingStatus}
+              disabled={!isAuthenticated() || invokeMutation.isPending || !!pollingStatus}
+              title={!isAuthenticated() ? 'Auth token required - configure in Settings > Connection' : undefined}
             >
               <BoltIcon className={styles.executeIcon} />
-              {invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Running...' : 'Execute'}
+              {!isAuthenticated() ? 'Auth Required' : invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Running...' : 'Execute'}
             </button>
+
+            {!isAuthenticated() && (
+              <div className={styles.authWarning}>
+                <ExclamationTriangleIcon className={styles.warningIcon} />
+                <div className={styles.warningContent}>
+                  <p>Authentication token required to execute agents</p>
+                  <p>
+                    Configure your auth token in{' '}
+                    <a href="/configuration/connection" className={styles.configLink}>
+                      Settings → Connection
+                    </a>
+                  </p>
+                </div>
+              </div>
+            )}
 
             {pollingStatus && (
               <div className={styles.statusIndicator}>

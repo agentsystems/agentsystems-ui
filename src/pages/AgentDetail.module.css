@@ -310,6 +310,57 @@
   100% { transform: rotate(360deg); }
 }
 
+.authWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--warning-bg, rgba(245, 158, 11, 0.05));
+  border-radius: var(--radius);
+  border-left: 4px solid var(--warning);
+  border: 1px solid var(--warning-border, rgba(245, 158, 11, 0.15));
+}
+
+.warningIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--warning);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.warningContent {
+  flex: 1;
+}
+
+.warningContent p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.warningContent p:first-child {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.configLink {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 3px;
+  padding: 1px 4px;
+  transition: all 0.2s ease;
+}
+
+.configLink:hover {
+  background-color: var(--accent);
+  color: var(--bg);
+  text-decoration: none;
+}
+
 .fileUpload {
   display: flex;
   flex-direction: column;
