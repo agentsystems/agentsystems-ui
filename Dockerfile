@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # AgentSystems UI Image with Comprehensive License Attribution
-# Ensures bulletproof compliance with all third-party software licenses
+# Includes third-party license metadata to aid compliance reviews
 # -----------------------------------------------------------------------------
 
 # Build args for version injection

@@ -49,7 +49,7 @@ export function initSentry() {
     // Performance monitoring sample rate
     tracesSampleRate: isProduction ? 0.1 : 1.0,
     
-    // Error sampling (100% in production for comprehensive error tracking)
+    // Error sampling (set to 1.0 in production for comprehensive error tracking)
     sampleRate: 1.0,
     
     // Privacy and security settings

@@ -252,7 +252,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          # Always build locally first for verification, never push in this step
+          # Build locally first for verification, never push in this step
           platforms: linux/amd64
           push: false
           load: true
@@ -293,7 +293,7 @@ jobs:
         run: |
           echo "🔍 Scanning local image for secrets and sensitive data..."
 
-          # Always scan the locally built image before any potential push
+          # Scan the locally built image before any potential push
           echo "Using locally built image: agentsystems-ui-local"
 
           # Check for common secret patterns
