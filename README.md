@@ -25,17 +25,17 @@ A self-hostable web interface for the AgentSystems platform. Built with modern R
 - 📊 **Real-time Dashboard**: Live agent monitoring with system metrics
 - 🤖 **Agent Management**: Discover, start, stop, and invoke agents
 - 📝 **Live Logs**: Stream real-time logs with filtering and search
-- ⚙️ **Settings**: Secure configuration with form validation
+- ⚙️ **Settings**: Configuration with validation and security checks
 - 🔄 **File Uploads**: Support for agent file processing workflows
 
 ### 🛡️ **Enterprise Security**
 - 🔒 **Input Sanitization**: XSS protection and malicious payload filtering
 - 🚦 **Rate Limiting**: Abuse prevention for forms and API calls
-- 🔐 **Secure Authentication**: Safe token handling without hardcoded credentials
+- 🔐 **Authentication**: Secure token-handling practices (no hardcoded credentials)
 - 📋 **Form Validation**: Comprehensive client-side validation with user feedback
 
 ### ♿ **Accessibility Excellence**
-- **WCAG 2.1 Compliant**: Screen reader and keyboard navigation support
+- **Accessibility**: Aims to meet WCAG 2.1 guidelines; includes screen-reader and keyboard navigation support
 - **Skip Links**: Quick navigation for assistive technology users
 - **ARIA Labels**: Comprehensive labeling for all interactive elements
 - **Semantic HTML**: Proper landmark and heading structure
@@ -176,7 +176,7 @@ The application includes a test suite:
 - **Component Tests**: All UI components thoroughly tested
 - **Integration Tests**: Page-level functionality verification  
 - **Security Tests**: Input sanitization and validation testing
-- **Accessibility Tests**: WCAG compliance verification
+- **Accessibility tests**: Automated checks against WCAG 2.1 rules
 - **API Tests**: Client functionality and error handling
 
 Run `npm test` to execute the test suite.
@@ -202,13 +202,13 @@ The UI supports three professionally designed themes:
 - **Terminal typography** with monospace fonts throughout
 - Perfect for developers who want that classic hacker movie experience
 
-All themes use CSS custom properties for easy customization and maintain WCAG 2.1 accessibility standards.
+All themes use CSS custom properties for easy customization and aim to align with WCAG 2.1 accessibility guidelines.
 
 ## 🔒 Security Features
 
 - **Input Sanitization**: All user inputs are sanitized to prevent XSS attacks
 - **Rate Limiting**: Protection against form spam and API abuse
-- **Secure Headers**: CSRF protection and content type validation
+- **Security headers**: CSRF protection and content-type validation
 - **Authentication**: Secure token handling without hardcoded credentials
 - **JSON Validation**: Safe parsing and sanitization of agent payloads
 
@@ -250,4 +250,4 @@ We welcome contributions! The codebase is designed for easy contribution with:
 
 ## License
 
-All use of this software is governed by the [LICENSE](LICENSE).
+Licensed under the [Apache-2.0 license](./LICENSE).
