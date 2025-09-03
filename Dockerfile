@@ -128,7 +128,7 @@ RUN echo "{\"version\": \"${VERSION}\", \"build_timestamp\": \"${BUILD_TIMESTAMP
 
 # Generate final license summary for easy access
 RUN echo "# AgentSystems UI - Complete License Attribution\n" > /app/licenses/README.md && \
-    echo "This container provides bulletproof license attribution for compliance.\n" >> /app/licenses/README.md && \
+    echo "This container includes license attribution files.\n" >> /app/licenses/README.md && \
     echo "## Coverage Areas\n" >> /app/licenses/README.md && \
     echo "✅ **Production Dependencies**: All runtime Node.js packages with full license texts\n" >> /app/licenses/README.md && \
     echo "✅ **Build Environment**: Node.js runtime, npm, Alpine Linux\n" >> /app/licenses/README.md && \
