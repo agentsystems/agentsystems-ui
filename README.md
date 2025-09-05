@@ -1,7 +1,7 @@
 # AgentSystems UI
 
 [![GitHub stars](https://img.shields.io/github/stars/agentsystems/agentsystems?style=flat-square&logo=github)](https://github.com/agentsystems/agentsystems/stargazers)
-[![Tests](https://img.shields.io/badge/tests-73%20passing-brightgreen)](https://github.com/agentsystems/agentsystems-ui)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/agentsystems/agentsystems-ui/ci.yml?branch=main)](https://github.com/agentsystems/agentsystems-ui/actions)
 
 > [!NOTE]  
 > **Public Beta** - Part of the AgentSystems platform. Official public launch September 15, 2025.
