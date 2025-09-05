@@ -572,7 +572,7 @@ export default function AgentDetail() {
               className="btn btn-lg btn-bright"
               onClick={handleInvoke}
               disabled={!isAuthenticated() || invokeMutation.isPending || !!pollingStatus}
-              title={!isAuthenticated() ? 'Auth token required - configure in Settings > Connection' : undefined}
+              title={!isAuthenticated() ? 'Auth token required - configure in Configuration > Gateway Connection' : undefined}
             >
               <BoltIcon className={styles.executeIcon} />
               {!isAuthenticated() ? 'Auth Required' : invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Running...' : 'Execute'}
@@ -586,7 +586,7 @@ export default function AgentDetail() {
                   <p>
                     Configure your auth token in{' '}
                     <a href="/configuration/connection" className={styles.configLink}>
-                      Settings → Connection
+                      Configuration → Gateway Connection
                     </a>
                   </p>
                 </div>
