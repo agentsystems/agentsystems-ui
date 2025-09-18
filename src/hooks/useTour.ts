@@ -159,17 +159,25 @@ We'll restore ${originalTheme} theme when done.`,
         // Detect when user clicks the agent card
         const agentCard = element as HTMLElement
         agentCard.addEventListener('click', () => {
-          // Wait for the agent detail page to load
+          // Wait for the agent detail page to load AND the start button to appear
+          // The start button only appears when agent is stopped
           waitForElement(
             '[data-tour="start-agent-button"]',
             (startButton) => {
               if (startButton) {
+                console.log('Tour: Start button found, agent is stopped')
                 getDriverInstance().moveNext()
               }
             },
             {
-              maxAttempts: 10,
-              intervalMs: 200  // Check frequently for smooth transition
+              maxAttempts: 20,  // Give more time for agent to stop if needed
+              intervalMs: 300,
+              onTimeout: () => {
+                // If button never appears, agent might still be running
+                console.warn('Tour: Start button not found, agent may still be running')
+                // Try to proceed anyway
+                getDriverInstance().moveNext()
+              }
             }
           )
         }, { once: true })
@@ -626,8 +634,19 @@ Each deployment specifies:<br>
     // Set tour active
     setTourActive(true)
 
-    // Skip agent check for now - we'll check when we actually need to start it
-    // This speeds up tour initialization significantly
+    // Ensure hello-world-agent is stopped for consistent tour experience
+    // Do this async so it doesn't delay tour start
+    agentsApi.list().then(response => {
+      const helloWorldAgent = response.agents.find(a => a.name === 'hello-world-agent')
+      if (helloWorldAgent && helloWorldAgent.state === 'running') {
+        console.log('Tour: Stopping hello-world-agent for consistent experience')
+        agentsApi.stopAgent('hello-world-agent').catch(error => {
+          console.warn('Tour: Could not stop agent:', error)
+        })
+      }
+    }).catch(error => {
+      console.warn('Tour: Could not check agent state:', error)
+    })
 
     console.log('Tour: Creating Driver instance')
 
