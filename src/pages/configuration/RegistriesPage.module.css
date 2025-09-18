@@ -9,7 +9,7 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .breadcrumbLink {
@@ -135,13 +135,13 @@
 }
 
 .errorText {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--error);
   margin-top: 0.25rem;
 }
 
 .hint {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
 
@@ -265,7 +265,7 @@
   align-items: center;
   padding: 0.125rem 0.5rem;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -289,7 +289,7 @@
   color: var(--success);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -301,7 +301,7 @@
   background: rgba(245, 158, 11, 0.1);
   border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: var(--radius);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--warning);
 }
 
@@ -334,14 +334,14 @@
 }
 
 .detailLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-muted);
   min-width: 3rem;
 }
 
 .detailValue {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
 }
 
@@ -404,7 +404,7 @@
 .agentSummary {
   padding: 0.5rem 0.75rem;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   user-select: none;
 }
@@ -423,7 +423,7 @@
 
 .agentName {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   background: var(--surface-2);
   color: var(--text-secondary);
   padding: 0.25rem 0.5rem;
@@ -434,6 +434,6 @@
 .moreAgents {
   font-style: italic;
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   padding: 0.25rem 0.5rem;
 }

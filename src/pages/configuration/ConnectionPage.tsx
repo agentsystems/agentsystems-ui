@@ -211,7 +211,7 @@ export default function ConnectionPage() {
               </span>
             )}
             <span className={styles.hint} id="auth-token-hint">
-              Bearer token for authentication
+              Bearer token for authentication. Default demo token provided - please change for production use.
             </span>
           </div>
 
@@ -268,6 +268,13 @@ export default function ConnectionPage() {
           <div className={styles.warning}>
             <ExclamationTriangleIcon />
             <span>Complete the connection configuration to use AgentSystems features</span>
+          </div>
+        )}
+
+        {token === 'demo-token-please-change' && (
+          <div className={styles.warning}>
+            <ExclamationTriangleIcon />
+            <span>Using demo token - please update with your a new token for production use</span>
           </div>
         )}
       </Card>
