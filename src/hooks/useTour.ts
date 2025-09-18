@@ -13,6 +13,24 @@ import { useThemeStore } from '@stores/themeStore'
 import { agentsApi } from '@api/agents'
 import 'driver.js/dist/driver.css'
 
+// CSS to prevent interaction with highlighted elements during tour
+const injectTourInteractionStyles = () => {
+  const styleId = 'tour-interaction-styles'
+  if (!document.getElementById(styleId)) {
+    const styleSheet = document.createElement('style')
+    styleSheet.id = styleId
+    styleSheet.textContent = `
+      .tour-no-interaction {
+        pointer-events: none !important;
+      }
+      .tour-no-interaction * {
+        pointer-events: none !important;
+      }
+    `
+    document.head.appendChild(styleSheet)
+  }
+}
+
 interface TourHook {
   startExecutionFirstTour: () => void
   hasCompletedTour: boolean
@@ -419,6 +437,17 @@ We'll restore ${originalTheme} theme when done.`,
         description: 'Agent outputs appear here.<br><br>Files can be previewed, downloaded, or used as inputs for other agents.',
         side: 'top',
         align: 'start'
+      },
+      onHighlighted: (element) => {
+        // Prevent clicks on artifacts during tour
+        if (element) {
+          (element as HTMLElement).classList.add('tour-no-interaction')
+        }
+      },
+      onDeselected: (element) => {
+        if (element) {
+          (element as HTMLElement).classList.remove('tour-no-interaction')
+        }
       }
     },
 
@@ -518,6 +547,17 @@ Each deployment specifies:<br>
         description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• Pre-built agents for common tasks<br>• Community-contributed solutions<br>• Enterprise agent templates<br>• One-click deployments',
         side: 'right',
         align: 'start'
+      },
+      onHighlighted: (element) => {
+        // Prevent clicking the nav item during tour
+        if (element) {
+          (element as HTMLElement).classList.add('tour-no-interaction')
+        }
+      },
+      onDeselected: (element) => {
+        if (element) {
+          (element as HTMLElement).classList.remove('tour-no-interaction')
+        }
       }
     },
 
@@ -529,6 +569,17 @@ Each deployment specifies:<br>
         description: 'Get help whenever you need it.<br><br>The <strong>Support</strong> page provides:<br>• Documentation and guides<br>• Troubleshooting resources<br>• Community forums<br>• <strong>Restart this tour anytime</strong>',
         side: 'right',
         align: 'start'
+      },
+      onHighlighted: (element) => {
+        // Prevent clicking the nav item during tour
+        if (element) {
+          (element as HTMLElement).classList.add('tour-no-interaction')
+        }
+      },
+      onDeselected: (element) => {
+        if (element) {
+          (element as HTMLElement).classList.remove('tour-no-interaction')
+        }
       }
     },
 
@@ -584,12 +635,23 @@ You're ready to explore AgentSystems.<br><br>
     disableBodyScroll: true,
 
     // Callbacks
-    onHighlighted: (element: Element | undefined) => {
+    onHighlighted: (element: Element | undefined, step: any) => {
+      // Inject styles if not already done
+      injectTourInteractionStyles()
+
       // Check if element exists (first step may not have an element)
       if (element) {
         // Add custom highlighting for better visibility
         (element as HTMLElement).style.position = 'relative';
         (element as HTMLElement).style.zIndex = '10001'
+
+        // Check if this step has 'next' button disabled
+        const nextDisabled = step?.popover?.disableButtons?.includes('next')
+
+        // If next button is NOT disabled, prevent interaction with the element
+        if (!nextDisabled) {
+          (element as HTMLElement).classList.add('tour-no-interaction')
+        }
       }
 
       // Prevent all scrolling during tour
@@ -603,7 +665,9 @@ You're ready to explore AgentSystems.<br><br>
       // Reset any custom styling
       if (element) {
         (element as HTMLElement).style.position = '';
-        (element as HTMLElement).style.zIndex = ''
+        (element as HTMLElement).style.zIndex = '';
+        // Remove interaction prevention class
+        (element as HTMLElement).classList.remove('tour-no-interaction')
       }
     },
 
