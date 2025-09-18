@@ -47,9 +47,9 @@
 }
 
 .logoIcon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto var(--spacing-4) auto;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 48px auto;
   display: block;
   animation: iconPulse 3s ease-in-out infinite;
   filter: drop-shadow(0 0 20px rgba(var(--accent-rgb), 0.3));
@@ -79,10 +79,12 @@
 }
 
 .tagline {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  letter-spacing: 0.05em;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  letter-spacing: 0.08em;
   animation: fadeIn 1s ease-in 0.3s both;
+  font-weight: 300;
+  text-transform: uppercase;
 }
 
 .loader {

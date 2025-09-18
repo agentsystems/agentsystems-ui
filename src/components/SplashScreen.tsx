@@ -44,10 +44,7 @@ export default function SplashScreen() {
             alt="AgentSystems"
             className={styles.logoIcon}
           />
-          <div className={styles.logoText}>
-            AGENT<span className={styles.accent}>SYSTEMS</span>
-          </div>
-          <div className={styles.tagline}>Your Path to AI Sovereignty</div>
+          <div className={styles.tagline}>A Step Towards AI Sovereignty</div>
         </div>
 
         <div className={styles.loader}>
@@ -58,7 +55,7 @@ export default function SplashScreen() {
             />
           </div>
           <div className={styles.loadingText}>
-            Initializing systems... {Math.floor(progress)}%
+            Initializing AgentSystems... {Math.floor(progress)}%
           </div>
         </div>
       </div>
