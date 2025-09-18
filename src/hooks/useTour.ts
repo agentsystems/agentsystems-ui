@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { driver, type DriveStep } from 'driver.js'
+import { driver, type Driver, type DriveStep } from 'driver.js'
 import { useTourStore } from '@stores/tourStore'
 import { useThemeStore } from '@stores/themeStore'
 import { agentsApi } from '@api/agents'
@@ -30,8 +30,7 @@ export function useTour(): TourHook {
   } = useTourStore()
 
   // Tour step templates without driver instance references
-  const getTourSteps = (getDriverInstance: () => any): DriveStep[] => {
-    const driverInstance = getDriverInstance()
+  const getTourSteps = (getDriverInstance: () => Driver): DriveStep[] => {
     return [
     // Step 1: Welcome Modal (free-floating)
     {
@@ -57,7 +56,7 @@ export function useTour(): TourHook {
         // Detect when user clicks the actual Agents link
         const agentsLink = element as HTMLElement
         agentsLink.addEventListener('click', () => {
-          setTimeout(() => driverInstance.moveNext(), 800)
+          setTimeout(() => getDriverInstance().moveNext(), 800)
         }, { once: true })
       }
     },
@@ -76,7 +75,7 @@ export function useTour(): TourHook {
         // Detect when user clicks the agent card
         const agentCard = element as HTMLElement
         agentCard.addEventListener('click', () => {
-          setTimeout(() => driverInstance.moveNext(), 1000)
+          setTimeout(() => getDriverInstance().moveNext(), 1000)
         }, { once: true })
       }
     },
@@ -108,7 +107,7 @@ export function useTour(): TourHook {
         const startButton = element as HTMLElement
         startButton.addEventListener('click', () => {
           // Wait for agent to start, then continue tour
-          setTimeout(() => driverInstance.moveNext(), 3000)
+          setTimeout(() => getDriverInstance().moveNext(), 3000)
         }, { once: true })
       }
     },
@@ -139,7 +138,7 @@ export function useTour(): TourHook {
         const executeButton = element as HTMLElement
         executeButton.addEventListener('click', () => {
           // Wait for execution to start, then show status
-          setTimeout(() => driverInstance.moveNext(), 3000)
+          setTimeout(() => getDriverInstance().moveNext(), 3000)
         }, { once: true })
       }
     },
@@ -168,7 +167,7 @@ export function useTour(): TourHook {
           // Check if status changed to completed or if results are ready
           if (resultsElement && resultsElement.textContent && resultsElement.textContent.length > 10) {
             // Results are ready, auto-advance to show them
-            setTimeout(() => driverInstance.moveNext(), 1000)
+            setTimeout(() => getDriverInstance().moveNext(), 1000)
             return true
           }
 
@@ -178,7 +177,7 @@ export function useTour(): TourHook {
           } else {
             // Timeout - move to next step anyway
             console.warn('Tour: Execution took too long, proceeding anyway')
-            setTimeout(() => driverInstance.moveNext(), 1000)
+            setTimeout(() => getDriverInstance().moveNext(), 1000)
           }
           return false
         }
@@ -217,7 +216,7 @@ Would you like to:<br><br>
           storeMark('execution-first')
           setTourActive(false)
           console.log('User chose to explore on their own')
-          driverInstance.destroy()
+          getDriverInstance().destroy()
         }
       }
     },
@@ -238,7 +237,7 @@ Would you like to:<br><br>
         settingsLink.addEventListener('click', () => {
           // Wait for navigation then show completion
           setTimeout(() => {
-            driverInstance.moveNext()
+            getDriverInstance().moveNext()
           }, 800)
         }, { once: true })
       }
@@ -465,10 +464,10 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
     console.log('Tour: Current theme:', currentTheme, 'Overlay color:', overlayColor)
 
     // We need to create a mutable reference for the driver instance
-    let driverInstance: any = null
+    let driverInstance: Driver | null = null
 
     // Create steps with reference to driver instance
-    const steps = getTourSteps((() => driverInstance))
+    const steps = getTourSteps((() => driverInstance!))
 
     // Create new driver instance with theme-aware overlay
     driverInstance = driver({
