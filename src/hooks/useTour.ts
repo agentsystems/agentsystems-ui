@@ -116,12 +116,12 @@ We'll restore ${originalTheme} theme when done.`,
 
     // Step 2: Dashboard Overview
     {
-      element: '[data-tour="dashboard-content"]',
+      element: '[data-tour="dashboard-header"]',
       popover: {
         title: 'Your Command Center 📊',
         description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents</strong> - Active containers and their status<br>• <strong>Recent Executions</strong> - Latest agent activity<br>• <strong>System Health</strong> - Resource usage and performance<br><br>Everything runs locally on your machine.',
-        side: 'top',
-        align: 'center'
+        side: 'bottom',
+        align: 'start'
       }
     },
 
@@ -514,7 +514,7 @@ Each deployment specifies:<br>
     {
       element: '[data-tour="hub-nav"]',
       popover: {
-        title: 'Agent Hub Marketplace 🛍️',
+        title: 'Agent Hub 🛍️',
         description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• Pre-built agents for common tasks<br>• Community-contributed solutions<br>• Enterprise agent templates<br>• One-click deployments',
         side: 'right',
         align: 'start'

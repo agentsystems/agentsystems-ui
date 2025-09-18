@@ -135,10 +135,10 @@ export default function Dashboard() {
 
   return (
     <div className={styles.dashboard} role="main" aria-label="Dashboard" data-tour="dashboard-content">
-      <div className={styles.header}>
+      <div className={styles.header} data-tour="dashboard-header">
         <h1 id="dashboard-title">Dashboard</h1>
         <p className={styles.subtitle} id="dashboard-subtitle">System overview and metrics</p>
-        
+
       </div>
 
       <StatsGrid 
