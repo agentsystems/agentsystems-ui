@@ -626,23 +626,8 @@ Each deployment specifies:<br>
     // Set tour active
     setTourActive(true)
 
-    // Ensure hello-world-agent is stopped before starting tour
-    try {
-      console.log('Tour: Checking agent state...')
-      const response = await agentsApi.list()
-      const helloWorldAgent = response.agents.find(a => a.name === 'hello-world-agent')
-
-      if (helloWorldAgent && helloWorldAgent.state === 'running') {
-        console.log('Tour: Preparing environment - stopping hello-world-agent')
-        await agentsApi.stopAgent('hello-world-agent')
-        // Wait a moment for the agent to stop
-        await new Promise(resolve => setTimeout(resolve, 500))
-      } else {
-        console.log('Tour: Agent is already stopped or not found')
-      }
-    } catch (error) {
-      console.warn('Tour: Could not check/stop agent state:', error)
-    }
+    // Skip agent check for now - we'll check when we actually need to start it
+    // This speeds up tour initialization significantly
 
     console.log('Tour: Creating Driver instance')
 
