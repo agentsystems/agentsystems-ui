@@ -33,6 +33,49 @@ export function useTour(): TourHook {
   const getTourSteps = (getDriverInstance: () => Driver, originalTheme?: string): DriveStep[] => {
     const steps: DriveStep[] = []
 
+    // Helper function to wait for elements with configurable polling
+    const waitForElement = (
+      selector: string,
+      callback: (element: Element | null) => void,
+      options: {
+        maxAttempts?: number
+        intervalMs?: number
+        onTimeout?: () => void
+      } = {}
+    ) => {
+      const {
+        maxAttempts = 20,  // Default: 10 seconds with 500ms intervals
+        intervalMs = 500,
+        onTimeout
+      } = options
+
+      let attempts = 0
+
+      const checkElement = () => {
+        attempts++
+        const element = document.querySelector(selector)
+
+        if (element) {
+          callback(element)
+          return
+        }
+
+        if (attempts < maxAttempts) {
+          setTimeout(checkElement, intervalMs)
+        } else {
+          console.warn(`Tour: Element ${selector} not found after ${attempts * intervalMs}ms`)
+          if (onTimeout) {
+            onTimeout()
+          } else {
+            callback(null)
+          }
+        }
+      }
+
+      // Start checking immediately
+      checkElement()
+    }
+
     // Add theme switching confirmation step if needed
     if (originalTheme && originalTheme !== 'light') {
       steps.push({
@@ -85,7 +128,19 @@ We'll restore ${originalTheme} theme when done.`,
         // Detect when user clicks the actual Agents link
         const agentsLink = element as HTMLElement
         agentsLink.addEventListener('click', () => {
-          setTimeout(() => getDriverInstance().moveNext(), 800)
+          // Wait for the agents page to load and card to appear
+          waitForElement(
+            '[data-tour="hello-world-agent-card"]',
+            (card) => {
+              if (card) {
+                getDriverInstance().moveNext()
+              }
+            },
+            {
+              maxAttempts: 10,
+              intervalMs: 200  // Check frequently for smooth transition
+            }
+          )
         }, { once: true })
       }
     },
@@ -104,7 +159,19 @@ We'll restore ${originalTheme} theme when done.`,
         // Detect when user clicks the agent card
         const agentCard = element as HTMLElement
         agentCard.addEventListener('click', () => {
-          setTimeout(() => getDriverInstance().moveNext(), 1000)
+          // Wait for the agent detail page to load
+          waitForElement(
+            '[data-tour="start-agent-button"]',
+            (startButton) => {
+              if (startButton) {
+                getDriverInstance().moveNext()
+              }
+            },
+            {
+              maxAttempts: 10,
+              intervalMs: 200  // Check frequently for smooth transition
+            }
+          )
         }, { once: true })
       }
     },
@@ -123,8 +190,20 @@ We'll restore ${originalTheme} theme when done.`,
         // Detect when user clicks the start button
         const startButton = element as HTMLElement
         startButton.addEventListener('click', () => {
-          // Wait for agent to start, then continue tour
-          setTimeout(() => getDriverInstance().moveNext(), 3000)
+          // Wait for agent metadata to appear after starting
+          waitForElement(
+            '[data-tour="agent-metadata"]',
+            (metadata) => {
+              if (metadata) {
+                // Give a moment for the metadata to fully render
+                setTimeout(() => getDriverInstance().moveNext(), 500)
+              }
+            },
+            {
+              maxAttempts: 20,  // 10 seconds for agent to start
+              intervalMs: 500
+            }
+          )
         }, { once: true })
       }
     },
@@ -154,8 +233,20 @@ We'll restore ${originalTheme} theme when done.`,
         // Detect when user clicks the execute button
         const executeButton = element as HTMLElement
         executeButton.addEventListener('click', () => {
-          // Wait for execution to start and status element to render
-          setTimeout(() => getDriverInstance().moveNext(), 3000)
+          // Wait for execution status element to appear
+          waitForElement(
+            '[data-tour="execution-status"]',
+            (statusEl) => {
+              if (statusEl) {
+                // Move to next step to highlight the status
+                getDriverInstance().moveNext()
+              }
+            },
+            {
+              maxAttempts: 10,  // 5 seconds
+              intervalMs: 500
+            }
+          )
         }, { once: true })
       }
     },
@@ -171,60 +262,47 @@ We'll restore ${originalTheme} theme when done.`,
         disableButtons: ['next', 'previous']
       },
       onHighlighted: async () => {
-        // First wait for the execution status element to actually appear
-        let statusAttempts = 0
-        const maxStatusAttempts = 20 // 20 attempts * 500ms = 10 seconds to find status element
-
-        const waitForStatusElement = () => {
-          statusAttempts++
-          const statusElement = document.querySelector('[data-tour="execution-status"]')
-
-          if (!statusElement && statusAttempts < maxStatusAttempts) {
-            // Status element not yet visible, keep waiting
-            setTimeout(waitForStatusElement, 500)
-            return
-          }
-
-          if (!statusElement) {
-            console.warn('Tour: Execution status element never appeared, skipping')
-            setTimeout(() => getDriverInstance().moveNext(), 1000)
-            return
-          }
-
-          // Now poll for execution completion
-          const maxAttempts = 60 // 60 seconds max wait
-          let attempts = 0
-
-          const checkForCompletion = async () => {
-            attempts++
-
-            // Check if execution status changed to completed
-            const resultsElement = document.querySelector('[data-tour="execution-results"]')
-
-            // Check if results are ready
-            if (resultsElement && resultsElement.textContent && resultsElement.textContent.length > 10) {
-              // Results are ready, auto-advance to show them
+        // First wait for the execution status element to appear
+        waitForElement(
+          '[data-tour="execution-status"]',
+          (statusElement) => {
+            if (!statusElement) {
+              console.warn('Tour: Execution status element never appeared, skipping')
               setTimeout(() => getDriverInstance().moveNext(), 1000)
-              return true
+              return
             }
 
-            if (attempts < maxAttempts) {
-              // Keep checking every second
-              setTimeout(checkForCompletion, 1000)
-            } else {
-              // Timeout - move to next step anyway
-              console.warn('Tour: Execution took too long, proceeding anyway')
-              setTimeout(() => getDriverInstance().moveNext(), 1000)
+            // Now poll for execution completion
+            let attempts = 0
+            const maxAttempts = 60 // 60 seconds max wait
+
+            const checkForCompletion = () => {
+              attempts++
+
+              // Check if results are ready
+              const resultsElement = document.querySelector('[data-tour="execution-results"]')
+              if (resultsElement && resultsElement.textContent && resultsElement.textContent.length > 10) {
+                // Results are ready, auto-advance
+                setTimeout(() => getDriverInstance().moveNext(), 500)
+                return
+              }
+
+              if (attempts < maxAttempts) {
+                setTimeout(checkForCompletion, 1000)
+              } else {
+                console.warn('Tour: Execution took too long, proceeding anyway')
+                setTimeout(() => getDriverInstance().moveNext(), 500)
+              }
             }
-            return false
+
+            // Start checking for completion after a brief delay
+            setTimeout(checkForCompletion, 2000)
+          },
+          {
+            maxAttempts: 20,  // 10 seconds
+            intervalMs: 500
           }
-
-          // Start checking for completion
-          setTimeout(checkForCompletion, 2000)
-        }
-
-        // Start waiting for status element
-        waitForStatusElement()
+        )
       }
     },
 
@@ -249,17 +327,28 @@ We'll restore ${originalTheme} theme when done.`,
         align: 'start',
         disableButtons: ['next']
       },
-      onHighlighted: (element) => {
-        // Wait a bit for the table to populate with the new execution
-        setTimeout(() => {
-          const firstRow = element as HTMLElement
-          if (firstRow) {
-            firstRow.addEventListener('click', () => {
-              // Move to next step after clicking row
-              setTimeout(() => getDriverInstance().moveNext(), 1500)
-            }, { once: true })
+      onHighlighted: () => {
+        // Wait for the execution row to appear in the table
+        waitForElement(
+          '[data-tour="execution-row-first"]',
+          (firstRow) => {
+            if (firstRow) {
+              const row = firstRow as HTMLElement
+              row.addEventListener('click', () => {
+                // Move to next step after clicking row
+                setTimeout(() => getDriverInstance().moveNext(), 500)
+              }, { once: true })
+            } else {
+              // If row doesn't appear, skip to next step
+              console.warn('Tour: Execution row did not appear in table')
+              setTimeout(() => getDriverInstance().moveNext(), 500)
+            }
+          },
+          {
+            maxAttempts: 10,  // 5 seconds should be enough
+            intervalMs: 500
           }
-        }, 1000)
+        )
       }
     },
 
@@ -287,7 +376,7 @@ We'll restore ${originalTheme} theme when done.`,
       onHighlighted: (element) => {
         const artifactsTab = element as HTMLElement
         artifactsTab?.addEventListener('click', () => {
-          setTimeout(() => getDriverInstance().moveNext(), 1000)
+          setTimeout(() => getDriverInstance().moveNext(), 500)
         }, { once: true })
       }
     },
