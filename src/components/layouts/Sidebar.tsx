@@ -77,6 +77,8 @@ export default function Sidebar() {
                 data-tour={
                   item.name.toLowerCase() === 'agents' ? 'agents-nav' :
                   item.name.toLowerCase() === 'configuration' ? 'settings-nav' :
+                  item.name.toLowerCase() === 'agent hub' ? 'hub-nav' :
+                  item.name.toLowerCase() === 'support' ? 'support-nav' :
                   undefined
                 }
               >

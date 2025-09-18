@@ -114,7 +114,18 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 2: Navigate to Agents
+    // Step 2: Dashboard Overview
+    {
+      element: '[data-tour="dashboard-content"]',
+      popover: {
+        title: 'Your Command Center 📊',
+        description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents</strong> - Active containers and their status<br>• <strong>Recent Executions</strong> - Latest agent activity<br>• <strong>System Health</strong> - Resource usage and performance<br><br>Everything runs locally on your machine.',
+        side: 'top',
+        align: 'center'
+      }
+    },
+
+    // Step 3: Navigate to Agents
     {
       element: '[data-tour="agents-nav"]',
       popover: {
@@ -145,7 +156,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 3: Show Agent Card (first step on Agents page)
+    // Step 4: Show Agent Card (first step on Agents page)
     {
       element: '[data-tour="hello-world-agent-card"]',
       popover: {
@@ -184,7 +195,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 4: Turn On Agent (first step on Agent Detail page)
+    // Step 5: Turn On Agent (first step on Agent Detail page)
     {
       element: '[data-tour="start-agent-button"]',
       popover: {
@@ -216,7 +227,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 5: Agent Metadata (shows runtime information)
+    // Step 6: Agent Metadata (shows runtime information)
     {
       element: '[data-tour="agent-metadata"]',
       popover: {
@@ -227,7 +238,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 6: Execute Agent
+    // Step 7: Execute Agent
     {
       element: '[data-tour="execute-agent-button"]',
       popover: {
@@ -259,7 +270,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 7: Execution Status (while running)
+    // Step 8: Execution Status (while running)
     {
       element: '[data-tour="execution-status"]',
       popover: {
@@ -314,7 +325,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 8: Execution Results
+    // Step 9: Execution Results
     {
       element: '[data-tour="execution-results"]',
       popover: {
@@ -325,7 +336,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 9: View Execution in Table
+    // Step 10: View Execution in Table
     {
       element: '[data-tour="execution-row-first"]',
       popover: {
@@ -371,7 +382,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 10: Execution Detail Panel
+    // Step 11: Execution Detail Panel
     {
       element: '[data-tour="execution-detail-panel"]',
       popover: {
@@ -382,7 +393,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 11: Artifacts Tab
+    // Step 12: Artifacts Tab
     {
       element: '[data-tour="artifacts-tab"]',
       popover: {
@@ -400,7 +411,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 12: Artifacts Panel
+    // Step 13: Artifacts Panel
     {
       element: '[data-tour="artifacts-panel"]',
       popover: {
@@ -412,7 +423,7 @@ We'll restore ${originalTheme} theme when done.`,
     },
 
     // Configuration Tour Steps
-    // Step 13: Navigate to Configuration
+    // Step 14: Navigate to Configuration
     {
       element: '[data-tour="settings-nav"]',
       popover: {
@@ -434,7 +445,7 @@ We'll restore ${originalTheme} theme when done.`,
     },
 
     // Configuration Page Tour Steps (12-16)
-    // Step 14: Credentials Card
+    // Step 15: Credentials Card
     {
       element: '[data-tour="credentials-card"]',
       popover: {
@@ -451,7 +462,7 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       }
     },
 
-    // Step 15: Registry Connections Card
+    // Step 16: Registry Connections Card
     {
       element: '[data-tour="registry-connections-card"]',
       popover: {
@@ -467,7 +478,7 @@ Supported registries:<br>
       }
     },
 
-    // Step 16: Model Connections Card
+    // Step 17: Model Connections Card
     {
       element: '[data-tour="model-connections-card"]',
       popover: {
@@ -483,7 +494,7 @@ Supported providers:<br>
       }
     },
 
-    // Step 17: Agents Card
+    // Step 18: Agents Configuration
     {
       element: '[data-tour="agents-config-card"]',
       popover: {
@@ -499,23 +510,40 @@ Each deployment specifies:<br>
       }
     },
 
-    // Step 18: Tour Complete
+    // Step 19: Agent Hub
+    {
+      element: '[data-tour="hub-nav"]',
+      popover: {
+        title: 'Agent Hub Marketplace 🛍️',
+        description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• Pre-built agents for common tasks<br>• Community-contributed solutions<br>• Enterprise agent templates<br>• One-click deployments',
+        side: 'right',
+        align: 'start'
+      }
+    },
+
+    // Step 20: Support
+    {
+      element: '[data-tour="support-nav"]',
+      popover: {
+        title: 'Help & Documentation 💬',
+        description: 'Get help whenever you need it.<br><br>The <strong>Support</strong> page provides:<br>• Documentation and guides<br>• Troubleshooting resources<br>• Community forums<br>• <strong>Restart this tour anytime</strong>',
+        side: 'right',
+        align: 'start'
+      }
+    },
+
+    // Step 21: Tour Complete
     {
       popover: {
-        title: 'Tour Complete! 🎉',
-        description: `You've successfully executed an AI agent on your local infrastructure.<br><br>
-<strong>You learned how to:</strong><br>
-• Start and execute AI agents<br>
-• View execution history and details<br>
-• Access generated artifacts<br>
-• Configure credentials securely<br>
-• Connect to container registries<br>
-• Set up AI model providers<br><br>
-<strong>Explore more:</strong><br>
-• <strong>Agent Hub</strong> - Discover new agents<br>
-• <strong>Audit Trail</strong> - View detailed logs<br>
-• <strong>Support</strong> - Access help and restart tour<br><br>
-<a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">View Documentation →</a>`,
+        title: 'Congratulations! 🎉',
+        description: `You've mastered the basics of AI Sovereignty!<br><br>
+<strong>You successfully:</strong><br>
+✅ Executed an AI agent locally<br>
+✅ Viewed execution results and artifacts<br>
+✅ Explored configuration options<br><br>
+Your AI infrastructure is now fully under your control.<br><br>
+<strong>Ready to build something amazing?</strong><br><br>
+<a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">Explore the Docs →</a>`,
         side: 'top',
         align: 'center',
         showButtons: ['close']
