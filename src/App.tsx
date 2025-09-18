@@ -9,6 +9,7 @@ import { useThemeStore } from '@stores/themeStore'
 import { useScanline } from '@hooks/useScanline'
 
 // Lazy-loaded components for code splitting
+const SplashScreen = lazy(() => import('@components/SplashScreen'))
 const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Agents = lazy(() => import('@pages/Agents'))
 const Marketplace = lazy(() => import('@pages/Marketplace'))
@@ -52,8 +53,15 @@ function App() {
       <ScrollToTop />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
+          {/* Splash screen only on root path */}
+          <Route path="/" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <SplashScreen />
+            </Suspense>
+          } />
+
+          {/* Main app routes */}
           <Route path="/" element={<MainLayout />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <Dashboard />

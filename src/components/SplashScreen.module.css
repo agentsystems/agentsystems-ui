@@ -1,0 +1,236 @@
+.splashScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.content {
+  text-align: center;
+  max-width: 500px;
+  padding: var(--spacing-6);
+}
+
+.logo {
+  margin-bottom: var(--spacing-8);
+  animation: slideDown 0.6s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.logoIcon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-4) auto;
+  display: block;
+  animation: iconPulse 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(var(--accent-rgb), 0.3));
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1) translateX(0);
+  }
+  50% {
+    transform: scale(1.05) translateX(0);
+  }
+}
+
+.logoText {
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-2);
+  color: var(--text-primary);
+  text-shadow: 0 0 30px rgba(var(--accent-rgb), 0.3);
+}
+
+.accent {
+  color: #47a1d9;
+  text-shadow: 0 0 40px rgba(71, 161, 217, 0.5);
+}
+
+.tagline {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  animation: fadeIn 1s ease-in 0.3s both;
+}
+
+.loader {
+  margin: var(--spacing-8) 0;
+  animation: fadeIn 1s ease-in 0.6s both;
+}
+
+.loadingBar {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+.loadingProgress {
+  height: 100%;
+  background: linear-gradient(90deg,
+    #00b6a0,
+    #47a1d9,
+    #00b6a0);
+  background-size: 200% 100%;
+  animation: gradientShift 2s linear infinite;
+  border-radius: var(--radius-full);
+  transition: none; /* Remove transition for linear progress */
+  box-shadow: 0 0 20px rgba(71, 161, 217, 0.6);
+}
+
+.loadingText {
+  margin-top: 12px;
+  padding-top: 0;
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+.animation {
+  margin-top: var(--spacing-8);
+  position: relative;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  animation: fadeIn 1s ease-in 0.9s both;
+}
+
+.pulse {
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.6);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Cyber theme specific styles */
+:global(.theme-cyber) .splashScreen {
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(10, 10, 10, 0.98) 100%);
+}
+
+:global(.theme-cyber) .logoIcon {
+  filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.6))
+          drop-shadow(0 0 60px rgba(0, 255, 255, 0.3));
+}
+
+:global(.theme-cyber) .logoText {
+  text-shadow:
+    0 0 30px rgba(0, 255, 255, 0.5),
+    0 0 60px rgba(0, 255, 255, 0.3);
+  animation: cyberpulse 2s ease-in-out infinite;
+}
+
+@keyframes cyberpulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+}
+
+:global(.theme-cyber) .loadingProgress {
+  background: linear-gradient(90deg,
+    #00ffff,
+    #00ff00,
+    #00ffff);
+  animation: gradientShift 2s linear infinite;
+  background-size: 200% 100%;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Light theme adjustments */
+:global(.theme-light) .splashScreen {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(250, 250, 250, 1) 100%);
+}
+
+:global(.theme-light) .logoText {
+  color: var(--gray-900);
+}
+
+:global(.theme-light) .loadingProgress {
+  background: linear-gradient(90deg,
+    #00b6a0,
+    #47a1d9,
+    #00b6a0);
+  animation: gradientShift 2s linear infinite;
+  background-size: 200% 100%;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .logoText {
+    font-size: 2rem;
+  }
+
+  .tagline {
+    font-size: 0.95rem;
+  }
+}
