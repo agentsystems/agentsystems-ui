@@ -405,7 +405,7 @@ export default function Executions() {
 
       <div className={`${styles.layout} ${!selectedExecution ? styles.layoutFullWidth : ''}`}>
         <div className={styles.executionsList}>
-          <Card>
+          <Card style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <h2 className={styles.alignedHeading}>Execution History</h2>
             <div className={styles.executionsTable}>
               <div className={styles.tableHeader}>

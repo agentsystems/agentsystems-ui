@@ -405,7 +405,9 @@
 }
 
 .executionsList {
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .executionsList h2 {
@@ -416,8 +418,9 @@
 }
 
 .executionsTable {
-  height: calc(100% - 60px);
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .tableHeader {
