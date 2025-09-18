@@ -30,24 +30,107 @@ export function useTour(): TourHook {
   } = useTourStore()
 
   // Tour step templates without driver instance references
-  const getTourSteps = (getDriverInstance: () => Driver): DriveStep[] => {
-    return [
-    // Step 1: Welcome Modal (free-floating)
+  const getTourSteps = (getDriverInstance: () => Driver, originalTheme?: string): DriveStep[] => {
+    const steps: DriveStep[] = []
+
+    // Helper function to wait for elements with configurable polling
+    const waitForElement = (
+      selector: string,
+      callback: (element: Element | null) => void,
+      options: {
+        maxAttempts?: number
+        intervalMs?: number
+        onTimeout?: () => void
+      } = {}
+    ) => {
+      const {
+        maxAttempts = 20,  // Default: 10 seconds with 500ms intervals
+        intervalMs = 500,
+        onTimeout
+      } = options
+
+      let attempts = 0
+
+      const checkElement = () => {
+        attempts++
+        const element = document.querySelector(selector)
+
+        if (element) {
+          callback(element)
+          return
+        }
+
+        if (attempts < maxAttempts) {
+          setTimeout(checkElement, intervalMs)
+        } else {
+          console.warn(`Tour: Element ${selector} not found after ${attempts * intervalMs}ms`)
+          if (onTimeout) {
+            onTimeout()
+          } else {
+            callback(null)
+          }
+        }
+      }
+
+      // Start checking immediately
+      checkElement()
+    }
+
+    // Add theme switching confirmation step if needed
+    if (originalTheme && originalTheme !== 'light') {
+      steps.push({
+        popover: {
+          title: '🎨Theme Switch',
+          description: `Tour looks best in light theme.<br><br>
+We'll restore ${originalTheme} theme when done.`,
+          side: 'top',
+          align: 'center',
+          showButtons: ['close', 'next'],
+          nextBtnText: 'Start Tour →',
+          onNextClick: () => {
+            console.log('Tour: Switching to light theme')
+            useThemeStore.getState().setTheme('light')
+            getDriverInstance().moveNext()
+          },
+          onCloseClick: () => {
+            console.log('Tour: User declined theme switch')
+            storeMark('execution-first')
+            setTourActive(false)
+            getDriverInstance().destroy()
+          }
+        }
+      })
+    }
+
+    // Add the regular tour steps
+    steps.push(
+    // Step 1 (or 2): Welcome Modal (free-floating)
     {
       popover: {
         title: 'Welcome to AI Sovereignty! 🎉',
-        description: `You now have a complete AI agent platform running <strong>locally on your machine</strong>. Let's see it in action in just 60 seconds!`,
+        description: `You now have a complete AI agent platform running on your local machine.<br><br>This quick tour will show you how to execute AI agents locally.`,
         side: 'top',
         align: 'center'
       }
     },
 
-    // Step 2: Navigate to Agents
+    // Step 2: Dashboard Overview
+    {
+      element: '[data-tour="dashboard-header"]',
+      popover: {
+        title: 'Your Command Center 📊',
+        description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents</strong> - Active containers and their status<br>• <strong>Recent Executions</strong> - Latest agent activity<br>• <strong>System Health</strong> - Resource usage and performance<br><br>Designed to run locally on your infrastructure.',
+        side: 'bottom',
+        align: 'start'
+      }
+    },
+
+    // Step 3: Navigate to Agents
     {
       element: '[data-tour="agents-nav"]',
       popover: {
         title: 'Your Agent Library',
-        description: '<strong>Click the "Agents" link</strong> to see all your configured agents.<br><br>We\'ve pre-installed a <em>hello-world-agent</em> for you to try.',
+        description: 'Click the <strong>Agents</strong> link to view your agent library.<br><br>We\'ve pre-installed a hello-world-agent to demonstrate the platform.',
         side: 'right',
         align: 'start',
         disableButtons: ['next']
@@ -56,17 +139,29 @@ export function useTour(): TourHook {
         // Detect when user clicks the actual Agents link
         const agentsLink = element as HTMLElement
         agentsLink.addEventListener('click', () => {
-          setTimeout(() => getDriverInstance().moveNext(), 800)
+          // Wait for the agents page to load and card to appear
+          waitForElement(
+            '[data-tour="hello-world-agent-card"]',
+            (card) => {
+              if (card) {
+                getDriverInstance().moveNext()
+              }
+            },
+            {
+              maxAttempts: 10,
+              intervalMs: 200  // Check frequently for smooth transition
+            }
+          )
         }, { once: true })
       }
     },
 
-    // Step 3: Show Agent Card (first step on Agents page)
+    // Step 4: Show Agent Card (first step on Agents page)
     {
       element: '[data-tour="hello-world-agent-card"]',
       popover: {
         title: 'Your First Agent',
-        description: 'This is your <strong>hello-world-agent</strong> - ready to demonstrate local AI processing.<br><br><em>Click on the card background (avoid the buttons) to view details.</em>',
+        description: 'The <strong>hello-world-agent</strong> demonstrates how agents run in isolated containers.<br><br>Click the card to view agent details.',
         side: 'top',
         align: 'start',
         disableButtons: ['next', 'previous']
@@ -75,29 +170,37 @@ export function useTour(): TourHook {
         // Detect when user clicks the agent card
         const agentCard = element as HTMLElement
         agentCard.addEventListener('click', () => {
-          setTimeout(() => getDriverInstance().moveNext(), 1000)
+          // Wait for the agent detail page to load AND the start button to appear
+          // The start button only appears when agent is stopped
+          waitForElement(
+            '[data-tour="start-agent-button"]',
+            (startButton) => {
+              if (startButton) {
+                console.log('Tour: Start button found, agent is stopped')
+                getDriverInstance().moveNext()
+              }
+            },
+            {
+              maxAttempts: 20,  // Give more time for agent to stop if needed
+              intervalMs: 300,
+              onTimeout: () => {
+                // If button never appears, agent might still be running
+                console.warn('Tour: Start button not found, agent may still be running')
+                // Try to proceed anyway
+                getDriverInstance().moveNext()
+              }
+            }
+          )
         }, { once: true })
       }
     },
 
-    // Step 4: Show Status Banner (first step on Agent Detail page)
-    {
-      element: '[data-tour="agent-status-banner"]',
-      popover: {
-        title: 'Agent Status Monitoring',
-        description: 'AgentSystems tracks each agent\'s state in <strong>real-time</strong>.<br><br>This agent is <em>stopped</em> but will <strong>auto-start</strong> when you invoke it.',
-        side: 'bottom',
-        align: 'start',
-        disableButtons: ['previous']
-      }
-    },
-
-    // Step 5: Turn On Agent
+    // Step 5: Turn On Agent (first step on Agent Detail page)
     {
       element: '[data-tour="start-agent-button"]',
       popover: {
         title: 'Start Your Agent',
-        description: '<strong>Click "Turn On"</strong> to start the agent container.<br><br>This demonstrates AgentSystems\' <em>on-demand container management</em>.',
+        description: 'Click <strong>Turn On</strong> to start the agent container.<br><br>AgentSystems manages containers on-demand to save resources.',
         side: 'top',
         align: 'start',
         disableButtons: ['next']
@@ -106,8 +209,20 @@ export function useTour(): TourHook {
         // Detect when user clicks the start button
         const startButton = element as HTMLElement
         startButton.addEventListener('click', () => {
-          // Wait for agent to start, then continue tour
-          setTimeout(() => getDriverInstance().moveNext(), 3000)
+          // Wait for agent metadata to appear after starting
+          waitForElement(
+            '[data-tour="agent-metadata"]',
+            (metadata) => {
+              if (metadata) {
+                // Give a moment for the metadata to fully render
+                setTimeout(() => getDriverInstance().moveNext(), 500)
+              }
+            },
+            {
+              maxAttempts: 20,  // 10 seconds for agent to start
+              intervalMs: 500
+            }
+          )
         }, { once: true })
       }
     },
@@ -117,7 +232,7 @@ export function useTour(): TourHook {
       element: '[data-tour="agent-metadata"]',
       popover: {
         title: 'Your Agent is Ready! 🤖',
-        description: 'This metadata was loaded <strong>directly from the running container</strong>.<br><br>Notice:<br>• <strong>Purpose:</strong> generates historical narratives<br>• <strong>Version:</strong> 0.1.1<br>• <strong>AI Model:</strong> gemma3:1b (local)<br><br><em>All of this runs entirely on your computer!</em>',
+        description: 'The agent has started and reported its metadata.<br><br>Key information:<br>• <strong>Status:</strong> Running in container<br>• <strong>Model:</strong> Local AI model configured<br>• <strong>Version:</strong> Agent version and capabilities<br><br>Processing is designed for local infrastructure.',
         side: 'top',
         align: 'start'
       }
@@ -128,7 +243,7 @@ export function useTour(): TourHook {
       element: '[data-tour="execute-agent-button"]',
       popover: {
         title: 'Execute Your Agent Locally',
-        description: '<strong>Click "Execute"</strong> to run this agent with a sample request.<br><br>The processing happens <strong>entirely on your machine</strong> - <em>no external servers involved!</em>',
+        description: 'Click <strong>Execute</strong> to send a sample request to the agent.<br><br>The agent will process this request using your local compute resources.',
         side: 'top',
         align: 'start',
         disableButtons: ['next']
@@ -137,97 +252,183 @@ export function useTour(): TourHook {
         // Detect when user clicks the execute button
         const executeButton = element as HTMLElement
         executeButton.addEventListener('click', () => {
-          // Wait for execution to start, then show status
-          setTimeout(() => getDriverInstance().moveNext(), 3000)
+          // Wait for execution status element to appear
+          waitForElement(
+            '[data-tour="execution-status"]',
+            (statusEl) => {
+              if (statusEl) {
+                // Move to next step to highlight the status
+                getDriverInstance().moveNext()
+              }
+            },
+            {
+              maxAttempts: 10,  // 5 seconds
+              intervalMs: 500
+            }
+          )
         }, { once: true })
       }
     },
 
-    // Step 8: Execution Status (while agent is running)
+    // Step 8: Execution Status (while running)
     {
       element: '[data-tour="execution-status"]',
       popover: {
-        title: 'Agent Executing Locally 🔄',
-        description: 'Your agent is now processing the request using <strong>local AI models</strong>.<br><br>Notice the <strong>"running"</strong> status in the execution history - this is happening <em>on your computer</em>.',
+        title: 'Agent Processing 🔄',
+        description: 'Your agent is processing the request.<br><br>Execution status appears here in real-time.',
         side: 'top',
         align: 'start',
         disableButtons: ['next', 'previous']
       },
       onHighlighted: async () => {
-        // Poll for execution completion
-        const maxAttempts = 60 // 60 seconds max wait
-        let attempts = 0
+        // First wait for the execution status element to appear
+        waitForElement(
+          '[data-tour="execution-status"]',
+          (statusElement) => {
+            if (!statusElement) {
+              console.warn('Tour: Execution status element never appeared, skipping')
+              setTimeout(() => getDriverInstance().moveNext(), 1000)
+              return
+            }
 
-        const checkForCompletion = async () => {
-          attempts++
+            // Now poll for execution completion
+            let attempts = 0
+            const maxAttempts = 60 // 60 seconds max wait
 
-          // Check if execution status changed to completed
-          const resultsElement = document.querySelector('[data-tour="execution-results"]')
+            const checkForCompletion = () => {
+              attempts++
 
-          // Check if status changed to completed or if results are ready
-          if (resultsElement && resultsElement.textContent && resultsElement.textContent.length > 10) {
-            // Results are ready, auto-advance to show them
-            setTimeout(() => getDriverInstance().moveNext(), 1000)
-            return true
+              // Check if results are ready
+              const resultsElement = document.querySelector('[data-tour="execution-results"]')
+              if (resultsElement && resultsElement.textContent && resultsElement.textContent.length > 10) {
+                // Results are ready, auto-advance
+                setTimeout(() => getDriverInstance().moveNext(), 500)
+                return
+              }
+
+              if (attempts < maxAttempts) {
+                setTimeout(checkForCompletion, 1000)
+              } else {
+                console.warn('Tour: Execution took too long, proceeding anyway')
+                setTimeout(() => getDriverInstance().moveNext(), 500)
+              }
+            }
+
+            // Start checking for completion after a brief delay
+            setTimeout(checkForCompletion, 2000)
+          },
+          {
+            maxAttempts: 20,  // 10 seconds
+            intervalMs: 500
           }
-
-          if (attempts < maxAttempts) {
-            // Keep checking every second
-            setTimeout(checkForCompletion, 1000)
-          } else {
-            // Timeout - move to next step anyway
-            console.warn('Tour: Execution took too long, proceeding anyway')
-            setTimeout(() => getDriverInstance().moveNext(), 1000)
-          }
-          return false
-        }
-
-        // Start checking after a short delay
-        setTimeout(checkForCompletion, 2000)
+        )
       }
     },
 
-    // Step 9: Execution Results (after completion)
+    // Step 9: Execution Results
     {
       element: '[data-tour="execution-results"]',
       popover: {
-        title: 'AI Sovereignty Complete! 🚀',
-        description: '<strong>Perfect!</strong> Your agent processed the request locally and returned results.<br><br>This JSON response was generated <strong>entirely on your machine!</strong>',
+        title: 'Success! 🎉',
+        description: 'Your agent has completed the request.<br><br>The response shows the AI-generated output from your local infrastructure.',
         side: 'top',
         align: 'start'
       }
     },
 
-    // Step 10: Tour Completion Choice
+    // Step 10: View Execution in Table
     {
+      element: '[data-tour="execution-row-first"]',
       popover: {
-        title: 'What\'s Next? 🤔',
-        description: `<strong>Great job!</strong> You've successfully executed an AI agent locally.<br><br>
-Would you like to:<br><br>
-• <strong>Explore on your own</strong> - Start building with AgentSystems<br>
-• <strong>Continue the tour</strong> - Learn about configuration, credentials, and deploying custom agents<br><br>
-<em>You can always restart the tour from Support if you skip it now.</em>`,
+        title: 'Execution History 📋',
+        description: 'Your execution appears in the history table.<br><br>Click the row to view detailed results and artifacts.',
         side: 'top',
-        align: 'center',
-        showButtons: ['close', 'next'],
-        nextBtnText: 'Continue Tour →',
-        onCloseClick: () => {
-          // User chose to explore - mark tour complete
-          storeMark('execution-first')
-          setTourActive(false)
-          console.log('User chose to explore on their own')
-          getDriverInstance().destroy()
-        }
+        align: 'start',
+        disableButtons: ['next']
+      },
+      onHighlighted: () => {
+        // Wait for the execution row to appear in the table
+        waitForElement(
+          '[data-tour="execution-row-first"]',
+          (firstRow) => {
+            if (firstRow) {
+              const row = firstRow as HTMLElement
+              row.addEventListener('click', () => {
+                // Wait for the execution detail panel to appear on the Executions page
+                waitForElement(
+                  '[data-tour="execution-detail-panel"]',
+                  (panel) => {
+                    if (panel) {
+                      getDriverInstance().moveNext()
+                    }
+                  },
+                  {
+                    maxAttempts: 10,
+                    intervalMs: 200
+                  }
+                )
+              }, { once: true })
+            } else {
+              // If row doesn't appear, skip to next step
+              console.warn('Tour: Execution row did not appear in table')
+              setTimeout(() => getDriverInstance().moveNext(), 500)
+            }
+          },
+          {
+            maxAttempts: 10,  // 5 seconds should be enough
+            intervalMs: 500
+          }
+        )
       }
     },
 
-    // Configuration Tour Steps (11-12)
-    // Step 11: Navigate to Settings
+    // Step 11: Execution Detail Panel
+    {
+      element: '[data-tour="execution-detail-panel"]',
+      popover: {
+        title: 'Execution Details 📊',
+        description: 'View complete execution information including inputs, outputs, and status.<br><br>The <strong>Audit Trail</strong> tab provides detailed logs for debugging.',
+        side: 'top',
+        align: 'start'
+      }
+    },
+
+    // Step 12: Artifacts Tab
+    {
+      element: '[data-tour="artifacts-tab"]',
+      popover: {
+        title: 'Agent Artifacts 📁',
+        description: 'Click <strong>Artifacts</strong> to view files generated by your agent.<br><br>All outputs are stored locally and can be downloaded.',
+        side: 'top',
+        align: 'start',
+        disableButtons: ['next']
+      },
+      onHighlighted: (element) => {
+        const artifactsTab = element as HTMLElement
+        artifactsTab?.addEventListener('click', () => {
+          setTimeout(() => getDriverInstance().moveNext(), 500)
+        }, { once: true })
+      }
+    },
+
+    // Step 13: Artifacts Panel
+    {
+      element: '[data-tour="artifacts-panel"]',
+      popover: {
+        title: 'Generated Files',
+        description: 'Agent outputs appear here.<br><br>Files can be previewed, downloaded, or used as inputs for other agents.',
+        side: 'top',
+        align: 'start'
+      }
+    },
+
+    // Configuration Tour Steps
+    // Step 14: Navigate to Configuration
     {
       element: '[data-tour="settings-nav"]',
       popover: {
         title: 'Configuration Center',
-        description: 'Let\'s configure AgentSystems to connect to your environment.<br><br><strong>Click Configuration to continue.</strong>',
+        description: 'The Configuration page manages connections and credentials.<br><br>Click <strong>Configuration</strong> to explore these settings.',
         side: 'right',
         align: 'start',
         disableButtons: ['next']
@@ -244,15 +445,16 @@ Would you like to:<br><br>
     },
 
     // Configuration Page Tour Steps (12-16)
-    // Step 12: Credentials Card
+    // Step 15: Credentials Card
     {
       element: '[data-tour="credentials-card"]',
       popover: {
         title: 'Credentials Management 🔑',
-        description: `<strong>Store API keys and tokens</strong><br><br>
-• Environment variables keep credentials separate from code<br>
-• Not exposed in configuration files<br>
-• Passed to agent containers at runtime<br><br>
+        description: `Store API keys and authentication tokens securely.<br><br>
+Credentials are:<br>
+• Stored as environment variables<br>
+• Isolated from your codebase<br>
+• Injected into containers at runtime<br><br>
 <pre style="background: rgba(0,0,0,0.1); padding: 8px; border-radius: 4px; font-size: 12px;">OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...</pre>`,
         side: 'top',
@@ -260,64 +462,88 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       }
     },
 
-    // Step 13: Registry Connections Card
+    // Step 16: Registry Connections Card
     {
       element: '[data-tour="registry-connections-card"]',
       popover: {
         title: 'Container Registry Access 📦',
-        description: `<strong>Connect to agent repositories</strong><br><br>
+        description: `Connect to container registries to access agent images.<br><br>
+Supported registries:<br>
 • Docker Hub for public agents<br>
 • Private registries for proprietary agents<br>
-• Enterprise repositories (Harbor, ECR, ACR)<br>
-• <em>Pull agents from multiple sources simultaneously</em>`,
+• Enterprise platforms (Harbor, ECR, ACR)<br>
+• Multiple simultaneous connections`,
         side: 'top',
         align: 'start'
       }
     },
 
-    // Step 14: Model Connections Card
+    // Step 17: Model Connections Card
     {
       element: '[data-tour="model-connections-card"]',
       popover: {
         title: 'AI Model Configuration 🤖',
-        description: `<strong>Configure AI provider connections</strong><br><br>
+        description: `Configure connections to AI model providers.<br><br>
+Supported providers:<br>
 • <strong>Cloud:</strong> OpenAI, Anthropic, AWS Bedrock<br>
-• <strong>Local:</strong> Ollama for local processing<br>
-• <strong>Routing:</strong> Agents use models transparently<br>
-• <em>Switch providers without changing agent code!</em>`,
+• <strong>Local:</strong> Ollama for on-premise models<br>
+• <strong>Flexibility:</strong> Switch providers without code changes<br>
+• <strong>Routing:</strong> Automatic model selection per agent`,
         side: 'top',
         align: 'start'
       }
     },
 
-    // Step 15: Agents Card
+    // Step 18: Agents Configuration
     {
       element: '[data-tour="agents-config-card"]',
       popover: {
         title: 'Agent Deployments 🚀',
-        description: `<strong>Define your agent fleet</strong><br><br>
+        description: `Define and deploy your agent configurations.<br><br>
+Each deployment specifies:<br>
 • Container image and version<br>
-• Registry source selection<br>
+• Source registry selection<br>
 • Runtime parameters and labels<br>
-• <em>Deploy agents with a single command!</em>`,
+• Resource requirements and limits`,
         side: 'top',
         align: 'start'
       }
     },
 
-    // Step 16: Tour Complete on Configuration Page
+    // Step 19: Agent Hub
+    {
+      element: '[data-tour="hub-nav"]',
+      popover: {
+        title: 'Agent Hub 🛍️',
+        description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• Pre-built agents for common tasks<br>• Community-contributed solutions<br>• Enterprise agent templates<br>• One-click deployments',
+        side: 'right',
+        align: 'start'
+      }
+    },
+
+    // Step 20: Support
+    {
+      element: '[data-tour="support-nav"]',
+      popover: {
+        title: 'Help & Documentation 💬',
+        description: 'Get help whenever you need it.<br><br>The <strong>Support</strong> page provides:<br>• Documentation and guides<br>• Troubleshooting resources<br>• Community forums<br>• <strong>Restart this tour anytime</strong>',
+        side: 'right',
+        align: 'start'
+      }
+    },
+
+    // Step 21: Tour Complete
     {
       popover: {
-        title: 'Tour Complete! 🎉',
-        description: `<strong>Excellent work!</strong> You've learned the essentials of AgentSystems.<br><br>
-<strong>You now understand how to:</strong><br>
-• Execute AI agents locally on your machine<br>
-• Configure credentials and connections<br>
-• Connect to container registries for agent deployment<br>
-• Set up AI model providers<br>
-• Manage your agent deployments<br><br>
-<strong>Ready to learn more?</strong><br>
-<a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">View the documentation →</a>`,
+        title: 'Congratulations! 🎉',
+        description: `You've completed the tour!<br><br>
+<strong>You successfully:</strong><br>
+✅ Executed an AI agent locally<br>
+✅ Viewed execution results and artifacts<br>
+✅ Explored configuration options<br><br>
+You're ready to explore AgentSystems.<br><br>
+<strong>Ready to build something amazing?</strong><br><br>
+<a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">Explore the Docs →</a>`,
         side: 'top',
         align: 'center',
         showButtons: ['close']
@@ -327,7 +553,9 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
         showCompletionMessage()
       }
     }
-  ]
+    )
+
+    return steps
   }
 
   // Scroll prevention handler
@@ -406,6 +634,10 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
   const startExecutionFirstTour = useCallback(async () => {
     console.log('Tour: startExecutionFirstTour called')
 
+    // Save current theme and force light theme for best tour experience
+    const themeStore = useThemeStore.getState()
+    const originalTheme = themeStore.theme
+    console.log('Tour: Saving original theme:', originalTheme)
 
     // Prevent multiple simultaneous starts
     const currentTourState = useTourStore.getState()
@@ -424,57 +656,57 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       return
     }
 
+    // We'll handle theme switching after user confirms in the first tour step
+
     console.log('Tour: Setting tour active')
     // Set tour active
     setTourActive(true)
 
-    // Ensure hello-world-agent is stopped before starting tour
-    try {
-      console.log('Tour: Checking agent state...')
-      const response = await agentsApi.list()
+    // Ensure hello-world-agent is stopped for consistent tour experience
+    // Do this async so it doesn't delay tour start
+    agentsApi.list().then(response => {
       const helloWorldAgent = response.agents.find(a => a.name === 'hello-world-agent')
-
       if (helloWorldAgent && helloWorldAgent.state === 'running') {
-        console.log('Tour: Preparing environment - stopping hello-world-agent')
-        await agentsApi.stopAgent('hello-world-agent')
-        // Wait a moment for the agent to stop
-        await new Promise(resolve => setTimeout(resolve, 500))
-      } else {
-        console.log('Tour: Agent is already stopped or not found')
+        console.log('Tour: Stopping hello-world-agent for consistent experience')
+        agentsApi.stopAgent('hello-world-agent').catch(error => {
+          console.warn('Tour: Could not stop agent:', error)
+        })
       }
-    } catch (error) {
-      console.warn('Tour: Could not check/stop agent state:', error)
-    }
+    }).catch(error => {
+      console.warn('Tour: Could not check agent state:', error)
+    })
 
     console.log('Tour: Creating Driver instance')
 
-    // Get the current theme from the store and adjust overlay color
-    const currentTheme = useThemeStore.getState().theme
-    let overlayColor = 'rgba(0, 0, 0, 0.5)' // default for light theme
-
-    if (currentTheme === 'dark') {
-      overlayColor = 'rgba(0, 0, 0, 0.9)' // very dark for dark theme
-      console.log('Tour: Using dark theme overlay')
-    } else if (currentTheme === 'cyber') {
-      overlayColor = 'rgba(0, 10, 0, 0.9)' // very dark green for cyber theme
-      console.log('Tour: Using cyber theme overlay')
-    } else {
-      console.log('Tour: Using default light theme overlay')
-    }
-    console.log('Tour: Current theme:', currentTheme, 'Overlay color:', overlayColor)
+    // Since we force light theme, always use light theme overlay
+    const overlayColor = 'rgba(0, 0, 0, 0.5)' // light theme overlay
+    console.log('Tour: Using light theme overlay for tour')
 
     // We need to create a mutable reference for the driver instance
     let driverInstance: Driver | null = null
 
-    // Create steps with reference to driver instance
-    const steps = getTourSteps((() => driverInstance!))
+    // Create steps with reference to driver instance and original theme
+    const steps = getTourSteps((() => driverInstance!), originalTheme)
 
-    // Create new driver instance with theme-aware overlay
-    driverInstance = driver({
+    // Create custom driver config with theme restoration
+    const tourDriverConfig = {
       ...driverConfig,
       overlayColor,
-      steps
-    })
+      steps,
+      onDestroyed: () => {
+        // Call original onDestroyed
+        driverConfig.onDestroyed()
+
+        // Restore original theme if it was changed
+        if (originalTheme !== 'light') {
+          console.log('Tour: Restoring original theme:', originalTheme)
+          useThemeStore.getState().setTheme(originalTheme)
+        }
+      }
+    }
+
+    // Create new driver instance with theme-aware overlay
+    driverInstance = driver(tourDriverConfig)
 
     console.log('Tour: Starting Driver tour')
     driverInstance.drive()

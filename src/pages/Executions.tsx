@@ -467,7 +467,7 @@ export default function Executions() {
         </div>
 
         {selectedExecution && (
-          <div className={styles.executionDetail}>
+          <div className={styles.executionDetail} data-tour="execution-detail-panel">
             <Card>
               <div className={styles.detailHeader}>
                 <h2 className={styles.alignedHeading}>Execution Details</h2>
@@ -515,6 +515,7 @@ export default function Executions() {
                     setActiveTab('artifacts')
                     playClickSound()
                   }}
+                  data-tour="artifacts-tab"
                 >
                   Artifacts
                 </button>
@@ -626,7 +627,7 @@ export default function Executions() {
               )}
 
               {activeTab === 'artifacts' && (
-                <div className={styles.tabContent}>
+                <div className={styles.tabContent} data-tour="artifacts-panel">
                   <h3 className={styles.tabHeading}>Execution Artifacts</h3>
                   {artifactsData && (artifactsData.input_files.length > 0 || artifactsData.output_files.length > 0) ? (
                     <div className={styles.detailGrid}>

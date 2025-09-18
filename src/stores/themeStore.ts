@@ -35,7 +35,7 @@ interface ThemeStore {
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => ({
-      theme: 'dark',
+      theme: 'light',
       scanlineEnabled: false, // Default to off for better UX
       scanlineFrequency: '90', // Default to 90 seconds
       setTheme: (theme) => set({ theme }),

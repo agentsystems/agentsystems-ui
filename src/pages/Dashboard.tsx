@@ -45,23 +45,11 @@ export default function Dashboard() {
 
     // Only start tour if: not completed, not already active, and on dashboard
     if (!hasCompletedTour && !isTourActive && window.location.pathname === '/dashboard') {
-      console.log('Dashboard: Scheduling tour start in 1500ms')
-      // Wait for page to be fully rendered and animations to settle
+      console.log('Dashboard: Starting tour with minimal delay')
+      // Start tour quickly - just enough for initial render
       const timer = setTimeout(() => {
-        console.log('Dashboard: Timer fired, checking readyState:', document.readyState)
-        // Additional check to ensure DOM is stable
-        if (document.readyState === 'complete') {
-          console.log('Dashboard: DOM complete, starting tour')
-          startExecutionFirstTour()
-        } else {
-          console.log('Dashboard: DOM not ready, waiting 500ms more')
-          // Wait a bit more if still loading
-          setTimeout(() => {
-            console.log('Dashboard: Delayed start, starting tour now')
-            startExecutionFirstTour()
-          }, 500)
-        }
-      }, 1500) // Increased delay to prevent flicker
+        startExecutionFirstTour()
+      }, 100) // Reduced from 1500ms to 100ms
 
       return () => {
         console.log('Dashboard: Cleanup - clearing timer')
@@ -146,11 +134,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={styles.dashboard} role="main" aria-label="Dashboard">
-      <div className={styles.header}>
+    <div className={styles.dashboard} role="main" aria-label="Dashboard" data-tour="dashboard-content">
+      <div className={styles.header} data-tour="dashboard-header">
         <h1 id="dashboard-title">Dashboard</h1>
         <p className={styles.subtitle} id="dashboard-subtitle">System overview and metrics</p>
-        
+
       </div>
 
       <StatsGrid 
