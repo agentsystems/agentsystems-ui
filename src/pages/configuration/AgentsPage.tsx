@@ -31,7 +31,10 @@ export default function AgentsPage() {
   const [formData, setFormData] = useState<Omit<AgentConfigForm, 'id'>>(initialFormData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [showAdvanced, setShowAdvanced] = useState(false)
+  // Advanced options removed - keeping state for potential future use
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-expect-error - keeping for potential future use
+  const [showAdvanced] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
   
   const { playClickSound } = useAudio()
@@ -98,7 +101,7 @@ export default function AgentsPage() {
       
       setFormData(initialFormData)
       setErrors({})
-      setShowAdvanced(false)
+      // Advanced section removed
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to save agent')
     }
@@ -118,7 +121,7 @@ export default function AgentsPage() {
     })
     setEditingId(agent.id)
     setErrors({})
-    setShowAdvanced(Object.keys(agent.envVariables).length > 0 || !!agent.egressAllowlist || agent.exposePorts !== '8000')
+    // Advanced section removed - no longer needed
     
     // Auto-scroll to form
     setTimeout(() => {
@@ -145,7 +148,7 @@ export default function AgentsPage() {
     setFormData(initialFormData)
     setEditingId(null)
     setErrors({})
-    setShowAdvanced(false)
+    // Advanced section removed
   }
 
   return (
@@ -265,37 +268,24 @@ export default function AgentsPage() {
             </div>
           </div>
 
-          {/* Advanced Options Toggle */}
-          <div className={styles.advancedToggle}>
-            <button
-              type="button"
-              onClick={() => {
-                playClickSound()
-                setShowAdvanced(!showAdvanced)
-              }}
-              className="btn btn-sm btn-subtle"
-            >
-              {showAdvanced ? 'Hide' : 'Show'} Advanced Options
-            </button>
+          <div className={styles.formGroup}>
+            <label htmlFor="egress-allowlist">Egress Allowlist</label>
+            <input
+              id="egress-allowlist"
+              type="text"
+              value={formData.egressAllowlist}
+              onChange={(e) => setFormData(prev => ({ ...prev, egressAllowlist: e.target.value }))}
+              className={styles.input}
+              placeholder="https://api.anthropic.com, https://api.openai.com"
+            />
+            <span className={styles.hint}>
+              Comma-separated list of URLs this agent can access
+            </span>
           </div>
 
-          {showAdvanced && (
+          {/* Advanced Options Section Removed - keeping for potential future use */}
+          {false && (
             <div className={styles.advancedSection}>
-              <div className={styles.formGroup}>
-                <label htmlFor="egress-allowlist">Egress Allowlist</label>
-                <input
-                  id="egress-allowlist"
-                  type="text"
-                  value={formData.egressAllowlist}
-                  onChange={(e) => setFormData(prev => ({ ...prev, egressAllowlist: e.target.value }))}
-                  className={styles.input}
-                  placeholder="https://api.anthropic.com, https://api.openai.com"
-                />
-                <span className={styles.hint}>
-                  Comma-separated list of URLs this agent can access
-                </span>
-              </div>
-
               <div className={styles.formGroup}>
                 <label htmlFor="expose-ports">Exposed Ports</label>
                 <input
@@ -453,14 +443,6 @@ export default function AgentsPage() {
                     <div className={styles.detailRow}>
                       <span className={styles.detailLabel}>Egress:</span>
                       <span className={styles.detailValue}>{agent.egressAllowlist}</span>
-                    </div>
-                  )}
-                  {Object.keys(agent.envVariables).length > 0 && (
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Env Vars:</span>
-                      <span className={styles.detailValue}>
-                        {Object.keys(agent.envVariables).join(', ')}
-                      </span>
                     </div>
                   )}
                 </div>
