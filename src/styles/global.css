@@ -39,10 +39,10 @@
   --text-muted: #94a3b8;
 
   /* Accent colors - technical but warm */
-  --accent: #00d9ff;
-  --accent-2: #3b82f6;
-  --accent-3: #8b5cf6;
-  --gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+  --accent: #00b6a0;
+  --accent-2: #47a1d9;
+  --accent-3: #47a1d9;
+  --gradient: linear-gradient(135deg, #00b6a0 0%, #47a1d9 100%);
   
   /* Status colors */
   --success: #10b981;
@@ -89,10 +89,10 @@
   --text-muted: #64748b;
 
   /* Accent colors - vibrant but professional */
-  --accent: #0891b2;
-  --accent-2: #2563eb;
-  --accent-3: #7c3aed;
-  --gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+  --accent: #00b6a0;
+  --accent-2: #47a1d9;
+  --accent-3: #47a1d9;
+  --gradient: linear-gradient(135deg, #00b6a0 0%, #47a1d9 100%);
   
   /* Status colors */
   --success: #059669;

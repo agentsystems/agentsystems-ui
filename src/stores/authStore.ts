@@ -12,10 +12,13 @@ interface AuthStore {
   isAuthenticated: () => boolean
 }
 
+// Default demo token - users should change this for production
+const DEFAULT_DEMO_TOKEN = 'demo-token-please-change'
+
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
-      token: null, // No default token for security
+      token: DEFAULT_DEMO_TOKEN, // Pre-set demo token for initial setup
       gatewayUrl: config.API_GATEWAY_URL,
       wsUrl: config.WS_ENDPOINT_URL,
       
