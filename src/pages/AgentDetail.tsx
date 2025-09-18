@@ -690,7 +690,7 @@ export default function AgentDetail() {
                 className={styles.executionRow}
                 onClick={() => {
                   playClickSound()
-                  window.open(`/executions?thread=${execution.thread_id}`, '_blank')
+                  window.location.href = `/executions?thread=${execution.thread_id}`
                 }}
                 data-tour={index === 0 ? 'execution-row-first' : undefined}
               >
