@@ -32,8 +32,8 @@ export default function AgentsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   // Advanced options removed - keeping state for potential future use
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // @ts-expect-error - keeping for potential future use
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showAdvanced] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
   
