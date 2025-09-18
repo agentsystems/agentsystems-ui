@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import { useEffect, Suspense, lazy } from 'react'
 import MainLayout from '@components/layouts/MainLayout'
 import ErrorBoundary from '@components/ErrorBoundary'

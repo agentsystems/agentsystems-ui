@@ -33,7 +33,7 @@ export default function SplashScreen() {
     // Sort pause points by progress
     pausePoints.sort((a, b) => a.progress - b.progress)
 
-    let startTime = Date.now()
+    const startTime = Date.now()
     let totalPauseTime = 0
     let currentPauseIndex = 0
     let isPaused = false
