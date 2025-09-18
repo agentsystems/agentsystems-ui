@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { driver, type Driver, type DriveStep } from 'driver.js'
+import { driver, type DriveStep } from 'driver.js'
 import { useTourStore } from '@stores/tourStore'
 import { useThemeStore } from '@stores/themeStore'
 import { agentsApi } from '@api/agents'
@@ -26,11 +26,13 @@ export function useTour(): TourHook {
     hasCompletedTour,
     markTourComplete: storeMark,
     resetTour: storeReset,
-    shouldShowTour,
     setTourActive
   } = useTourStore()
 
-  const allTourSteps: DriveStep[] = [
+  // Tour step templates without driver instance references
+  const getTourSteps = (getDriverInstance: () => any): DriveStep[] => {
+    const driverInstance = getDriverInstance()
+    return [
     // Step 1: Welcome Modal (free-floating)
     {
       popover: {
@@ -161,7 +163,6 @@ export function useTour(): TourHook {
           attempts++
 
           // Check if execution status changed to completed
-          const statusElement = document.querySelector('[data-tour="execution-status"]')
           const resultsElement = document.querySelector('[data-tour="execution-results"]')
 
           // Check if status changed to completed or if results are ready
@@ -211,7 +212,6 @@ Would you like to:<br><br>
         align: 'center',
         showButtons: ['close', 'next'],
         nextBtnText: 'Continue Tour →',
-        closeBtnText: 'Explore on My Own',
         onCloseClick: () => {
           // User chose to explore - mark tour complete
           storeMark('execution-first')
@@ -321,8 +321,7 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
 <a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">View the documentation →</a>`,
         side: 'top',
         align: 'center',
-        showButtons: ['close'],
-        closeBtnText: 'Finish Tour'
+        showButtons: ['close']
       },
       onHighlighted: () => {
         // Mark tour as complete when this step is shown
@@ -330,10 +329,6 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       }
     }
   ]
-
-  // Get tour steps starting from current position
-  const getTourSteps = (): DriveStep[] => {
-    return allTourSteps
   }
 
   // Scroll prevention handler
@@ -346,7 +341,7 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
   // Driver instance configuration
   const driverConfig = {
     showProgress: true,
-    showButtons: ['next', 'previous', 'close'],
+    showButtons: ['next', 'previous', 'close'] as ('next' | 'previous' | 'close')[],
     nextBtnText: 'Next →',
     prevBtnText: '← Back',
     doneBtnText: 'Complete Tour',
@@ -366,8 +361,8 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       // Check if element exists (first step may not have an element)
       if (element) {
         // Add custom highlighting for better visibility
-        (element as HTMLElement).style.position = 'relative'
-        ;(element as HTMLElement).style.zIndex = '10001'
+        (element as HTMLElement).style.position = 'relative';
+        (element as HTMLElement).style.zIndex = '10001'
       }
 
       // Prevent all scrolling during tour
@@ -380,8 +375,8 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
     onDeselected: (element: Element | undefined) => {
       // Reset any custom styling
       if (element) {
-        ;(element as HTMLElement).style.position = ''
-        ;(element as HTMLElement).style.zIndex = ''
+        (element as HTMLElement).style.position = '';
+        (element as HTMLElement).style.zIndex = ''
       }
     },
 
@@ -402,8 +397,6 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
     }
   }
 
-  let driverInstance: Driver
-
   const showCompletionMessage = () => {
     // Mark tour as completed in store
     storeMark('execution-first')
@@ -413,6 +406,7 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
 
   const startExecutionFirstTour = useCallback(async () => {
     console.log('Tour: startExecutionFirstTour called')
+
 
     // Prevent multiple simultaneous starts
     const currentTourState = useTourStore.getState()
@@ -454,7 +448,6 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
     }
 
     console.log('Tour: Creating Driver instance')
-    const steps = getTourSteps()
 
     // Get the current theme from the store and adjust overlay color
     const currentTheme = useThemeStore.getState().theme
@@ -471,6 +464,13 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
     }
     console.log('Tour: Current theme:', currentTheme, 'Overlay color:', overlayColor)
 
+    // We need to create a mutable reference for the driver instance
+    let driverInstance: any = null
+
+    // Create steps with reference to driver instance
+    const steps = getTourSteps((() => driverInstance))
+
+    // Create new driver instance with theme-aware overlay
     driverInstance = driver({
       ...driverConfig,
       overlayColor,
@@ -480,7 +480,8 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
     console.log('Tour: Starting Driver tour')
     driverInstance.drive()
     console.log('Tour: Driver tour started')
-  }, [navigate, setTourActive])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, setTourActive, storeMark])
 
   const markTourComplete = useCallback(() => {
     storeMark('execution-first')

@@ -36,7 +36,7 @@ import { useTourStore } from '@stores/tourStore'
 import styles from './Dashboard.module.css'
 
 export default function Dashboard() {
-  const { startExecutionFirstTour, resetTour } = useTour()
+  const { startExecutionFirstTour } = useTour()
   const { hasCompletedTour, isTourActive } = useTourStore()
 
   // Check if we should show tour on first visit - only once on mount
@@ -68,7 +68,7 @@ export default function Dashboard() {
         clearTimeout(timer)
       }
     }
-  }, []) // Empty dependency array - only check on mount
+  }, [hasCompletedTour, isTourActive, startExecutionFirstTour]) // Include all dependencies
 
   // Fetch data for dashboard components
   const { data: agentsData } = useQuery({
