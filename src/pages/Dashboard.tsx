@@ -41,20 +41,30 @@ export default function Dashboard() {
 
   // Check if we should show tour on first visit - only once on mount
   useEffect(() => {
+    // Check localStorage directly to debug
+    const tourStorage = localStorage.getItem('tour-storage')
+    console.log('Dashboard: Raw localStorage tour-storage:', tourStorage)
     console.log('Dashboard: Tour check - hasCompletedTour:', hasCompletedTour, 'isTourActive:', isTourActive)
+    console.log('Dashboard: Current pathname:', window.location.pathname)
 
     // Only start tour if: not completed, not already active, and on dashboard
     if (!hasCompletedTour && !isTourActive && window.location.pathname === '/dashboard') {
-      console.log('Dashboard: Starting tour with minimal delay')
-      // Start tour quickly - just enough for initial render
+      console.log('Dashboard: Starting tour with delay')
+      // Start tour with a slightly longer delay to ensure everything is rendered
       const timer = setTimeout(() => {
+        console.log('Dashboard: Actually starting tour now')
         startExecutionFirstTour()
-      }, 100) // Reduced from 1500ms to 100ms
+      }, 500) // Increased to 500ms to ensure page is fully loaded after splash
 
       return () => {
         console.log('Dashboard: Cleanup - clearing timer')
         clearTimeout(timer)
       }
+    } else {
+      console.log('Dashboard: Not starting tour - conditions not met')
+      console.log('  - hasCompletedTour:', hasCompletedTour)
+      console.log('  - isTourActive:', isTourActive)
+      console.log('  - pathname check:', window.location.pathname === '/dashboard')
     }
   }, [hasCompletedTour, isTourActive, startExecutionFirstTour]) // Include all dependencies
 
