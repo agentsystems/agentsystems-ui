@@ -32,7 +32,7 @@ interface ConfigCardProps {
   onClick: () => void
 }
 
-function ConfigCard({ title, icon: Icon, status, statusText, description, onClick }: ConfigCardProps) {
+function ConfigCard({ title, icon: Icon, status, statusText, description, onClick, tourId }: ConfigCardProps & { tourId?: string }) {
   const statusIcon = {
     healthy: CheckCircleIcon,
     warning: ExclamationTriangleIcon,
@@ -42,7 +42,7 @@ function ConfigCard({ title, icon: Icon, status, statusText, description, onClic
   const StatusIcon = statusIcon
 
   return (
-    <Card onClick={onClick}>
+    <Card onClick={onClick} data-tour={tourId}>
       <div className={styles.cardHeader}>
         <div className={styles.cardTitle}>
           <Icon className={styles.cardIcon} />
@@ -215,30 +215,21 @@ export default function ConfigurationOverview() {
             Agent Platform
           </h2>
           <p className={styles.categoryDescription}>
-            Configure agents, AI models, and deployment resources
+            Configure credentials, registries, AI models, and agent deployments
           </p>
-          
+
           <div className={styles.categoryCards}>
             <ConfigCard
-              title="Agents"
-              icon={RocketLaunchIcon}
-              status={agentsStatus.status}
-              statusText={agentsStatus.text}
-              description={agentsStatus.description}
-              href="/configuration/agents"
-              onClick={() => handleCardClick('/configuration/agents')}
+              title="Credentials"
+              icon={KeyIcon}
+              status={credentialsStatus.status}
+              statusText={credentialsStatus.text}
+              description={credentialsStatus.description}
+              href="/configuration/credentials"
+              onClick={() => handleCardClick('/configuration/credentials')}
+              tourId="credentials-card"
             />
-            
-            <ConfigCard
-              title="Model Connections"
-              icon={CpuChipIcon}
-              status={modelsStatus.status}
-              statusText={modelsStatus.text}
-              description={modelsStatus.description}
-              href="/configuration/models"
-              onClick={() => handleCardClick('/configuration/models')}
-            />
-            
+
             <ConfigCard
               title="Registry Connections"
               icon={ServerIcon}
@@ -247,6 +238,29 @@ export default function ConfigurationOverview() {
               description={registriesStatus.description}
               href="/configuration/registries"
               onClick={() => handleCardClick('/configuration/registries')}
+              tourId="registry-connections-card"
+            />
+
+            <ConfigCard
+              title="Model Connections"
+              icon={CpuChipIcon}
+              status={modelsStatus.status}
+              statusText={modelsStatus.text}
+              description={modelsStatus.description}
+              href="/configuration/models"
+              onClick={() => handleCardClick('/configuration/models')}
+              tourId="model-connections-card"
+            />
+
+            <ConfigCard
+              title="Agents"
+              icon={RocketLaunchIcon}
+              status={agentsStatus.status}
+              statusText={agentsStatus.text}
+              description={agentsStatus.description}
+              href="/configuration/agents"
+              onClick={() => handleCardClick('/configuration/agents')}
+              tourId="agents-config-card"
             />
           </div>
         </div>
@@ -283,27 +297,6 @@ export default function ConfigurationOverview() {
           </div>
         </div>
 
-        {/* Security & Access */}
-        <div className={styles.configCategory}>
-          <h2 className={styles.categoryTitle}>
-            Security & Access
-          </h2>
-          <p className={styles.categoryDescription}>
-            Manage credentials, environment variables, and access controls
-          </p>
-          
-          <div className={styles.categoryCards}>
-            <ConfigCard
-              title="Credentials"
-              icon={KeyIcon}
-              status={credentialsStatus.status}
-              statusText={credentialsStatus.text}
-              description={credentialsStatus.description}
-              href="/configuration/credentials"
-              onClick={() => handleCardClick('/configuration/credentials')}
-            />
-          </div>
-        </div>
       </div>
 
       {/* About Section */}

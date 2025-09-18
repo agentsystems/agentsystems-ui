@@ -23,13 +23,16 @@ interface SystemStatusBannerProps {
   message: string
   /** Additional CSS classes */
   className?: string
+  /** Tour data attribute */
+  'data-tour'?: string
 }
 
 export default function SystemStatusBanner({
   status,
   title,
   message,
-  className = ''
+  className = '',
+  'data-tour': dataTour
 }: SystemStatusBannerProps) {
   const StatusIcon = {
     healthy: CheckCircleIcon,
@@ -38,7 +41,7 @@ export default function SystemStatusBanner({
   }[status]
 
   return (
-    <div className={`${styles.statusBanner} ${styles[status]} ${className}`}>
+    <div className={`${styles.statusBanner} ${styles[status]} ${className}`} data-tour={dataTour}>
       <div className={styles.statusContent}>
         <div className={styles.statusInfo}>
           <StatusIcon className={styles.statusIcon} />

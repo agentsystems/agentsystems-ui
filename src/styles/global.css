@@ -611,4 +611,39 @@ a:hover {
   animation: blink-cursor 1s infinite;
 }
 
+/* Tour Popover Styles */
+.tour-wide-popover {
+  width: 480px !important;
+  max-width: 480px !important;
+}
+
+/* Theme-aware tour popover backgrounds and text */
+.theme-dark .driver-popover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.theme-dark .driver-popover-title {
+  color: var(--text);
+}
+
+.theme-dark .driver-popover-description {
+  color: var(--text-secondary);
+}
+
+.theme-cyber .driver-popover {
+  background: rgba(0, 10, 0, 0.95);
+  color: #00ff00;
+}
+
+.theme-cyber .driver-popover-title {
+  color: #00ff00;
+}
+
+.theme-cyber .driver-popover-description {
+  color: #00cc00;
+}
+
+
+
 

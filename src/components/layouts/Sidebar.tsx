@@ -74,6 +74,11 @@ export default function Sidebar() {
                 }
                 onClick={playClickSound}
                 aria-label={`Navigate to ${item.name} page`}
+                data-tour={
+                  item.name.toLowerCase() === 'agents' ? 'agents-nav' :
+                  item.name.toLowerCase() === 'configuration' ? 'settings-nav' :
+                  undefined
+                }
               >
                 <item.icon className={styles.navIcon} aria-hidden="true" />
                 <span>{item.name}</span>

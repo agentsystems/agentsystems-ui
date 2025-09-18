@@ -29,6 +29,7 @@ import StatusBadge from '@components/common/StatusBadge'
 import { PowerIcon, EyeIcon } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
 import { getAgentButtonText } from '@utils/agentHelpers'
+import { useTourStore } from '@stores/tourStore'
 import styles from './AgentCard.module.css'
 
 interface Agent {
@@ -61,6 +62,7 @@ export default function AgentCard({
 }: AgentCardProps) {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
+  const { isTourActive } = useTourStore()
 
   const handleCardClick = () => {
     playClickSound()
@@ -81,6 +83,7 @@ export default function AgentCard({
       ariaDescription={`Agent is currently ${agent.state}. Click to view configuration and invoke options.`}
       role="button"
       tabIndex={0}
+      data-tour={agent.name === 'hello-world-agent' ? 'hello-world-agent-card' : undefined}
     >
       <div className={styles.agentHeader}>
         <div className={styles.agentInfo}>
@@ -103,34 +106,35 @@ export default function AgentCard({
 
       <div className={styles.agentActions} role="group" aria-label={`Actions for ${agent.name}`}>
         {agent.state === 'stopped' || agent.state === 'not-created' ? (
-          <button 
+          <button
             className="btn btn-sm btn-subtle btn-success-color"
             onClick={(e) => handleActionClick(e, onStart)}
-            disabled={isOperating}
+            disabled={isOperating || isTourActive}
             aria-label={`Start ${agent.name} agent`}
-            title={`Start the ${agent.name} agent container`}
+            title={isTourActive ? 'Disabled during tour' : `Start the ${agent.name} agent container`}
           >
             <PowerIcon />
             {isOperating ? 'Turning On...' : getAgentButtonText(agent.state)}
           </button>
         ) : (
-          <button 
+          <button
             className="btn btn-sm btn-subtle btn-danger-color"
             onClick={(e) => handleActionClick(e, onStop)}
-            disabled={isOperating}
+            disabled={isOperating || isTourActive}
             aria-label={`Stop ${agent.name} agent`}
-            title={`Stop the ${agent.name} agent container`}
+            title={isTourActive ? 'Disabled during tour' : `Stop the ${agent.name} agent container`}
           >
             <PowerIcon />
             {isOperating ? 'Turning Off...' : getAgentButtonText(agent.state)}
           </button>
         )}
-        
-        <button 
+
+        <button
           className="btn btn-sm btn-subtle"
           onClick={(e) => handleActionClick(e, () => navigate(`/agents/${agent.name}`))}
+          disabled={isTourActive}
           aria-label={`View ${agent.name} agent`}
-          title={`Open ${agent.name} agent page`}
+          title={isTourActive ? 'Disabled during tour' : `Open ${agent.name} agent page`}
         >
           <EyeIcon />
           View

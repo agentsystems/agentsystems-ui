@@ -22,6 +22,8 @@ interface CardProps {
   role?: string
   /** Tab index for keyboard navigation */
   tabIndex?: number
+  /** Tour data attribute */
+  'data-tour'?: string
 }
 
 /**
@@ -58,7 +60,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(({
   ariaDescription,
   isSelected,
   role,
-  tabIndex 
+  tabIndex,
+  'data-tour': dataTour
 }, ref) => {
   const { playClickSound } = useAudio()
 
@@ -92,6 +95,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(({
       aria-label={ariaLabel}
       aria-description={ariaDescription}
       aria-pressed={isSelected}
+      data-tour={dataTour}
     >
       {children}
     </div>
