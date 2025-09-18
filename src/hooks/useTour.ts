@@ -108,7 +108,7 @@ We'll restore ${originalTheme} theme when done.`,
     {
       popover: {
         title: 'Welcome to AI Sovereignty! 🎉',
-        description: `You now have a complete AI agent platform running on your local machine.<br><br>This 60-second tour will show you how to execute AI agents without any external dependencies.`,
+        description: `You now have a complete AI agent platform running on your local machine.<br><br>This quick tour will show you how to execute AI agents locally.`,
         side: 'top',
         align: 'center'
       }
@@ -119,7 +119,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="dashboard-header"]',
       popover: {
         title: 'Your Command Center 📊',
-        description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents</strong> - Active containers and their status<br>• <strong>Recent Executions</strong> - Latest agent activity<br>• <strong>System Health</strong> - Resource usage and performance<br><br>Everything runs locally on your machine.',
+        description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents</strong> - Active containers and their status<br>• <strong>Recent Executions</strong> - Latest agent activity<br>• <strong>System Health</strong> - Resource usage and performance<br><br>Designed to run locally on your infrastructure.',
         side: 'bottom',
         align: 'start'
       }
@@ -232,7 +232,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="agent-metadata"]',
       popover: {
         title: 'Your Agent is Ready! 🤖',
-        description: 'The agent has started and reported its metadata.<br><br>Key information:<br>• <strong>Status:</strong> Running in container<br>• <strong>Model:</strong> Local AI model configured<br>• <strong>Version:</strong> Agent version and capabilities<br><br>All processing happens on your local infrastructure.',
+        description: 'The agent has started and reported its metadata.<br><br>Key information:<br>• <strong>Status:</strong> Running in container<br>• <strong>Model:</strong> Local AI model configured<br>• <strong>Version:</strong> Agent version and capabilities<br><br>Processing is designed for local infrastructure.',
         side: 'top',
         align: 'start'
       }
@@ -536,12 +536,12 @@ Each deployment specifies:<br>
     {
       popover: {
         title: 'Congratulations! 🎉',
-        description: `You've mastered the basics of AI Sovereignty!<br><br>
+        description: `You've completed the tour!<br><br>
 <strong>You successfully:</strong><br>
 ✅ Executed an AI agent locally<br>
 ✅ Viewed execution results and artifacts<br>
 ✅ Explored configuration options<br><br>
-Your AI infrastructure is now fully under your control.<br><br>
+You're ready to explore AgentSystems.<br><br>
 <strong>Ready to build something amazing?</strong><br><br>
 <a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">Explore the Docs →</a>`,
         side: 'top',
