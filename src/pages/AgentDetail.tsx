@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
 import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
@@ -19,6 +19,7 @@ import styles from './AgentDetail.module.css'
 
 export default function AgentDetail() {
   const { agentName } = useParams<{ agentName: string }>()
+  const navigate = useNavigate()
   const { playClickSound } = useAudio()
   const { toasts, removeToast, showError } = useToast()
   const { gatewayUrl, isAuthenticated } = useAuthStore()
@@ -690,7 +691,7 @@ export default function AgentDetail() {
                 className={styles.executionRow}
                 onClick={() => {
                   playClickSound()
-                  window.location.href = `/executions?thread=${execution.thread_id}`
+                  navigate(`/executions?thread=${execution.thread_id}`)
                 }}
                 data-tour={index === 0 ? 'execution-row-first' : undefined}
               >

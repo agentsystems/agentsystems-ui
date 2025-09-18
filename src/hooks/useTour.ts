@@ -335,8 +335,19 @@ We'll restore ${originalTheme} theme when done.`,
             if (firstRow) {
               const row = firstRow as HTMLElement
               row.addEventListener('click', () => {
-                // Move to next step after clicking row
-                setTimeout(() => getDriverInstance().moveNext(), 500)
+                // Wait for the execution detail panel to appear on the Executions page
+                waitForElement(
+                  '[data-tour="execution-detail-panel"]',
+                  (panel) => {
+                    if (panel) {
+                      getDriverInstance().moveNext()
+                    }
+                  },
+                  {
+                    maxAttempts: 10,
+                    intervalMs: 200
+                  }
+                )
               }, { once: true })
             } else {
               // If row doesn't appear, skip to next step
