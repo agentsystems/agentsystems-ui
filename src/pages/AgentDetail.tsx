@@ -676,7 +676,7 @@ export default function AgentDetail() {
             </button>
           </div>
           
-          <div className={styles.executionsTable}>
+          <div className={styles.executionsTable} data-tour="executions-table">
             <div className={styles.tableHeader}>
               <span>Status</span>
               <span>Started</span>
@@ -692,7 +692,7 @@ export default function AgentDetail() {
                   playClickSound()
                   window.open(`/executions?thread=${execution.thread_id}`, '_blank')
                 }}
-                data-tour={index === 0 && execution.state === 'running' ? 'execution-status' : undefined}
+                data-tour={index === 0 ? 'execution-row-first' : undefined}
               >
                 <span 
                   className={`${styles.status} ${

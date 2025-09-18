@@ -109,19 +109,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 4: Show Status Banner (first step on Agent Detail page)
-    {
-      element: '[data-tour="agent-status-banner"]',
-      popover: {
-        title: 'Agent Status Monitoring',
-        description: 'Each agent reports its current state: running, stopped, or not created.<br><br>This agent is currently <strong>stopped</strong> and will start automatically when needed.',
-        side: 'bottom',
-        align: 'start',
-        disableButtons: ['previous']
-      }
-    },
-
-    // Step 5: Turn On Agent
+    // Step 4: Turn On Agent (first step on Agent Detail page)
     {
       element: '[data-tour="start-agent-button"]',
       popover: {
@@ -141,7 +129,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 6: Agent Metadata (shows runtime information)
+    // Step 5: Agent Metadata (shows runtime information)
     {
       element: '[data-tour="agent-metadata"]',
       popover: {
@@ -152,7 +140,7 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 7: Execute Agent
+    // Step 6: Execute Agent
     {
       element: '[data-tour="execute-agent-button"]',
       popover: {
@@ -166,34 +154,40 @@ We'll restore ${originalTheme} theme when done.`,
         // Detect when user clicks the execute button
         const executeButton = element as HTMLElement
         executeButton.addEventListener('click', () => {
-          // Wait longer for execution to actually start and status element to render
-          setTimeout(() => getDriverInstance().moveNext(), 5000)
+          // Wait for execution to start and status element to render
+          setTimeout(() => getDriverInstance().moveNext(), 3000)
         }, { once: true })
       }
     },
 
-    // Step 8: Execution Status (while agent is running)
+    // Step 7: Execution Status (while running)
     {
       element: '[data-tour="execution-status"]',
       popover: {
-        title: 'Agent Executing Locally 🔄',
-        description: 'The agent is processing your request.<br><br>The execution history shows the current status and tracks all agent activity.',
+        title: 'Agent Processing 🔄',
+        description: 'Your agent is processing the request.<br><br>Execution status appears here in real-time.',
         side: 'top',
         align: 'start',
         disableButtons: ['next', 'previous']
       },
       onHighlighted: async () => {
-        // First, wait for the status element to appear
-        let statusCheckAttempts = 0
-        const maxStatusAttempts = 10 // 10 seconds to find status element
+        // First wait for the execution status element to actually appear
+        let statusAttempts = 0
+        const maxStatusAttempts = 20 // 20 attempts * 500ms = 10 seconds to find status element
 
         const waitForStatusElement = () => {
-          statusCheckAttempts++
+          statusAttempts++
           const statusElement = document.querySelector('[data-tour="execution-status"]')
 
-          if (!statusElement && statusCheckAttempts < maxStatusAttempts) {
+          if (!statusElement && statusAttempts < maxStatusAttempts) {
             // Status element not yet visible, keep waiting
-            setTimeout(waitForStatusElement, 1000)
+            setTimeout(waitForStatusElement, 500)
+            return
+          }
+
+          if (!statusElement) {
+            console.warn('Tour: Execution status element never appeared, skipping')
+            setTimeout(() => getDriverInstance().moveNext(), 1000)
             return
           }
 
@@ -207,7 +201,7 @@ We'll restore ${originalTheme} theme when done.`,
             // Check if execution status changed to completed
             const resultsElement = document.querySelector('[data-tour="execution-results"]')
 
-            // Check if status changed to completed or if results are ready
+            // Check if results are ready
             if (resultsElement && resultsElement.textContent && resultsElement.textContent.length > 10) {
               // Results are ready, auto-advance to show them
               setTimeout(() => getDriverInstance().moveNext(), 1000)
@@ -234,42 +228,83 @@ We'll restore ${originalTheme} theme when done.`,
       }
     },
 
-    // Step 9: Execution Results (after completion)
+    // Step 8: Execution Results
     {
       element: '[data-tour="execution-results"]',
       popover: {
-        title: 'AI Sovereignty Complete! 🚀',
-        description: 'Request processed successfully.<br><br>The JSON response shows the agent\'s output, generated using your local infrastructure.',
+        title: 'Success! 🎉',
+        description: 'Your agent has completed the request.<br><br>The response shows the AI-generated output from your local infrastructure.',
         side: 'top',
         align: 'start'
       }
     },
 
-    // Step 10: Tour Completion Choice
+    // Step 9: View Execution in Table
     {
+      element: '[data-tour="execution-row-first"]',
       popover: {
-        title: 'What\'s Next? 🤔',
-        description: `You've executed your first AI agent.<br><br>
-Choose your path:<br><br>
-• Close the tour to explore on your own<br>
-• Click <strong>Continue Tour</strong> to learn about configuration<br><br>
-You can restart the tour anytime from the Support page.`,
+        title: 'Execution History 📋',
+        description: 'Your execution appears in the history table.<br><br>Click the row to view detailed results and artifacts.',
         side: 'top',
-        align: 'center',
-        showButtons: ['close', 'next'],
-        nextBtnText: 'Continue Tour →',
-        onCloseClick: () => {
-          // User chose to explore - mark tour complete
-          storeMark('execution-first')
-          setTourActive(false)
-          console.log('User chose to explore on their own')
-          getDriverInstance().destroy()
-        }
+        align: 'start',
+        disableButtons: ['next']
+      },
+      onHighlighted: (element) => {
+        // Wait a bit for the table to populate with the new execution
+        setTimeout(() => {
+          const firstRow = element as HTMLElement
+          if (firstRow) {
+            firstRow.addEventListener('click', () => {
+              // Move to next step after clicking row
+              setTimeout(() => getDriverInstance().moveNext(), 1500)
+            }, { once: true })
+          }
+        }, 1000)
       }
     },
 
-    // Configuration Tour Steps (11-12)
-    // Step 11: Navigate to Settings
+    // Step 10: Execution Detail Panel
+    {
+      element: '[data-tour="execution-detail-panel"]',
+      popover: {
+        title: 'Execution Details 📊',
+        description: 'View complete execution information including inputs, outputs, and status.<br><br>The <strong>Audit Trail</strong> tab provides detailed logs for debugging.',
+        side: 'top',
+        align: 'start'
+      }
+    },
+
+    // Step 11: Artifacts Tab
+    {
+      element: '[data-tour="artifacts-tab"]',
+      popover: {
+        title: 'Agent Artifacts 📁',
+        description: 'Click <strong>Artifacts</strong> to view files generated by your agent.<br><br>All outputs are stored locally and can be downloaded.',
+        side: 'top',
+        align: 'start',
+        disableButtons: ['next']
+      },
+      onHighlighted: (element) => {
+        const artifactsTab = element as HTMLElement
+        artifactsTab?.addEventListener('click', () => {
+          setTimeout(() => getDriverInstance().moveNext(), 1000)
+        }, { once: true })
+      }
+    },
+
+    // Step 12: Artifacts Panel
+    {
+      element: '[data-tour="artifacts-panel"]',
+      popover: {
+        title: 'Generated Files',
+        description: 'Agent outputs appear here.<br><br>Files can be previewed, downloaded, or used as inputs for other agents.',
+        side: 'top',
+        align: 'start'
+      }
+    },
+
+    // Configuration Tour Steps
+    // Step 13: Navigate to Configuration
     {
       element: '[data-tour="settings-nav"]',
       popover: {
@@ -291,7 +326,7 @@ You can restart the tour anytime from the Support page.`,
     },
 
     // Configuration Page Tour Steps (12-16)
-    // Step 12: Credentials Card
+    // Step 14: Credentials Card
     {
       element: '[data-tour="credentials-card"]',
       popover: {
@@ -308,7 +343,7 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       }
     },
 
-    // Step 13: Registry Connections Card
+    // Step 15: Registry Connections Card
     {
       element: '[data-tour="registry-connections-card"]',
       popover: {
@@ -324,7 +359,7 @@ Supported registries:<br>
       }
     },
 
-    // Step 14: Model Connections Card
+    // Step 16: Model Connections Card
     {
       element: '[data-tour="model-connections-card"]',
       popover: {
@@ -340,7 +375,7 @@ Supported providers:<br>
       }
     },
 
-    // Step 15: Agents Card
+    // Step 17: Agents Card
     {
       element: '[data-tour="agents-config-card"]',
       popover: {
@@ -356,19 +391,22 @@ Each deployment specifies:<br>
       }
     },
 
-    // Step 16: Tour Complete on Configuration Page
+    // Step 18: Tour Complete
     {
       popover: {
         title: 'Tour Complete! 🎉',
-        description: `You've completed the AgentSystems tour.<br><br>
+        description: `You've successfully executed an AI agent on your local infrastructure.<br><br>
 <strong>You learned how to:</strong><br>
-• Execute AI agents on local infrastructure<br>
-• Monitor agent status and execution<br>
-• Configure credentials and connections<br>
-• Access container registries<br>
-• Connect AI model providers<br>
-• Deploy agent configurations<br><br>
-<strong>Continue learning:</strong><br>
+• Start and execute AI agents<br>
+• View execution history and details<br>
+• Access generated artifacts<br>
+• Configure credentials securely<br>
+• Connect to container registries<br>
+• Set up AI model providers<br><br>
+<strong>Explore more:</strong><br>
+• <strong>Agent Hub</strong> - Discover new agents<br>
+• <strong>Audit Trail</strong> - View detailed logs<br>
+• <strong>Support</strong> - Access help and restart tour<br><br>
 <a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">View Documentation →</a>`,
         side: 'top',
         align: 'center',
