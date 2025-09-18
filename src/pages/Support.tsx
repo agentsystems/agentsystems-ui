@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { 
   ChatBubbleLeftRightIcon,
   DocumentTextIcon,
@@ -11,14 +12,27 @@ import {
   SparklesIcon,
   UserGroupIcon,
   EnvelopeIcon,
-  LinkIcon
+  LinkIcon,
+  PlayIcon
 } from '@heroicons/react/24/outline'
 import Card from '@components/common/Card'
+import { useTour } from '@hooks/useTour'
 import styles from './Support.module.css'
 
 export default function Support() {
+  const navigate = useNavigate()
+  const { startExecutionFirstTour, resetTour } = useTour()
+  
   const handleExternalLink = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleStartTour = () => {
+    resetTour() // Clear any existing completion state
+    navigate('/dashboard') // Go to dashboard
+    setTimeout(() => {
+      startExecutionFirstTour() // Start fresh tour
+    }, 500)
   }
 
   return (
@@ -37,6 +51,23 @@ export default function Support() {
             <ChatBubbleLeftRightIcon className={styles.sectionIcon} />
             Getting Help
           </h2>
+
+          <Card className={styles.resourceCard}>
+            <div className={styles.resourceHeader}>
+              <PlayIcon className={styles.resourceIcon} />
+              <div>
+                <h3>Interactive Tour</h3>
+                <p>Take the guided tour to learn AgentSystems features</p>
+              </div>
+            </div>
+            <button 
+              className={styles.resourceButton}
+              onClick={handleStartTour}
+            >
+              <PlayIcon className={styles.buttonIcon} />
+              Start Tour
+            </button>
+          </Card>
           
           <Card className={styles.resourceCard}>
             <div className={styles.resourceHeader}>

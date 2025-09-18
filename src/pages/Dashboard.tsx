@@ -23,6 +23,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { agentsApi } from '@api/agents'
 import { api } from '@api/client'
 import type { Execution } from '../types/api'
@@ -30,9 +31,45 @@ import StatsGrid from '@components/dashboard/StatsGrid'
 import RecentExecutions from '@components/dashboard/RecentExecutions'
 import SystemHealth from '@components/dashboard/SystemHealth'
 import { differenceInMilliseconds } from 'date-fns'
+import { useTour } from '@hooks/useTour'
+import { useTourStore } from '@stores/tourStore'
 import styles from './Dashboard.module.css'
 
 export default function Dashboard() {
+  const { startExecutionFirstTour, resetTour } = useTour()
+  const { hasCompletedTour, isTourActive } = useTourStore()
+
+  // Check if we should show tour on first visit - only once on mount
+  useEffect(() => {
+    console.log('Dashboard: Tour check - hasCompletedTour:', hasCompletedTour, 'isTourActive:', isTourActive)
+
+    // Only start tour if: not completed, not already active, and on dashboard
+    if (!hasCompletedTour && !isTourActive && window.location.pathname === '/dashboard') {
+      console.log('Dashboard: Scheduling tour start in 1500ms')
+      // Wait for page to be fully rendered and animations to settle
+      const timer = setTimeout(() => {
+        console.log('Dashboard: Timer fired, checking readyState:', document.readyState)
+        // Additional check to ensure DOM is stable
+        if (document.readyState === 'complete') {
+          console.log('Dashboard: DOM complete, starting tour')
+          startExecutionFirstTour()
+        } else {
+          console.log('Dashboard: DOM not ready, waiting 500ms more')
+          // Wait a bit more if still loading
+          setTimeout(() => {
+            console.log('Dashboard: Delayed start, starting tour now')
+            startExecutionFirstTour()
+          }, 500)
+        }
+      }, 1500) // Increased delay to prevent flicker
+
+      return () => {
+        console.log('Dashboard: Cleanup - clearing timer')
+        clearTimeout(timer)
+      }
+    }
+  }, []) // Empty dependency array - only check on mount
+
   // Fetch data for dashboard components
   const { data: agentsData } = useQuery({
     queryKey: ['agents'],
@@ -113,6 +150,7 @@ export default function Dashboard() {
       <div className={styles.header}>
         <h1 id="dashboard-title">Dashboard</h1>
         <p className={styles.subtitle} id="dashboard-subtitle">System overview and metrics</p>
+        
       </div>
 
       <StatsGrid 

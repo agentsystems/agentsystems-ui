@@ -95,6 +95,11 @@
   margin: 16px 0 24px 0;
 }
 
+.agentControls button {
+  min-width: 140px;
+  justify-content: center;
+}
+
 .imageInfo {
   border-bottom: 1px solid var(--border);
   padding-bottom: 16px;

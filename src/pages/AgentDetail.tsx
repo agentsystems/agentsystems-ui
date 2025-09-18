@@ -306,6 +306,7 @@ export default function AgentDetail() {
               status={currentAgent.state === 'running' ? 'healthy' : 'warning'}
               title="Agent Status"
               message={`Agent is currently ${currentAgent.state === 'running' ? 'running and ready for requests' : currentAgent.state === 'stopped' ? 'stopped but will auto-start on first request' : 'not created yet'}`}
+              data-tour="agent-status-banner"
             />
             
             <div className={styles.agentControls}>
@@ -317,6 +318,7 @@ export default function AgentDetail() {
                     startMutation.mutate(agentName!)
                   }}
                   disabled={startMutation.isPending}
+                  data-tour="start-agent-button"
                 >
                   <PowerIcon />
                   {startMutation.isPending || invokeMutation.isPending ? 'Turning On...' : getAgentButtonText(currentAgent.state)}
@@ -385,7 +387,7 @@ export default function AgentDetail() {
               </p>
             </div>
           ) : metadata ? (
-            <div className={styles.runtimeSection}>
+            <div className={styles.runtimeSection} data-tour="agent-metadata">
               <h3 className={styles.sectionHeader}>Runtime Metadata</h3>
               <div className={styles.metadataGrid}>
                 <div className={styles.metadataItem}>
@@ -573,6 +575,7 @@ export default function AgentDetail() {
               onClick={handleInvoke}
               disabled={!isAuthenticated() || invokeMutation.isPending || !!pollingStatus}
               title={!isAuthenticated() ? 'Auth token required - configure in Configuration > Gateway Connection' : undefined}
+              data-tour="execute-agent-button"
             >
               <BoltIcon className={styles.executeIcon} />
               {!isAuthenticated() ? 'Auth Required' : invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Running...' : 'Execute'}
@@ -593,57 +596,65 @@ export default function AgentDetail() {
               </div>
             )}
 
+            {/* Status/Results area - always present for tour anchoring */}
             {pollingStatus && (
-              <div className={styles.statusIndicator}>
+              <div className={styles.statusIndicator} data-tour="execution-status">
                 <div className={styles.spinner}></div>
                 <span>{pollingStatus}</span>
               </div>
             )}
 
-            {invocationResult && (
-              <div className={styles.result}>
-                {invocationResult.error ? (
-                  <div className={styles.error}>
-                    <h3>Error:</h3>
-                    <div className={styles.errorMessage}>
-                      {invocationResult.error.message}
-                      {invocationResult.error.status && (
-                        <span className={styles.errorCode}> (Status: {invocationResult.error.status})</span>
+            {/* Results container - visible when we have results or are waiting */}
+            <div
+              className={styles.result}
+              data-tour="execution-results-container"
+              style={{ display: invocationResult ? 'block' : 'none' }}
+            >
+              {invocationResult && (
+                <>
+                  {invocationResult.error ? (
+                    <div className={styles.error}>
+                      <h3>Error:</h3>
+                      <div className={styles.errorMessage}>
+                        {invocationResult.error.message}
+                        {invocationResult.error.status && (
+                          <span className={styles.errorCode}> (Status: {invocationResult.error.status})</span>
+                        )}
+                      </div>
+                      {invocationResult.error.body && (
+                        <details className={styles.errorDetails}>
+                          <summary>Error Details</summary>
+                          <pre>{invocationResult.error.body}</pre>
+                        </details>
                       )}
                     </div>
-                    {invocationResult.error.body && (
-                      <details className={styles.errorDetails}>
-                        <summary>Error Details</summary>
-                        <pre>{invocationResult.error.body}</pre>
-                      </details>
-                    )}
-                  </div>
-                ) : (
-                  <div className={styles.success}>
-                    <h3>Result:</h3>
-                    <pre>{
-                      (() => {
-                        try {
-                          // If it's a string, try to parse and beautify it
-                          if (typeof invocationResult.result === 'string') {
-                            const parsed = JSON.parse(invocationResult.result)
-                            return JSON.stringify(parsed, null, 2)
+                  ) : (
+                    <div className={styles.success}>
+                      <h3>Result:</h3>
+                      <pre data-tour="execution-results">{
+                        (() => {
+                          try {
+                            // If it's a string, try to parse and beautify it
+                            if (typeof invocationResult.result === 'string') {
+                              const parsed = JSON.parse(invocationResult.result)
+                              return JSON.stringify(parsed, null, 2)
+                            }
+                            // If it's already an object, stringify it
+                            return JSON.stringify(invocationResult.result, null, 2)
+                          } catch {
+                            // If parsing fails, display the raw string
+                            return invocationResult.result as string
                           }
-                          // If it's already an object, stringify it
-                          return JSON.stringify(invocationResult.result, null, 2)
-                        } catch {
-                          // If parsing fails, display the raw string
-                          return invocationResult.result as string
-                        }
-                      })()
-                    }</pre>
+                        })()
+                      }</pre>
+                    </div>
+                  )}
+                  <div className={styles.threadInfo}>
+                    <small>Thread ID: {invocationResult.thread_id}</small>
                   </div>
-                )}
-                <div className={styles.threadInfo}>
-                  <small>Thread ID: {invocationResult.thread_id}</small>
-                </div>
-              </div>
-            )}
+                </>
+              )}
+            </div>
           </div>
         </Card>
       </div>
@@ -673,7 +684,7 @@ export default function AgentDetail() {
               <span>Thread ID</span>
             </div>
             
-            {executionHistory.executions.slice(0, 5).map((execution: Execution) => (
+            {executionHistory.executions.slice(0, 5).map((execution: Execution, index: number) => (
               <div
                 key={execution.thread_id}
                 className={styles.executionRow}
@@ -681,6 +692,7 @@ export default function AgentDetail() {
                   playClickSound()
                   window.open(`/executions?thread=${execution.thread_id}`, '_blank')
                 }}
+                data-tour={index === 0 && execution.state === 'running' ? 'execution-status' : undefined}
               >
                 <span 
                   className={`${styles.status} ${
