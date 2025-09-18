@@ -4,6 +4,7 @@ import MainLayout from '@components/layouts/MainLayout'
 import ErrorBoundary from '@components/ErrorBoundary'
 import SkipLinks from '@components/SkipLinks'
 import LoadingSpinner from '@components/LoadingSpinner'
+import ScrollToTop from '@components/ScrollToTop'
 import { useThemeStore } from '@stores/themeStore'
 import { useScanline } from '@hooks/useScanline'
 
@@ -48,6 +49,7 @@ function App() {
   return (
     <ErrorBoundary>
       <SkipLinks />
+      <ScrollToTop />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<MainLayout />}>
