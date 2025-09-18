@@ -30,13 +30,42 @@ export function useTour(): TourHook {
   } = useTourStore()
 
   // Tour step templates without driver instance references
-  const getTourSteps = (getDriverInstance: () => Driver): DriveStep[] => {
-    return [
-    // Step 1: Welcome Modal (free-floating)
+  const getTourSteps = (getDriverInstance: () => Driver, originalTheme?: string): DriveStep[] => {
+    const steps: DriveStep[] = []
+
+    // Add theme switching confirmation step if needed
+    if (originalTheme && originalTheme !== 'light') {
+      steps.push({
+        popover: {
+          title: '🎨Theme Switch',
+          description: `Tour looks best in light theme.<br><br>
+We'll restore ${originalTheme} theme when done.`,
+          side: 'top',
+          align: 'center',
+          showButtons: ['close', 'next'],
+          nextBtnText: 'Start Tour →',
+          onNextClick: () => {
+            console.log('Tour: Switching to light theme')
+            useThemeStore.getState().setTheme('light')
+            getDriverInstance().moveNext()
+          },
+          onCloseClick: () => {
+            console.log('Tour: User declined theme switch')
+            storeMark('execution-first')
+            setTourActive(false)
+            getDriverInstance().destroy()
+          }
+        }
+      })
+    }
+
+    // Add the regular tour steps
+    steps.push(
+    // Step 1 (or 2): Welcome Modal (free-floating)
     {
       popover: {
         title: 'Welcome to AI Sovereignty! 🎉',
-        description: `You now have a complete AI agent platform running <strong>locally on your machine</strong>. Let's see it in action in just 60 seconds!`,
+        description: `You now have a complete AI agent platform running on your local machine.<br><br>This 60-second tour will show you how to execute AI agents without any external dependencies.`,
         side: 'top',
         align: 'center'
       }
@@ -47,7 +76,7 @@ export function useTour(): TourHook {
       element: '[data-tour="agents-nav"]',
       popover: {
         title: 'Your Agent Library',
-        description: '<strong>Click the "Agents" link</strong> to see all your configured agents.<br><br>We\'ve pre-installed a <em>hello-world-agent</em> for you to try.',
+        description: 'Click the <strong>Agents</strong> link to view your agent library.<br><br>We\'ve pre-installed a hello-world-agent to demonstrate the platform.',
         side: 'right',
         align: 'start',
         disableButtons: ['next']
@@ -66,7 +95,7 @@ export function useTour(): TourHook {
       element: '[data-tour="hello-world-agent-card"]',
       popover: {
         title: 'Your First Agent',
-        description: 'This is your <strong>hello-world-agent</strong> - ready to demonstrate local AI processing.<br><br><em>Click on the card background (avoid the buttons) to view details.</em>',
+        description: 'The <strong>hello-world-agent</strong> demonstrates how agents run in isolated containers.<br><br>Click the card to view agent details.',
         side: 'top',
         align: 'start',
         disableButtons: ['next', 'previous']
@@ -85,7 +114,7 @@ export function useTour(): TourHook {
       element: '[data-tour="agent-status-banner"]',
       popover: {
         title: 'Agent Status Monitoring',
-        description: 'AgentSystems tracks each agent\'s state in <strong>real-time</strong>.<br><br>This agent is <em>stopped</em> but will <strong>auto-start</strong> when you invoke it.',
+        description: 'Each agent reports its current state: running, stopped, or not created.<br><br>This agent is currently <strong>stopped</strong> and will start automatically when needed.',
         side: 'bottom',
         align: 'start',
         disableButtons: ['previous']
@@ -97,7 +126,7 @@ export function useTour(): TourHook {
       element: '[data-tour="start-agent-button"]',
       popover: {
         title: 'Start Your Agent',
-        description: '<strong>Click "Turn On"</strong> to start the agent container.<br><br>This demonstrates AgentSystems\' <em>on-demand container management</em>.',
+        description: 'Click <strong>Turn On</strong> to start the agent container.<br><br>AgentSystems manages containers on-demand to save resources.',
         side: 'top',
         align: 'start',
         disableButtons: ['next']
@@ -117,7 +146,7 @@ export function useTour(): TourHook {
       element: '[data-tour="agent-metadata"]',
       popover: {
         title: 'Your Agent is Ready! 🤖',
-        description: 'This metadata was loaded <strong>directly from the running container</strong>.<br><br>Notice:<br>• <strong>Purpose:</strong> generates historical narratives<br>• <strong>Version:</strong> 0.1.1<br>• <strong>AI Model:</strong> gemma3:1b (local)<br><br><em>All of this runs entirely on your computer!</em>',
+        description: 'The agent has started and reported its metadata.<br><br>Key information:<br>• <strong>Status:</strong> Running in container<br>• <strong>Model:</strong> Local AI model configured<br>• <strong>Version:</strong> Agent version and capabilities<br><br>All processing happens on your local infrastructure.',
         side: 'top',
         align: 'start'
       }
@@ -128,7 +157,7 @@ export function useTour(): TourHook {
       element: '[data-tour="execute-agent-button"]',
       popover: {
         title: 'Execute Your Agent Locally',
-        description: '<strong>Click "Execute"</strong> to run this agent with a sample request.<br><br>The processing happens <strong>entirely on your machine</strong> - <em>no external servers involved!</em>',
+        description: 'Click <strong>Execute</strong> to send a sample request to the agent.<br><br>The agent will process this request using your local compute resources.',
         side: 'top',
         align: 'start',
         disableButtons: ['next']
@@ -137,8 +166,8 @@ export function useTour(): TourHook {
         // Detect when user clicks the execute button
         const executeButton = element as HTMLElement
         executeButton.addEventListener('click', () => {
-          // Wait for execution to start, then show status
-          setTimeout(() => getDriverInstance().moveNext(), 3000)
+          // Wait longer for execution to actually start and status element to render
+          setTimeout(() => getDriverInstance().moveNext(), 5000)
         }, { once: true })
       }
     },
@@ -148,42 +177,60 @@ export function useTour(): TourHook {
       element: '[data-tour="execution-status"]',
       popover: {
         title: 'Agent Executing Locally 🔄',
-        description: 'Your agent is now processing the request using <strong>local AI models</strong>.<br><br>Notice the <strong>"running"</strong> status in the execution history - this is happening <em>on your computer</em>.',
+        description: 'The agent is processing your request.<br><br>The execution history shows the current status and tracks all agent activity.',
         side: 'top',
         align: 'start',
         disableButtons: ['next', 'previous']
       },
       onHighlighted: async () => {
-        // Poll for execution completion
-        const maxAttempts = 60 // 60 seconds max wait
-        let attempts = 0
+        // First, wait for the status element to appear
+        let statusCheckAttempts = 0
+        const maxStatusAttempts = 10 // 10 seconds to find status element
 
-        const checkForCompletion = async () => {
-          attempts++
+        const waitForStatusElement = () => {
+          statusCheckAttempts++
+          const statusElement = document.querySelector('[data-tour="execution-status"]')
 
-          // Check if execution status changed to completed
-          const resultsElement = document.querySelector('[data-tour="execution-results"]')
-
-          // Check if status changed to completed or if results are ready
-          if (resultsElement && resultsElement.textContent && resultsElement.textContent.length > 10) {
-            // Results are ready, auto-advance to show them
-            setTimeout(() => getDriverInstance().moveNext(), 1000)
-            return true
+          if (!statusElement && statusCheckAttempts < maxStatusAttempts) {
+            // Status element not yet visible, keep waiting
+            setTimeout(waitForStatusElement, 1000)
+            return
           }
 
-          if (attempts < maxAttempts) {
-            // Keep checking every second
-            setTimeout(checkForCompletion, 1000)
-          } else {
-            // Timeout - move to next step anyway
-            console.warn('Tour: Execution took too long, proceeding anyway')
-            setTimeout(() => getDriverInstance().moveNext(), 1000)
+          // Now poll for execution completion
+          const maxAttempts = 60 // 60 seconds max wait
+          let attempts = 0
+
+          const checkForCompletion = async () => {
+            attempts++
+
+            // Check if execution status changed to completed
+            const resultsElement = document.querySelector('[data-tour="execution-results"]')
+
+            // Check if status changed to completed or if results are ready
+            if (resultsElement && resultsElement.textContent && resultsElement.textContent.length > 10) {
+              // Results are ready, auto-advance to show them
+              setTimeout(() => getDriverInstance().moveNext(), 1000)
+              return true
+            }
+
+            if (attempts < maxAttempts) {
+              // Keep checking every second
+              setTimeout(checkForCompletion, 1000)
+            } else {
+              // Timeout - move to next step anyway
+              console.warn('Tour: Execution took too long, proceeding anyway')
+              setTimeout(() => getDriverInstance().moveNext(), 1000)
+            }
+            return false
           }
-          return false
+
+          // Start checking for completion
+          setTimeout(checkForCompletion, 2000)
         }
 
-        // Start checking after a short delay
-        setTimeout(checkForCompletion, 2000)
+        // Start waiting for status element
+        waitForStatusElement()
       }
     },
 
@@ -192,7 +239,7 @@ export function useTour(): TourHook {
       element: '[data-tour="execution-results"]',
       popover: {
         title: 'AI Sovereignty Complete! 🚀',
-        description: '<strong>Perfect!</strong> Your agent processed the request locally and returned results.<br><br>This JSON response was generated <strong>entirely on your machine!</strong>',
+        description: 'Request processed successfully.<br><br>The JSON response shows the agent\'s output, generated using your local infrastructure.',
         side: 'top',
         align: 'start'
       }
@@ -202,11 +249,11 @@ export function useTour(): TourHook {
     {
       popover: {
         title: 'What\'s Next? 🤔',
-        description: `<strong>Great job!</strong> You've successfully executed an AI agent locally.<br><br>
-Would you like to:<br><br>
-• <strong>Explore on your own</strong> - Start building with AgentSystems<br>
-• <strong>Continue the tour</strong> - Learn about configuration, credentials, and deploying custom agents<br><br>
-<em>You can always restart the tour from Support if you skip it now.</em>`,
+        description: `You've executed your first AI agent.<br><br>
+Choose your path:<br><br>
+• Close the tour to explore on your own<br>
+• Click <strong>Continue Tour</strong> to learn about configuration<br><br>
+You can restart the tour anytime from the Support page.`,
         side: 'top',
         align: 'center',
         showButtons: ['close', 'next'],
@@ -227,7 +274,7 @@ Would you like to:<br><br>
       element: '[data-tour="settings-nav"]',
       popover: {
         title: 'Configuration Center',
-        description: 'Let\'s configure AgentSystems to connect to your environment.<br><br><strong>Click Configuration to continue.</strong>',
+        description: 'The Configuration page manages connections and credentials.<br><br>Click <strong>Configuration</strong> to explore these settings.',
         side: 'right',
         align: 'start',
         disableButtons: ['next']
@@ -249,10 +296,11 @@ Would you like to:<br><br>
       element: '[data-tour="credentials-card"]',
       popover: {
         title: 'Credentials Management 🔑',
-        description: `<strong>Store API keys and tokens</strong><br><br>
-• Environment variables keep credentials separate from code<br>
-• Not exposed in configuration files<br>
-• Passed to agent containers at runtime<br><br>
+        description: `Store API keys and authentication tokens securely.<br><br>
+Credentials are:<br>
+• Stored as environment variables<br>
+• Isolated from your codebase<br>
+• Injected into containers at runtime<br><br>
 <pre style="background: rgba(0,0,0,0.1); padding: 8px; border-radius: 4px; font-size: 12px;">OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...</pre>`,
         side: 'top',
@@ -265,11 +313,12 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       element: '[data-tour="registry-connections-card"]',
       popover: {
         title: 'Container Registry Access 📦',
-        description: `<strong>Connect to agent repositories</strong><br><br>
+        description: `Connect to container registries to access agent images.<br><br>
+Supported registries:<br>
 • Docker Hub for public agents<br>
 • Private registries for proprietary agents<br>
-• Enterprise repositories (Harbor, ECR, ACR)<br>
-• <em>Pull agents from multiple sources simultaneously</em>`,
+• Enterprise platforms (Harbor, ECR, ACR)<br>
+• Multiple simultaneous connections`,
         side: 'top',
         align: 'start'
       }
@@ -280,11 +329,12 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       element: '[data-tour="model-connections-card"]',
       popover: {
         title: 'AI Model Configuration 🤖',
-        description: `<strong>Configure AI provider connections</strong><br><br>
+        description: `Configure connections to AI model providers.<br><br>
+Supported providers:<br>
 • <strong>Cloud:</strong> OpenAI, Anthropic, AWS Bedrock<br>
-• <strong>Local:</strong> Ollama for local processing<br>
-• <strong>Routing:</strong> Agents use models transparently<br>
-• <em>Switch providers without changing agent code!</em>`,
+• <strong>Local:</strong> Ollama for on-premise models<br>
+• <strong>Flexibility:</strong> Switch providers without code changes<br>
+• <strong>Routing:</strong> Automatic model selection per agent`,
         side: 'top',
         align: 'start'
       }
@@ -295,11 +345,12 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       element: '[data-tour="agents-config-card"]',
       popover: {
         title: 'Agent Deployments 🚀',
-        description: `<strong>Define your agent fleet</strong><br><br>
+        description: `Define and deploy your agent configurations.<br><br>
+Each deployment specifies:<br>
 • Container image and version<br>
-• Registry source selection<br>
+• Source registry selection<br>
 • Runtime parameters and labels<br>
-• <em>Deploy agents with a single command!</em>`,
+• Resource requirements and limits`,
         side: 'top',
         align: 'start'
       }
@@ -309,15 +360,16 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
     {
       popover: {
         title: 'Tour Complete! 🎉',
-        description: `<strong>Excellent work!</strong> You've learned the essentials of AgentSystems.<br><br>
-<strong>You now understand how to:</strong><br>
-• Execute AI agents locally on your machine<br>
+        description: `You've completed the AgentSystems tour.<br><br>
+<strong>You learned how to:</strong><br>
+• Execute AI agents on local infrastructure<br>
+• Monitor agent status and execution<br>
 • Configure credentials and connections<br>
-• Connect to container registries for agent deployment<br>
-• Set up AI model providers<br>
-• Manage your agent deployments<br><br>
-<strong>Ready to learn more?</strong><br>
-<a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">View the documentation →</a>`,
+• Access container registries<br>
+• Connect AI model providers<br>
+• Deploy agent configurations<br><br>
+<strong>Continue learning:</strong><br>
+<a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">View Documentation →</a>`,
         side: 'top',
         align: 'center',
         showButtons: ['close']
@@ -327,7 +379,9 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
         showCompletionMessage()
       }
     }
-  ]
+    )
+
+    return steps
   }
 
   // Scroll prevention handler
@@ -406,6 +460,10 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
   const startExecutionFirstTour = useCallback(async () => {
     console.log('Tour: startExecutionFirstTour called')
 
+    // Save current theme and force light theme for best tour experience
+    const themeStore = useThemeStore.getState()
+    const originalTheme = themeStore.theme
+    console.log('Tour: Saving original theme:', originalTheme)
 
     // Prevent multiple simultaneous starts
     const currentTourState = useTourStore.getState()
@@ -423,6 +481,8 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
       }, 500)
       return
     }
+
+    // We'll handle theme switching after user confirms in the first tour step
 
     console.log('Tour: Setting tour active')
     // Set tour active
@@ -448,33 +508,35 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
 
     console.log('Tour: Creating Driver instance')
 
-    // Get the current theme from the store and adjust overlay color
-    const currentTheme = useThemeStore.getState().theme
-    let overlayColor = 'rgba(0, 0, 0, 0.5)' // default for light theme
-
-    if (currentTheme === 'dark') {
-      overlayColor = 'rgba(0, 0, 0, 0.9)' // very dark for dark theme
-      console.log('Tour: Using dark theme overlay')
-    } else if (currentTheme === 'cyber') {
-      overlayColor = 'rgba(0, 10, 0, 0.9)' // very dark green for cyber theme
-      console.log('Tour: Using cyber theme overlay')
-    } else {
-      console.log('Tour: Using default light theme overlay')
-    }
-    console.log('Tour: Current theme:', currentTheme, 'Overlay color:', overlayColor)
+    // Since we force light theme, always use light theme overlay
+    const overlayColor = 'rgba(0, 0, 0, 0.5)' // light theme overlay
+    console.log('Tour: Using light theme overlay for tour')
 
     // We need to create a mutable reference for the driver instance
     let driverInstance: Driver | null = null
 
-    // Create steps with reference to driver instance
-    const steps = getTourSteps((() => driverInstance!))
+    // Create steps with reference to driver instance and original theme
+    const steps = getTourSteps((() => driverInstance!), originalTheme)
 
-    // Create new driver instance with theme-aware overlay
-    driverInstance = driver({
+    // Create custom driver config with theme restoration
+    const tourDriverConfig = {
       ...driverConfig,
       overlayColor,
-      steps
-    })
+      steps,
+      onDestroyed: () => {
+        // Call original onDestroyed
+        driverConfig.onDestroyed()
+
+        // Restore original theme if it was changed
+        if (originalTheme !== 'light') {
+          console.log('Tour: Restoring original theme:', originalTheme)
+          useThemeStore.getState().setTheme(originalTheme)
+        }
+      }
+    }
+
+    // Create new driver instance with theme-aware overlay
+    driverInstance = driver(tourDriverConfig)
 
     console.log('Tour: Starting Driver tour')
     driverInstance.drive()
