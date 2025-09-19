@@ -163,7 +163,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="agents-nav"]',
       popover: {
         title: 'Your Agent Library',
-        description: 'Click the <strong>Agents</strong> link to view your agent library.<br><br>We\'ve pre-installed a hello-world-agent to demonstrate the platform.<br><br><strong>Click "Agents" to continue.</strong>',
+        description: 'View and manage your AI agents from this section.<br><br>We\'ve pre-installed a hello-world-agent to demonstrate the platform.<br><br><strong>Click "Agents" to continue.</strong>',
         side: 'right',
         align: 'start',
         disableButtons: ['next']
@@ -420,7 +420,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="execution-detail-panel"]',
       popover: {
         title: 'Execution Details 📊',
-        description: 'View complete execution information including inputs, outputs, and status.<br><br>The <strong>Audit Trail</strong> tab provides detailed logs for debugging.',
+        description: 'View complete execution information including inputs, outputs, and status.<br><br>The <strong>Audit</strong> tab provides detailed logs for debugging.',
         side: 'top',
         align: 'start'
       }
