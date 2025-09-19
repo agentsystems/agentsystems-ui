@@ -664,7 +664,7 @@ You're ready to explore AgentSystems.<br><br>
     disableBodyScroll: true,
 
     // Callbacks
-    onHighlighted: (element: Element | undefined, step: any) => {
+    onHighlighted: (element: Element | undefined, step: DriveStep) => {
       // Inject styles if not already done
       injectTourInteractionStyles()
 
