@@ -26,6 +26,21 @@ const injectTourInteractionStyles = () => {
       .tour-no-interaction * {
         pointer-events: none !important;
       }
+      /* Make tour popovers slightly wider - override Driver.js defaults */
+      .driver-popover {
+        min-width: 350px !important;
+        width: 350px !important;
+      }
+      .driver-popover-content {
+        width: 100% !important;
+      }
+      .driver-popover-title {
+        max-width: none !important;
+      }
+      .driver-popover-description {
+        max-width: none !important;
+        width: 100% !important;
+      }
     `
     document.head.appendChild(styleSheet)
   }
@@ -697,6 +712,9 @@ You're ready to explore AgentSystems.<br><br>
 
   const startExecutionFirstTour = useCallback(async () => {
     console.log('Tour: startExecutionFirstTour called')
+
+    // Inject tour styles immediately
+    injectTourInteractionStyles()
 
     // Save current theme and force light theme for best tour experience
     const themeStore = useThemeStore.getState()
