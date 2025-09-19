@@ -110,6 +110,37 @@
   outline-offset: 2px;
 }
 
+.inputGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputGroup .input {
+  flex: 1;
+  padding-right: 3rem;
+}
+
+.toggleButton {
+  position: absolute;
+  right: 0.75rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.toggleButton:hover {
+  color: var(--accent);
+}
+
+.toggleButton svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 .inputError {
   border-color: var(--error);
 }
@@ -127,6 +158,23 @@
 .hint {
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+.warningHint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.25rem;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: var(--warning, #ffc107);
+}
+
+.warningHint svg {
+  color: var(--warning, #ffc107);
 }
 
 .formActions {

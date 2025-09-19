@@ -13,6 +13,48 @@ import { useThemeStore } from '@stores/themeStore'
 import { agentsApi } from '@api/agents'
 import 'driver.js/dist/driver.css'
 
+// CSS to prevent interaction with highlighted elements during tour
+const injectTourInteractionStyles = () => {
+  const styleId = 'tour-interaction-styles'
+  if (!document.getElementById(styleId)) {
+    const styleSheet = document.createElement('style')
+    styleSheet.id = styleId
+    styleSheet.textContent = `
+      .tour-no-interaction {
+        pointer-events: none !important;
+      }
+      .tour-no-interaction * {
+        pointer-events: none !important;
+      }
+      /* Make tour popovers slightly wider - override Driver.js defaults */
+      .driver-popover {
+        min-width: 350px !important;
+        width: 350px !important;
+      }
+      .driver-popover-content {
+        width: 100% !important;
+      }
+      .driver-popover-title {
+        max-width: none !important;
+      }
+      .driver-popover-description {
+        max-width: none !important;
+        width: 100% !important;
+      }
+      /* Gradient text for click instructions */
+      .tour-action {
+        background: linear-gradient(135deg, #00b6a0 0%, #47a1d9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 600;
+        display: inline-block;
+      }
+    `
+    document.head.appendChild(styleSheet)
+  }
+}
+
 interface TourHook {
   startExecutionFirstTour: () => void
   hasCompletedTour: boolean
@@ -107,10 +149,11 @@ We'll restore ${originalTheme} theme when done.`,
     // Step 1 (or 2): Welcome Modal (free-floating)
     {
       popover: {
-        title: 'Welcome to AI Sovereignty! 🎉',
+        title: 'Welcome to AI Sovereignty 🎉',
         description: `You now have a complete AI agent platform running on your local machine.<br><br>This quick tour will show you how to execute AI agents locally.`,
         side: 'top',
-        align: 'center'
+        align: 'center',
+        showButtons: ['next', 'close']  // Hide Back button on welcome step
       }
     },
 
@@ -119,7 +162,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="dashboard-header"]',
       popover: {
         title: 'Your Command Center 📊',
-        description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents</strong> - Active containers and their status<br>• <strong>Recent Executions</strong> - Latest agent activity<br>• <strong>System Health</strong> - Resource usage and performance<br><br>Designed to run locally on your infrastructure.',
+        description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents:</strong> Active containers and their status<br>• <strong>Recent Executions:</strong> Latest agent activity<br>• <strong>System Health:</strong> Resource usage and performance<br><br>Designed to run locally on your infrastructure.',
         side: 'bottom',
         align: 'start'
       }
@@ -130,10 +173,10 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="agents-nav"]',
       popover: {
         title: 'Your Agent Library',
-        description: 'Click the <strong>Agents</strong> link to view your agent library.<br><br>We\'ve pre-installed a hello-world-agent to demonstrate the platform.',
+        description: 'View and manage your AI agents from this section.<br><br>We\'ve pre-installed a hello-world-agent to demonstrate the platform.<br><br><span class="tour-action">Click "Agents" to continue.</span>',
         side: 'right',
         align: 'start',
-        disableButtons: ['next']
+        showButtons: ['previous', 'close']
       },
       onHighlighted: (element) => {
         // Detect when user clicks the actual Agents link
@@ -161,10 +204,10 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="hello-world-agent-card"]',
       popover: {
         title: 'Your First Agent',
-        description: 'The <strong>hello-world-agent</strong> demonstrates how agents run in isolated containers.<br><br>Click the card to view agent details.',
+        description: 'The <strong>hello-world-agent</strong> demonstrates how agents run in isolated containers.<br><br><span class="tour-action">Click the agent card to continue.</span>',
         side: 'top',
         align: 'start',
-        disableButtons: ['next', 'previous']
+        showButtons: ['close']
       },
       onHighlighted: (element) => {
         // Detect when user clicks the agent card
@@ -200,10 +243,10 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="start-agent-button"]',
       popover: {
         title: 'Start Your Agent',
-        description: 'Click <strong>Turn On</strong> to start the agent container.<br><br>AgentSystems manages containers on-demand to save resources.',
+        description: 'AgentSystems manages containers on-demand to save resources.<br><br><span class="tour-action">Click "Turn On" to continue.</span>',
         side: 'top',
         align: 'start',
-        disableButtons: ['next']
+        showButtons: ['close']  // Hide Back button since this is first step on new page
       },
       onHighlighted: (element) => {
         // Detect when user clicks the start button
@@ -231,10 +274,11 @@ We'll restore ${originalTheme} theme when done.`,
     {
       element: '[data-tour="agent-metadata"]',
       popover: {
-        title: 'Your Agent is Ready! 🤖',
+        title: 'Your Agent is Ready 🤖',
         description: 'The agent has started and reported its metadata.<br><br>Key information:<br>• <strong>Status:</strong> Running in container<br>• <strong>Model:</strong> Local AI model configured<br>• <strong>Version:</strong> Agent version and capabilities<br><br>Processing is designed for local infrastructure.',
         side: 'top',
-        align: 'start'
+        align: 'start',
+        showButtons: ['next', 'close']  // Hide Back button since start button state has changed
       }
     },
 
@@ -243,10 +287,10 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="execute-agent-button"]',
       popover: {
         title: 'Execute Your Agent Locally',
-        description: 'Click <strong>Execute</strong> to send a sample request to the agent.<br><br>The agent will process this request using your local compute resources.',
+        description: 'The agent will process this request using your local compute resources.<br><br><span class="tour-action">Click "Execute" to continue.</span>',
         side: 'top',
         align: 'start',
-        disableButtons: ['next']
+        showButtons: ['previous', 'close']
       },
       onHighlighted: (element) => {
         // Detect when user clicks the execute button
@@ -278,7 +322,7 @@ We'll restore ${originalTheme} theme when done.`,
         description: 'Your agent is processing the request.<br><br>Execution status appears here in real-time.',
         side: 'top',
         align: 'start',
-        disableButtons: ['next', 'previous']
+        showButtons: ['close']
       },
       onHighlighted: async () => {
         // First wait for the execution status element to appear
@@ -329,10 +373,11 @@ We'll restore ${originalTheme} theme when done.`,
     {
       element: '[data-tour="execution-results"]',
       popover: {
-        title: 'Success! 🎉',
+        title: 'Success 🎉',
         description: 'Your agent has completed the request.<br><br>The response shows the AI-generated output from your local infrastructure.',
         side: 'top',
-        align: 'start'
+        align: 'start',
+        showButtons: ['next', 'close']  // Hide Back button on success step
       }
     },
 
@@ -341,10 +386,10 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="execution-row-first"]',
       popover: {
         title: 'Execution History 📋',
-        description: 'Your execution appears in the history table.<br><br>Click the row to view detailed results and artifacts.',
+        description: 'Your execution appears in the history table.<br><br><span class="tour-action">Click the execution row to continue.</span>',
         side: 'top',
         align: 'start',
-        disableButtons: ['next']
+        showButtons: ['previous', 'close']
       },
       onHighlighted: () => {
         // Wait for the execution row to appear in the table
@@ -387,9 +432,10 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="execution-detail-panel"]',
       popover: {
         title: 'Execution Details 📊',
-        description: 'View complete execution information including inputs, outputs, and status.<br><br>The <strong>Audit Trail</strong> tab provides detailed logs for debugging.',
+        description: 'View complete execution information including inputs, outputs, and status.<br><br>The <strong>Audit</strong> tab provides detailed logs for debugging.',
         side: 'top',
-        align: 'start'
+        align: 'start',
+        showButtons: ['next', 'close']  // Hide Back button on execution details
       }
     },
 
@@ -398,10 +444,10 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="artifacts-tab"]',
       popover: {
         title: 'Agent Artifacts 📁',
-        description: 'Click <strong>Artifacts</strong> to view files generated by your agent.<br><br>All outputs are stored locally and can be downloaded.',
+        description: 'View files generated by your agent. All outputs are stored locally and can be downloaded.<br><br><span class="tour-action">Click "Artifacts" to continue.</span>',
         side: 'top',
         align: 'start',
-        disableButtons: ['next']
+        showButtons: ['close']  // Hide Back button on artifacts navigation
       },
       onHighlighted: (element) => {
         const artifactsTab = element as HTMLElement
@@ -419,6 +465,17 @@ We'll restore ${originalTheme} theme when done.`,
         description: 'Agent outputs appear here.<br><br>Files can be previewed, downloaded, or used as inputs for other agents.',
         side: 'top',
         align: 'start'
+      },
+      onHighlighted: (element) => {
+        // Prevent clicks on artifacts during tour
+        if (element) {
+          (element as HTMLElement).classList.add('tour-no-interaction')
+        }
+      },
+      onDeselected: (element) => {
+        if (element) {
+          (element as HTMLElement).classList.remove('tour-no-interaction')
+        }
       }
     },
 
@@ -428,10 +485,10 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="settings-nav"]',
       popover: {
         title: 'Configuration Center',
-        description: 'The Configuration page manages connections and credentials.<br><br>Click <strong>Configuration</strong> to explore these settings.',
+        description: 'The Configuration page manages connections and credentials.<br><br><span class="tour-action">Click "Configuration" to continue.</span>',
         side: 'right',
         align: 'start',
-        disableButtons: ['next']
+        showButtons: ['previous', 'close']
       },
       onHighlighted: (element) => {
         const settingsLink = element as HTMLElement
@@ -450,7 +507,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="credentials-card"]',
       popover: {
         title: 'Credentials Management 🔑',
-        description: `Store API keys and authentication tokens securely.<br><br>
+        description: `Store API keys and authentication tokens.<br><br>
 Credentials are:<br>
 • Stored as environment variables<br>
 • Isolated from your codebase<br>
@@ -458,7 +515,8 @@ Credentials are:<br>
 <pre style="background: rgba(0,0,0,0.1); padding: 8px; border-radius: 4px; font-size: 12px;">OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...</pre>`,
         side: 'top',
-        align: 'start'
+        align: 'start',
+        showButtons: ['next', 'close']  // Hide Back button on credentials step
       }
     },
 
@@ -469,10 +527,10 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
         title: 'Container Registry Access 📦',
         description: `Connect to container registries to access agent images.<br><br>
 Supported registries:<br>
-• Docker Hub for public agents<br>
-• Private registries for proprietary agents<br>
-• Enterprise platforms (Harbor, ECR, ACR)<br>
-• Multiple simultaneous connections`,
+• <strong>Docker Hub:</strong> Public agent images<br>
+• <strong>Private registries:</strong> Proprietary agent images<br>
+• <strong>Enterprise platforms:</strong> Harbor, ECR, ACR support<br>
+• <strong>Multi-registry:</strong> Connect to multiple sources`,
         side: 'top',
         align: 'start'
       }
@@ -501,10 +559,10 @@ Supported providers:<br>
         title: 'Agent Deployments 🚀',
         description: `Define and deploy your agent configurations.<br><br>
 Each deployment specifies:<br>
-• Container image and version<br>
-• Source registry selection<br>
-• Runtime parameters and labels<br>
-• Resource requirements and limits`,
+• <strong>Image:</strong> Container and version to deploy<br>
+• <strong>Registry:</strong> Source for pulling images<br>
+• <strong>Parameters:</strong> Runtime configuration and labels<br>
+• <strong>Resources:</strong> Requirements and limits`,
         side: 'top',
         align: 'start'
       }
@@ -514,10 +572,21 @@ Each deployment specifies:<br>
     {
       element: '[data-tour="hub-nav"]',
       popover: {
-        title: 'Agent Hub 🛍️',
-        description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• Pre-built agents for common tasks<br>• Community-contributed solutions<br>• Enterprise agent templates<br>• One-click deployments',
+        title: 'Agent Hub 🌐',
+        description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• <strong>Pre-built agents:</strong> Common tasks ready to use<br>• <strong>Community solutions:</strong> Contributed by developers<br>• <strong>Enterprise templates:</strong> Production-ready agents<br>• <strong>One-click deployment:</strong> Easy installation',
         side: 'right',
         align: 'start'
+      },
+      onHighlighted: (element) => {
+        // Prevent clicking the nav item during tour
+        if (element) {
+          (element as HTMLElement).classList.add('tour-no-interaction')
+        }
+      },
+      onDeselected: (element) => {
+        if (element) {
+          (element as HTMLElement).classList.remove('tour-no-interaction')
+        }
       }
     },
 
@@ -526,16 +595,27 @@ Each deployment specifies:<br>
       element: '[data-tour="support-nav"]',
       popover: {
         title: 'Help & Documentation 💬',
-        description: 'Get help whenever you need it.<br><br>The <strong>Support</strong> page provides:<br>• Documentation and guides<br>• Troubleshooting resources<br>• Community forums<br>• <strong>Restart this tour anytime</strong>',
+        description: 'Get help whenever you need it.<br><br>The <strong>Support</strong> page provides:<br>• <strong>Documentation:</strong> Guides and references<br>• <strong>Troubleshooting:</strong> Common issues and solutions<br>• <strong>Community:</strong> Forums and discussions<br>• <strong>Tour restart:</strong> Access this tour anytime',
         side: 'right',
         align: 'start'
+      },
+      onHighlighted: (element) => {
+        // Prevent clicking the nav item during tour
+        if (element) {
+          (element as HTMLElement).classList.add('tour-no-interaction')
+        }
+      },
+      onDeselected: (element) => {
+        if (element) {
+          (element as HTMLElement).classList.remove('tour-no-interaction')
+        }
       }
     },
 
     // Step 21: Tour Complete
     {
       popover: {
-        title: 'Congratulations! 🎉',
+        title: 'Congratulations 🎉',
         description: `You've completed the tour!<br><br>
 <strong>You successfully:</strong><br>
 ✅ Executed an AI agent locally<br>
@@ -584,12 +664,25 @@ You're ready to explore AgentSystems.<br><br>
     disableBodyScroll: true,
 
     // Callbacks
-    onHighlighted: (element: Element | undefined) => {
+    onHighlighted: (element: Element | undefined, step: DriveStep) => {
+      // Inject styles if not already done
+      injectTourInteractionStyles()
+
       // Check if element exists (first step may not have an element)
       if (element) {
         // Add custom highlighting for better visibility
         (element as HTMLElement).style.position = 'relative';
         (element as HTMLElement).style.zIndex = '10001'
+
+        // Check if this step shows the 'next' button
+        const buttonsShown = step?.popover?.showButtons || ['next', 'previous', 'close']
+        const showsNextButton = buttonsShown.includes('next')
+
+        // If next button is NOT shown, user needs to click the element, so DON'T prevent interaction
+        // If next button IS shown, prevent interaction with the element
+        if (showsNextButton) {
+          (element as HTMLElement).classList.add('tour-no-interaction')
+        }
       }
 
       // Prevent all scrolling during tour
@@ -603,7 +696,9 @@ You're ready to explore AgentSystems.<br><br>
       // Reset any custom styling
       if (element) {
         (element as HTMLElement).style.position = '';
-        (element as HTMLElement).style.zIndex = ''
+        (element as HTMLElement).style.zIndex = '';
+        // Remove interaction prevention class
+        (element as HTMLElement).classList.remove('tour-no-interaction')
       }
     },
 
@@ -633,6 +728,9 @@ You're ready to explore AgentSystems.<br><br>
 
   const startExecutionFirstTour = useCallback(async () => {
     console.log('Tour: startExecutionFirstTour called')
+
+    // Inject tour styles immediately
+    injectTourInteractionStyles()
 
     // Save current theme and force light theme for best tour experience
     const themeStore = useThemeStore.getState()
