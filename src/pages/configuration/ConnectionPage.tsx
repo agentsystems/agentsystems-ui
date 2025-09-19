@@ -11,7 +11,9 @@ import {
   CheckIcon,
   LinkIcon,
   ChevronLeftIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  EyeIcon,
+  EyeSlashIcon
 } from '@heroicons/react/24/outline'
 import styles from './ConnectionPage.module.css'
 
@@ -23,6 +25,7 @@ export default function ConnectionPage() {
   const [localToken, setLocalToken] = useState(token || '')
   const [localGatewayUrl, setLocalGatewayUrl] = useState(gatewayUrl)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showToken, setShowToken] = useState(false)
 
   const handleSave = () => {
     playClickSound()
@@ -189,30 +192,51 @@ export default function ConnectionPage() {
 
           <div className={styles.formGroup}>
             <label htmlFor="auth-token">Auth Token</label>
-            <input
-              id="auth-token"
-              type="password"
-              value={localToken}
-              onChange={(e) => {
-                setLocalToken(e.target.value)
-                if (errors.token) {
-                  setErrors(prev => ({ ...prev, token: '' }))
-                }
-              }}
-              className={`${styles.input} ${errors.token ? styles.inputError : ''}`}
-              aria-describedby="auth-token-hint auth-token-error"
-              aria-invalid={!!errors.token}
-              placeholder="Enter your auth token"
-              required
-            />
+            <div className={styles.inputGroup}>
+              <input
+                id="auth-token"
+                type={showToken ? "text" : "password"}
+                value={localToken}
+                onChange={(e) => {
+                  setLocalToken(e.target.value)
+                  if (errors.token) {
+                    setErrors(prev => ({ ...prev, token: '' }))
+                  }
+                }}
+                className={`${styles.input} ${errors.token ? styles.inputError : ''}`}
+                aria-describedby="auth-token-hint auth-token-error"
+                aria-invalid={!!errors.token}
+                placeholder="Enter your auth token"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound()
+                  setShowToken(!showToken)
+                }}
+                className={styles.toggleButton}
+                aria-label={showToken ? "Hide token" : "Show token"}
+                title={showToken ? "Hide token" : "Show token"}
+              >
+                {showToken ? <EyeSlashIcon /> : <EyeIcon />}
+              </button>
+            </div>
             {errors.token && (
               <span className={styles.errorText} id="auth-token-error" role="alert">
                 {errors.token}
               </span>
             )}
-            <span className={styles.hint} id="auth-token-hint">
-              Bearer token for authentication. Default demo token provided - please change for production use.
-            </span>
+            {localToken === 'demo-token-please-change' ? (
+              <div className={styles.warningHint} id="auth-token-hint">
+                <ExclamationTriangleIcon style={{ width: '1.1rem', height: '1.1rem', flexShrink: 0 }} />
+                <span>Using demo token. Please replace with a new token.</span>
+              </div>
+            ) : (
+              <span className={styles.hint} id="auth-token-hint">
+                Bearer token for authentication.
+              </span>
+            )}
           </div>
 
           <div className={styles.formActions}>
