@@ -507,7 +507,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="credentials-card"]',
       popover: {
         title: 'Credentials Management 🔑',
-        description: `Store API keys and authentication tokens securely.<br><br>
+        description: `Store API keys and authentication tokens.<br><br>
 Credentials are:<br>
 • Stored as environment variables<br>
 • Isolated from your codebase<br>
