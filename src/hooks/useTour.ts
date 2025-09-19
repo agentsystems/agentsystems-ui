@@ -125,7 +125,7 @@ We'll restore ${originalTheme} theme when done.`,
     // Step 1 (or 2): Welcome Modal (free-floating)
     {
       popover: {
-        title: 'Welcome to AI Sovereignty! 🎉',
+        title: 'Welcome to AI Sovereignty 🎉',
         description: `You now have a complete AI agent platform running on your local machine.<br><br>This quick tour will show you how to execute AI agents locally.`,
         side: 'top',
         align: 'center'
@@ -137,7 +137,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="dashboard-header"]',
       popover: {
         title: 'Your Command Center 📊',
-        description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents</strong> - Active containers and their status<br>• <strong>Recent Executions</strong> - Latest agent activity<br>• <strong>System Health</strong> - Resource usage and performance<br><br>Designed to run locally on your infrastructure.',
+        description: 'This dashboard provides real-time visibility into your AI infrastructure:<br><br>• <strong>Running Agents:</strong> Active containers and their status<br>• <strong>Recent Executions:</strong> Latest agent activity<br>• <strong>System Health:</strong> Resource usage and performance<br><br>Designed to run locally on your infrastructure.',
         side: 'bottom',
         align: 'start'
       }
@@ -148,7 +148,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="agents-nav"]',
       popover: {
         title: 'Your Agent Library',
-        description: 'Click the <strong>Agents</strong> link to view your agent library.<br><br>We\'ve pre-installed a hello-world-agent to demonstrate the platform.',
+        description: 'Click the <strong>Agents</strong> link to view your agent library.<br><br>We\'ve pre-installed a hello-world-agent to demonstrate the platform.<br><br><strong>Click "Agents" to continue.</strong>',
         side: 'right',
         align: 'start',
         disableButtons: ['next']
@@ -179,7 +179,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="hello-world-agent-card"]',
       popover: {
         title: 'Your First Agent',
-        description: 'The <strong>hello-world-agent</strong> demonstrates how agents run in isolated containers.<br><br>Click the card to view agent details.',
+        description: 'The <strong>hello-world-agent</strong> demonstrates how agents run in isolated containers.<br><br><strong>Click the agent card to continue.</strong>',
         side: 'top',
         align: 'start',
         disableButtons: ['next', 'previous']
@@ -218,7 +218,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="start-agent-button"]',
       popover: {
         title: 'Start Your Agent',
-        description: 'Click <strong>Turn On</strong> to start the agent container.<br><br>AgentSystems manages containers on-demand to save resources.',
+        description: 'AgentSystems manages containers on-demand to save resources.<br><br><strong>Click "Turn On" to continue.</strong>',
         side: 'top',
         align: 'start',
         disableButtons: ['next']
@@ -249,7 +249,7 @@ We'll restore ${originalTheme} theme when done.`,
     {
       element: '[data-tour="agent-metadata"]',
       popover: {
-        title: 'Your Agent is Ready! 🤖',
+        title: 'Your Agent is Ready 🤖',
         description: 'The agent has started and reported its metadata.<br><br>Key information:<br>• <strong>Status:</strong> Running in container<br>• <strong>Model:</strong> Local AI model configured<br>• <strong>Version:</strong> Agent version and capabilities<br><br>Processing is designed for local infrastructure.',
         side: 'top',
         align: 'start'
@@ -261,7 +261,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="execute-agent-button"]',
       popover: {
         title: 'Execute Your Agent Locally',
-        description: 'Click <strong>Execute</strong> to send a sample request to the agent.<br><br>The agent will process this request using your local compute resources.',
+        description: 'The agent will process this request using your local compute resources.<br><br><strong>Click "Execute" to continue.</strong>',
         side: 'top',
         align: 'start',
         disableButtons: ['next']
@@ -347,7 +347,7 @@ We'll restore ${originalTheme} theme when done.`,
     {
       element: '[data-tour="execution-results"]',
       popover: {
-        title: 'Success! 🎉',
+        title: 'Success 🎉',
         description: 'Your agent has completed the request.<br><br>The response shows the AI-generated output from your local infrastructure.',
         side: 'top',
         align: 'start'
@@ -359,7 +359,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="execution-row-first"]',
       popover: {
         title: 'Execution History 📋',
-        description: 'Your execution appears in the history table.<br><br>Click the row to view detailed results and artifacts.',
+        description: 'Your execution appears in the history table.<br><br><strong>Click the execution row to continue.</strong>',
         side: 'top',
         align: 'start',
         disableButtons: ['next']
@@ -416,7 +416,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="artifacts-tab"]',
       popover: {
         title: 'Agent Artifacts 📁',
-        description: 'Click <strong>Artifacts</strong> to view files generated by your agent.<br><br>All outputs are stored locally and can be downloaded.',
+        description: 'View files generated by your agent. All outputs are stored locally and can be downloaded.<br><br><strong>Click "Artifacts" to continue.</strong>',
         side: 'top',
         align: 'start',
         disableButtons: ['next']
@@ -457,7 +457,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="settings-nav"]',
       popover: {
         title: 'Configuration Center',
-        description: 'The Configuration page manages connections and credentials.<br><br>Click <strong>Configuration</strong> to explore these settings.',
+        description: 'The Configuration page manages connections and credentials.<br><br><strong>Click "Configuration" to continue.</strong>',
         side: 'right',
         align: 'start',
         disableButtons: ['next']
@@ -498,10 +498,10 @@ ANTHROPIC_API_KEY=sk-ant-...</pre>`,
         title: 'Container Registry Access 📦',
         description: `Connect to container registries to access agent images.<br><br>
 Supported registries:<br>
-• Docker Hub for public agents<br>
-• Private registries for proprietary agents<br>
-• Enterprise platforms (Harbor, ECR, ACR)<br>
-• Multiple simultaneous connections`,
+• <strong>Docker Hub:</strong> Public agent images<br>
+• <strong>Private registries:</strong> Proprietary agent images<br>
+• <strong>Enterprise platforms:</strong> Harbor, ECR, ACR support<br>
+• <strong>Multi-registry:</strong> Connect to multiple sources`,
         side: 'top',
         align: 'start'
       }
@@ -530,10 +530,10 @@ Supported providers:<br>
         title: 'Agent Deployments 🚀',
         description: `Define and deploy your agent configurations.<br><br>
 Each deployment specifies:<br>
-• Container image and version<br>
-• Source registry selection<br>
-• Runtime parameters and labels<br>
-• Resource requirements and limits`,
+• <strong>Image:</strong> Container and version to deploy<br>
+• <strong>Registry:</strong> Source for pulling images<br>
+• <strong>Parameters:</strong> Runtime configuration and labels<br>
+• <strong>Resources:</strong> Requirements and limits`,
         side: 'top',
         align: 'start'
       }
@@ -543,8 +543,8 @@ Each deployment specifies:<br>
     {
       element: '[data-tour="hub-nav"]',
       popover: {
-        title: 'Agent Hub 🛍️',
-        description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• Pre-built agents for common tasks<br>• Community-contributed solutions<br>• Enterprise agent templates<br>• One-click deployments',
+        title: 'Agent Hub 🌐',
+        description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• <strong>Pre-built agents:</strong> Common tasks ready to use<br>• <strong>Community solutions:</strong> Contributed by developers<br>• <strong>Enterprise templates:</strong> Production-ready agents<br>• <strong>One-click deployment:</strong> Easy installation',
         side: 'right',
         align: 'start'
       },
@@ -566,7 +566,7 @@ Each deployment specifies:<br>
       element: '[data-tour="support-nav"]',
       popover: {
         title: 'Help & Documentation 💬',
-        description: 'Get help whenever you need it.<br><br>The <strong>Support</strong> page provides:<br>• Documentation and guides<br>• Troubleshooting resources<br>• Community forums<br>• <strong>Restart this tour anytime</strong>',
+        description: 'Get help whenever you need it.<br><br>The <strong>Support</strong> page provides:<br>• <strong>Documentation:</strong> Guides and references<br>• <strong>Troubleshooting:</strong> Common issues and solutions<br>• <strong>Community:</strong> Forums and discussions<br>• <strong>Tour restart:</strong> Access this tour anytime',
         side: 'right',
         align: 'start'
       },
@@ -586,7 +586,7 @@ Each deployment specifies:<br>
     // Step 21: Tour Complete
     {
       popover: {
-        title: 'Congratulations! 🎉',
+        title: 'Congratulations 🎉',
         description: `You've completed the tour!<br><br>
 <strong>You successfully:</strong><br>
 ✅ Executed an AI agent locally<br>
