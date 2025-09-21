@@ -633,7 +633,7 @@ export default function Executions() {
                   <div className={styles.tabHeader}>
                     <h3 className={styles.tabHeading}>Execution Artifacts</h3>
                     <a
-                      href="https://docs.agentsystems.ai/user-guide/working-with-files"
+                      href="https://docs.agentsystems.ai/user-guide/artifacts"
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.docsLink}
