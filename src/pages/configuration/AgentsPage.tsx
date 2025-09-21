@@ -12,7 +12,8 @@ import {
   TrashIcon,
   CheckIcon,
   XMarkIcon,
-  ChevronLeftIcon
+  ChevronLeftIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 import styles from './AgentsPage.module.css'
 
@@ -168,6 +169,16 @@ export default function AgentsPage() {
           <h1>Agents</h1>
           <p>Configure agent deployments using your registry connections</p>
         </div>
+        <a
+          href="https://docs.agentsystems.ai/configuration/agents"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.docsLink}
+          title="View documentation"
+        >
+          <QuestionMarkCircleIcon className={styles.docsIcon} />
+          <span>View Docs</span>
+        </a>
       </div>
 
       {/* Add/Edit Form */}

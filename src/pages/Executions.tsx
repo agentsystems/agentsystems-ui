@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, ArrowPathIcon, XMarkIcon, CalendarIcon, DocumentIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckIcon, ShieldCheckIcon, ShieldExclamationIcon, ArrowPathIcon, XMarkIcon, CalendarIcon, DocumentIcon, EyeIcon, ArrowDownTrayIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { apiClient } from '@api/client'
 import type { AuditEntry } from '../types/api'
@@ -542,7 +542,9 @@ export default function Executions() {
               {/* Tab Content */}
               {activeTab === 'overview' && (
                 <div className={styles.tabContent}>
-                  <h3 className={styles.tabHeading}>Execution Overview</h3>
+                  <div className={styles.tabHeader}>
+                    <h3 className={styles.tabHeading}>Execution Overview</h3>
+                  </div>
                   <div className={styles.detailGrid}>
                     <div className={styles.detailItem}>
                       <label>Thread ID</label>
@@ -628,7 +630,19 @@ export default function Executions() {
 
               {activeTab === 'artifacts' && (
                 <div className={styles.tabContent} data-tour="artifacts-panel">
-                  <h3 className={styles.tabHeading}>Execution Artifacts</h3>
+                  <div className={styles.tabHeader}>
+                    <h3 className={styles.tabHeading}>Execution Artifacts</h3>
+                    <a
+                      href="https://docs.agentsystems.ai/user-guide/artifacts"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.docsLink}
+                      title="View documentation"
+                    >
+                      <QuestionMarkCircleIcon className={styles.docsIcon} />
+                      <span>View Docs</span>
+                    </a>
+                  </div>
                   {artifactsData && (artifactsData.input_files.length > 0 || artifactsData.output_files.length > 0) ? (
                     <div className={styles.detailGrid}>
                       <div className={styles.detailItem}>
@@ -718,7 +732,9 @@ export default function Executions() {
 
               {activeTab === 'data' && (
                 <div className={styles.tabContent}>
-                  <h3 className={styles.tabHeading}>Execution Data</h3>
+                  <div className={styles.tabHeader}>
+                    <h3 className={styles.tabHeading}>Execution Data</h3>
+                  </div>
                   <div className={styles.detailGrid}>
                     {!!selectedExecution.payload && (
                       <div className={styles.detailItem} data-content-type="payload">
@@ -793,7 +809,19 @@ export default function Executions() {
 
               {activeTab === 'audit' && (
                 <div className={styles.tabContent}>
-                  <h3 className={styles.tabHeading}>Audit Trail</h3>
+                  <div className={styles.tabHeader}>
+                    <h3 className={styles.tabHeading}>Audit Trail</h3>
+                    <a
+                      href="https://docs.agentsystems.ai/user-guide/audit-logs"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.docsLink}
+                      title="View documentation"
+                    >
+                      <QuestionMarkCircleIcon className={styles.docsIcon} />
+                      <span>View Docs</span>
+                    </a>
+                  </div>
                   <div className={styles.auditSection}>
                     {/* All detail items in a single detailGrid for consistent spacing */}
                     <div className={styles.detailGrid}>

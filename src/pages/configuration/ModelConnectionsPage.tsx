@@ -13,7 +13,8 @@ import { ModelConnectionForm } from '../../types/config'
 import {
   ChevronLeftIcon,
   PlusIcon,
-  CpuChipIcon
+  CpuChipIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 import styles from './ModelConnectionsPage.module.css'
 
@@ -78,6 +79,16 @@ export default function ModelConnectionsPage() {
           <h1>Model Connections</h1>
           <p>Configure connections to LLM providers for agent routing</p>
         </div>
+        <a
+          href="https://docs.agentsystems.ai/configuration/model-connections"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.docsLink}
+          title="View documentation"
+        >
+          <QuestionMarkCircleIcon className={styles.docsIcon} />
+          <span>View Docs</span>
+        </a>
       </div>
 
       {/* Add/Edit Form */}
