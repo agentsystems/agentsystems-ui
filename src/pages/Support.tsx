@@ -96,7 +96,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://discord.gg/agentsystems')}
+              onClick={() => handleExternalLink('https://discord.gg/bXgbDNpj')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Discord Community
@@ -111,12 +111,12 @@ export default function Support() {
                 <p>Contact our team directly for urgent issues</p>
               </div>
             </div>
-            <button 
+            <button
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/?from=direct-support#talk-with-us')}
             >
               <LinkIcon className={styles.buttonIcon} />
-              contact@agentsystems.ai
+              Contact Us
             </button>
           </Card>
         </section>
@@ -138,27 +138,10 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.mintlify.app/quickstart')}
+              onClick={() => handleExternalLink('https://docs.agentsystems.ai/getting-started/quickstart')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Quick Start
-            </button>
-          </Card>
-
-          <Card className={styles.resourceCard}>
-            <div className={styles.resourceHeader}>
-              <CodeBracketIcon className={styles.resourceIcon} />
-              <div>
-                <h3>API Documentation</h3>
-                <p>Complete API reference and examples</p>
-              </div>
-            </div>
-            <button 
-              className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.mintlify.app/api-reference')}
-            >
-              <LinkIcon className={styles.buttonIcon} />
-              API Docs
             </button>
           </Card>
 
@@ -172,7 +155,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.mintlify.app/troubleshooting')}
+              onClick={() => handleExternalLink('https://docs.agentsystems.ai/user-guide/troubleshooting')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Troubleshooting
@@ -183,16 +166,16 @@ export default function Support() {
             <div className={styles.resourceHeader}>
               <AcademicCapIcon className={styles.resourceIcon} />
               <div>
-                <h3>Agent Development Guide</h3>
-                <p>Learn to build and publish your own agents</p>
+                <h3>Agent Deployment Guide</h3>
+                <p>Learn to deploy and publish your own agents</p>
               </div>
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.mintlify.app/guides/add-agent')}
+              onClick={() => handleExternalLink('https://docs.agentsystems.ai/deploy-agents/quickstart')}
             >
               <LinkIcon className={styles.buttonIcon} />
-              Development Guide
+              Deployment Guide
             </button>
           </Card>
         </section>
@@ -212,9 +195,9 @@ export default function Support() {
                 <p>Need a specific workflow agent for your industry?</p>
               </div>
             </div>
-            <button 
+            <button
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/?from=custom-agent#talk-with-us')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Request Agent
@@ -240,23 +223,6 @@ export default function Support() {
 
           <Card className={styles.resourceCard}>
             <div className={styles.resourceHeader}>
-              <HeartIcon className={styles.resourceIcon} />
-              <div>
-                <h3>Become a Sponsor</h3>
-                <p>Support the development of open agent infrastructure</p>
-              </div>
-            </div>
-            <button 
-              className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://github.com/sponsors/agentsystems')}
-            >
-              <LinkIcon className={styles.buttonIcon} />
-              GitHub Sponsors
-            </button>
-          </Card>
-
-          <Card className={styles.resourceCard}>
-            <div className={styles.resourceHeader}>
               <UserGroupIcon className={styles.resourceIcon} />
               <div>
                 <h3>Join Beta Program</h3>
@@ -265,7 +231,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/beta')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/?from=beta-program#talk-with-us')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Beta Program
@@ -288,9 +254,9 @@ export default function Support() {
                 <p>Priority support, SLAs, and custom deployment assistance</p>
               </div>
             </div>
-            <button 
+            <button
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/?from=enterprise-support#talk-with-us')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Contact Enterprise
@@ -305,9 +271,9 @@ export default function Support() {
                 <p>Professional services for custom workflow automation</p>
               </div>
             </div>
-            <button 
+            <button
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/?from=custom-development#talk-with-us')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Custom Development
@@ -324,7 +290,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('mailto:training@agentsystems.ai')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/?from=training-consulting#talk-with-us')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Training Services
@@ -341,56 +307,13 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/partners')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/?from=partner-program#talk-with-us')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Partner Program
             </button>
           </Card>
         </section>
-      </div>
-
-      {/* Platform Status Footer */}
-      <div className={styles.statusFooter}>
-        <Card className={styles.statusCard}>
-          <h3>Platform Status</h3>
-          <div className={styles.statusGrid}>
-            <div className={styles.statusItem}>
-              <div className={styles.statusIndicator} data-status="operational"></div>
-              <span>Gateway Services</span>
-              <span className={styles.statusText}>Operational</span>
-            </div>
-            <div className={styles.statusItem}>
-              <div className={styles.statusIndicator} data-status="operational"></div>
-              <span>Agent Discovery</span>
-              <span className={styles.statusText}>Operational</span>
-            </div>
-            <div className={styles.statusItem}>
-              <div className={styles.statusIndicator} data-status="operational"></div>
-              <span>Audit System</span>
-              <span className={styles.statusText}>Operational</span>
-            </div>
-            <div className={styles.statusItem}>
-              <div className={styles.statusIndicator} data-status="beta"></div>
-              <span>Marketplace</span>
-              <span className={styles.statusText}>Beta Preview</span>
-            </div>
-          </div>
-          <div className={styles.statusFooterLinks}>
-            <button 
-              className={styles.statusLink}
-              onClick={() => handleExternalLink('https://status.agentsystems.ai')}
-            >
-              Detailed Status Page
-            </button>
-            <button 
-              className={styles.statusLink}
-              onClick={() => handleExternalLink('https://github.com/agentsystems/agentsystems/releases')}
-            >
-              Release Notes
-            </button>
-          </div>
-        </Card>
       </div>
 
       {/* Beta Feedback Banner */}
@@ -400,9 +323,9 @@ export default function Support() {
             <h3>🚧 Beta Testing Feedback</h3>
             <p>Your feedback helps shape the future of AgentSystems. Share your experience, report issues, and suggest improvements.</p>
           </div>
-          <button 
+          <button
             className={styles.feedbackButton}
-            onClick={() => handleExternalLink('mailto:contact@agentsystems.ai')}
+            onClick={() => handleExternalLink('https://agentsystems.ai/?from=beta-feedback#talk-with-us')}
           >
             Provide Feedback
           </button>
