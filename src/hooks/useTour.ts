@@ -432,7 +432,7 @@ We'll restore ${originalTheme} theme when done.`,
       element: '[data-tour="execution-detail-panel"]',
       popover: {
         title: 'Execution Details 📊',
-        description: 'View complete execution information including inputs, outputs, and status.<br><br>The <strong>Audit</strong> tab provides detailed logs for debugging.',
+        description: 'View complete execution information including inputs, outputs, and status.<br><br>The <strong>Audit</strong> tab shows hash-chained records designed to help detect tampering.',
         side: 'top',
         align: 'start',
         showButtons: ['next', 'close']  // Hide Back button on execution details
