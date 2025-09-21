@@ -13,7 +13,8 @@ import {
   TrashIcon,
   KeyIcon,
   ExclamationTriangleIcon,
-  ChevronLeftIcon
+  ChevronLeftIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 import styles from './CredentialsPage.module.css'
 
@@ -173,6 +174,16 @@ export default function CredentialsPage() {
           <h1>Credentials</h1>
           <p>Manage credentials and environment variables for registry connections</p>
         </div>
+        <a
+          href="https://docs.agentsystems.ai/configuration/credentials"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.docsLink}
+          title="View documentation"
+        >
+          <QuestionMarkCircleIcon className={styles.docsIcon} />
+          <span>View Docs</span>
+        </a>
       </div>
 
       {/* Add/Edit Form */}

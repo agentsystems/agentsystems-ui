@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { MagnifyingGlassIcon, StarIcon, ShieldCheckIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, StarIcon, ShieldCheckIcon, PlusIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid'
 import Card from '@components/common/Card'
 import { 
@@ -97,10 +97,22 @@ export default function Marketplace() {
   return (
     <div className={styles.marketplace}>
       <div className={styles.header}>
-        <h1>Agent Hub</h1>
-        <p className={styles.subtitle}>
-          Discover and deploy workflow automation agents for business, personal, and regulated industries
-        </p>
+        <div>
+          <h1>Agent Hub</h1>
+          <p className={styles.subtitle}>
+            Discover and deploy workflow automation agents for business, personal, and regulated industries
+          </p>
+        </div>
+        <a
+          href="https://docs.agentsystems.ai/user-guide/agent-hub"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.docsLink}
+          title="View documentation"
+        >
+          <QuestionMarkCircleIcon className={styles.docsIcon} />
+          <span>View Docs</span>
+        </a>
       </div>
       
       <div className={styles.betaBanner}>

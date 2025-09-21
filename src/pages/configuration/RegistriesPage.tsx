@@ -12,7 +12,8 @@ import {
   CheckIcon,
   XMarkIcon,
   ChevronLeftIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 import styles from './RegistriesPage.module.css'
 
@@ -173,6 +174,16 @@ export default function RegistriesPage() {
           <h1>Registry Connections</h1>
           <p>Configure connections to Docker registries for agent deployment</p>
         </div>
+        <a
+          href="https://docs.agentsystems.ai/configuration/registry-connections"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.docsLink}
+          title="View documentation"
+        >
+          <QuestionMarkCircleIcon className={styles.docsIcon} />
+          <span>View Docs</span>
+        </a>
       </div>
 
       {/* Add/Edit Form */}

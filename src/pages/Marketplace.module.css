@@ -8,6 +8,9 @@
 /* Header Section */
 .header {
   margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .header h1 {
@@ -22,6 +25,30 @@
   color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.5;
+}
+
+.docsLink {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.docsLink:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.docsIcon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .betaBanner {
