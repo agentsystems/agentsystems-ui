@@ -18,7 +18,8 @@ import {
   ExclamationTriangleIcon,
   XCircleIcon,
   ChevronRightIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 import styles from './ConfigurationOverview.module.css'
 
@@ -175,12 +176,26 @@ export default function ConfigurationOverview() {
     <div className={styles.configurationOverview}>
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <h1>Configuration</h1>
-          <p className={styles.subtitle}>
-            Manage all platform settings and connections
-          </p>
+          <div className={styles.titleRow}>
+            <div>
+              <h1>Configuration</h1>
+              <p className={styles.subtitle}>
+                Manage all platform settings and connections
+              </p>
+            </div>
+            <a
+              href="https://docs.agentsystems.ai/configuration"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.docsLink}
+              title="View documentation"
+            >
+              <QuestionMarkCircleIcon className={styles.docsIcon} />
+              <span>View Docs</span>
+            </a>
+          </div>
         </div>
-        
+
         {lastSaved && (
           <div className={styles.lastSaved}>
             Last updated: {lastSaved instanceof Date ? lastSaved.toLocaleString() : new Date(lastSaved).toLocaleString()}
