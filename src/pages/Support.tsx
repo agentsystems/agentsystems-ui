@@ -113,7 +113,7 @@ export default function Support() {
             </div>
             <button
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/?from=direct-support#talk-with-us')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/contact.html?inquiry=direct-support')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Contact Us
@@ -197,7 +197,7 @@ export default function Support() {
             </div>
             <button
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/?from=custom-agent#talk-with-us')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/contact.html?inquiry=custom-agent')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Request Agent
@@ -231,7 +231,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/?from=beta-program#talk-with-us')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/contact.html?inquiry=beta-program')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Beta Program
@@ -256,7 +256,7 @@ export default function Support() {
             </div>
             <button
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/?from=enterprise-support#talk-with-us')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/contact.html?inquiry=enterprise-support')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Contact Enterprise
@@ -273,7 +273,7 @@ export default function Support() {
             </div>
             <button
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/?from=custom-development#talk-with-us')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/contact.html?inquiry=custom-development')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Custom Development
@@ -290,7 +290,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/?from=training-consulting#talk-with-us')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/contact.html?inquiry=training-consulting')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Training Services
@@ -307,7 +307,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://agentsystems.ai/?from=partner-program#talk-with-us')}
+              onClick={() => handleExternalLink('https://agentsystems.ai/contact.html?inquiry=partner-program')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Partner Program
@@ -325,7 +325,7 @@ export default function Support() {
           </div>
           <button
             className={styles.feedbackButton}
-            onClick={() => handleExternalLink('https://agentsystems.ai/?from=beta-feedback#talk-with-us')}
+            onClick={() => handleExternalLink('https://agentsystems.ai/contact.html?inquiry=beta-feedback')}
           >
             Provide Feedback
           </button>
