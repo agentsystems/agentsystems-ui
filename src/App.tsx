@@ -77,7 +77,7 @@ function App() {
                 <AgentDetail />
               </Suspense>
             } />
-            <Route path="hub" element={
+            <Route path="ecosystem" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <Marketplace />
               </Suspense>

@@ -38,7 +38,7 @@ const navigationSections: NavigationSection[] = [
   {
     title: 'Platform',
     items: [
-      { name: 'Agent Hub', href: '/hub', icon: RectangleStackIcon, badge: 'BETA' },
+      { name: 'Agent Ecosystem', href: '/ecosystem', icon: RectangleStackIcon, badge: 'BETA' },
       { name: 'Configuration', href: ROUTES.CONFIGURATION, icon: WrenchScrewdriverIcon },
       { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
       { name: 'Support', href: '/support', icon: QuestionMarkCircleIcon },
@@ -77,7 +77,7 @@ export default function Sidebar() {
                 data-tour={
                   item.name.toLowerCase() === 'agents' ? 'agents-nav' :
                   item.name.toLowerCase() === 'configuration' ? 'settings-nav' :
-                  item.name.toLowerCase() === 'agent hub' ? 'hub-nav' :
+                  item.name.toLowerCase() === 'agent ecosystem' ? 'hub-nav' :
                   item.name.toLowerCase() === 'support' ? 'support-nav' :
                   undefined
                 }

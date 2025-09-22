@@ -91,14 +91,14 @@ export default function Marketplace() {
 
   const handleAddToDeployment = (agent: MarketplaceAgent) => {
     // TODO: Integrate with actual deployment configuration
-    alert(`Agent Hub is currently in beta - this is a demonstration of the planned Agent Hub feature. ${agent.displayName} is not actually being deployed to your platform.`)
+    alert(`Agent Ecosystem is currently in beta - this is a demonstration of the planned Agent Ecosystem feature. ${agent.displayName} is not actually being deployed to your platform.`)
   }
 
   return (
     <div className={styles.marketplace}>
       <div className={styles.header}>
         <div>
-          <h1>Agent Hub</h1>
+          <h1>Agent Ecosystem</h1>
           <p className={styles.subtitle}>
             Discover and deploy workflow automation agents for business, personal, and regulated industries
           </p>
@@ -116,8 +116,8 @@ export default function Marketplace() {
       </div>
       
       <div className={styles.betaBanner}>
-        🚧 <strong>Beta Preview:</strong> Agent Hub showcasing the future of open agent infrastructure. 
-        Discover professional workflow automation - most agents are free and open source.
+        🚧 <strong>Beta Preview:</strong> Agent Ecosystem showcasing the future of open agent infrastructure.
+        Explore agents for business, development, and personal use - many are free and open source.
       </div>
 
       {/* Search and Filters */}
