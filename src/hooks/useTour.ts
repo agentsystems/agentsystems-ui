@@ -2,7 +2,7 @@
  * Tour management hook using Driver.js for onboarding
  * 
  * Provides execution-first tour for new users to demonstrate
- * AI sovereignty and platform capabilities
+ * the open platform for AI agents
  */
 
 import { useCallback } from 'react'
@@ -149,8 +149,8 @@ We'll restore ${originalTheme} theme when done.`,
     // Step 1 (or 2): Welcome Modal (free-floating)
     {
       popover: {
-        title: 'Welcome to AI Sovereignty 🎉',
-        description: `You now have a complete AI agent platform running on your local machine.<br><br>This quick tour will show you how to execute AI agents locally.`,
+        title: 'Welcome to AgentSystems 🎉',
+        description: `You now have the open platform for AI agents running on your infrastructure.<br><br>This quick tour will show you how to execute AI agents.`,
         side: 'top',
         align: 'center',
         showButtons: ['next', 'close']  // Hide Back button on welcome step
@@ -568,12 +568,12 @@ Each deployment specifies:<br>
       }
     },
 
-    // Step 19: Agent Hub
+    // Step 19: Agent Ecosystem
     {
       element: '[data-tour="hub-nav"]',
       popover: {
-        title: 'Agent Hub 🌐',
-        description: 'Discover and install new AI agents from the community.<br><br>The <strong>Agent Hub</strong> provides:<br>• <strong>Pre-built agents:</strong> Common tasks ready to use<br>• <strong>Community solutions:</strong> Contributed by developers<br>• <strong>Enterprise templates:</strong> Production-ready agents<br>• <strong>One-click deployment:</strong> Easy installation',
+        title: 'Agent Ecosystem 🌐',
+        description: 'Discover and install community and commercial AI agents.<br><br>The <strong>Agent Ecosystem</strong> provides:<br>• <strong>Pre-built agents:</strong> Common tasks ready to use<br>• <strong>Community solutions:</strong> Contributed by developers<br>• <strong>Enterprise templates:</strong> Production-ready agents<br>• <strong>One-click deployment:</strong> Easy installation',
         side: 'right',
         align: 'start'
       },
@@ -621,9 +621,11 @@ Each deployment specifies:<br>
 ✅ Executed an AI agent locally<br>
 ✅ Viewed execution results and artifacts<br>
 ✅ Explored configuration options<br><br>
-You're ready to explore AgentSystems.<br><br>
-<strong>Ready to build something amazing?</strong><br><br>
-<a href="https://agentsystems.mintlify.app/overview" target="_blank" style="color: var(--accent); text-decoration: underline;">Explore the Docs →</a>`,
+You're ready to start using AgentSystems!<br><br>
+<strong>What's next?</strong><br>
+• Run agents from your library<br>
+• Try different model providers<br>
+• Build and run your own custom agents`,
         side: 'top',
         align: 'center',
         showButtons: ['close']
