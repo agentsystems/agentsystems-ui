@@ -2,7 +2,7 @@
  * Tour management hook using Driver.js for onboarding
  * 
  * Provides execution-first tour for new users to demonstrate
- * AI sovereignty and platform capabilities
+ * the open platform for AI agents
  */
 
 import { useCallback } from 'react'
@@ -149,8 +149,8 @@ We'll restore ${originalTheme} theme when done.`,
     // Step 1 (or 2): Welcome Modal (free-floating)
     {
       popover: {
-        title: 'Welcome to AI Sovereignty 🎉',
-        description: `You now have a complete AI agent platform running on your local machine.<br><br>This quick tour will show you how to execute AI agents locally.`,
+        title: 'Welcome to AgentSystems 🎉',
+        description: `You now have the open platform for AI agents running on your infrastructure.<br><br>This quick tour will show you how to execute AI agents.`,
         side: 'top',
         align: 'center',
         showButtons: ['next', 'close']  // Hide Back button on welcome step
