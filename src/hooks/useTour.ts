@@ -2,7 +2,7 @@
  * Tour management hook using Driver.js for onboarding
  * 
  * Provides execution-first tour for new users to demonstrate
- * the open platform for AI agents
+ * The open runtime for AI agents, built with zero-trust principles
  */
 
 import { useCallback } from 'react'
@@ -150,7 +150,7 @@ We'll restore ${originalTheme} theme when done.`,
     {
       popover: {
         title: 'Welcome to AgentSystems 🎉',
-        description: `You now have the open platform for AI agents running on your infrastructure.<br><br>This quick tour will show you how to execute AI agents.`,
+        description: `Run AI agents on YOUR infrastructure—bring agents to your data, not your data to agents.<br><br>This quick tour will show you how to execute AI agents locally.`,
         side: 'top',
         align: 'center',
         showButtons: ['next', 'close']  // Hide Back button on welcome step
