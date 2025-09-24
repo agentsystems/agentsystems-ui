@@ -114,7 +114,7 @@ export default function SplashScreen() {
             alt="AgentSystems"
             className={styles.logoIcon}
           />
-          <div className={styles.tagline}>The Open Platform for AI Agents</div>
+          <div className={styles.tagline}>The Open Runtime for AI Agents, Built with Zero-Trust Principles</div>
         </div>
 
         <div className={styles.loader}>
