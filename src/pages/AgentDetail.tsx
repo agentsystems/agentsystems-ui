@@ -397,8 +397,8 @@ export default function AgentDetail() {
                 </div>
               
               <div className={styles.metadataItem}>
-                <label>Namespace</label>
-                <span className={styles.metadataValue}>{metadata.namespace}</span>
+                <label>Developer</label>
+                <span className={styles.metadataValue}>{metadata.developer}</span>
               </div>
               
               <div className={styles.metadataItem}>

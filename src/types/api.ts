@@ -10,7 +10,7 @@ export interface AgentsResponse {
 }
 
 export interface AgentMetadata {
-  namespace: string
+  developer: string
   name: string
   version: string
   description: string
