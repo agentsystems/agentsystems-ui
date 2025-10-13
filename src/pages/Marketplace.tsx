@@ -104,7 +104,7 @@ export default function Marketplace() {
           </p>
         </div>
         <a
-          href="https://docs.agentsystems.ai/user-guide/agent-hub"
+          href="https://docs.agentsystems.ai/user-guide/agent-index"
           target="_blank"
           rel="noopener noreferrer"
           className={styles.docsLink}
