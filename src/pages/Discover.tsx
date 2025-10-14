@@ -1,6 +1,28 @@
 import { useState, useEffect } from 'react'
 import { useConfigStore } from '@stores/configStore'
-import { MagnifyingGlassIcon, GlobeAltIcon, ExclamationTriangleIcon, QuestionMarkCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
+import {
+  MagnifyingGlassIcon,
+  GlobeAltIcon,
+  ExclamationTriangleIcon,
+  QuestionMarkCircleIcon,
+  ArrowLeftIcon,
+  UserIcon,
+  BriefcaseIcon,
+  MapPinIcon,
+  CalendarIcon,
+  ChatBubbleLeftRightIcon,
+  BuildingOfficeIcon,
+  IdentificationIcon,
+  EnvelopeIcon,
+  BookOpenIcon,
+  LightBulbIcon,
+  FolderIcon,
+  HandRaisedIcon,
+  HeartIcon,
+  CpuChipIcon,
+  LinkIcon,
+  UserGroupIcon
+} from '@heroicons/react/24/outline'
 import Card from '@components/common/Card'
 import styles from './Discover.module.css'
 
@@ -632,14 +654,44 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
               {(developer.tagline || developer.bio || developer.developer_type || developer.company || developer.location || developer.years_experience) && (
                 <div className={styles.modalSpecs}>
                   <div className={styles.specGroup}>
-                    <h4>About</h4>
+                    <h4><UserIcon />About</h4>
                     <ul>
-                      {developer.tagline && <li><strong>Tagline:</strong> {developer.tagline}</li>}
-                      {developer.bio && <li><strong>Bio:</strong> {developer.bio}</li>}
-                      {developer.developer_type && <li><strong>Type:</strong> {developer.developer_type}</li>}
-                      {developer.company && <li><strong>Company:</strong> {developer.company}</li>}
-                      {developer.location && <li><strong>Location:</strong> {developer.location}</li>}
-                      {developer.years_experience && <li><strong>Experience:</strong> {developer.years_experience} years</li>}
+                      {developer.tagline && (
+                        <li>
+                          <strong><ChatBubbleLeftRightIcon />Tagline</strong>
+                          <span>{developer.tagline}</span>
+                        </li>
+                      )}
+                      {developer.bio && (
+                        <li>
+                          <strong><IdentificationIcon />Bio</strong>
+                          <span>{developer.bio}</span>
+                        </li>
+                      )}
+                      {developer.developer_type && (
+                        <li>
+                          <strong><BriefcaseIcon />Type</strong>
+                          <span>{developer.developer_type}</span>
+                        </li>
+                      )}
+                      {developer.company && (
+                        <li>
+                          <strong><BuildingOfficeIcon />Company</strong>
+                          <span>{developer.company}</span>
+                        </li>
+                      )}
+                      {developer.location && (
+                        <li>
+                          <strong><MapPinIcon />Location</strong>
+                          <span>{developer.location}</span>
+                        </li>
+                      )}
+                      {developer.years_experience && (
+                        <li>
+                          <strong><CalendarIcon />Experience</strong>
+                          <span>{developer.years_experience} years</span>
+                        </li>
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -649,11 +701,11 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
               {(developer.website || developer.support_email || developer.documentation_url) && (
                 <div className={styles.modalSpecs}>
                   <div className={styles.specGroup}>
-                    <h4>Contact & Links</h4>
+                    <h4><GlobeAltIcon />Contact & Links</h4>
                     <ul>
                       {developer.website && (
                         <li>
-                          <strong>Website:</strong>{' '}
+                          <strong><GlobeAltIcon />Website</strong>
                           <a href={developer.website} target="_blank" rel="noopener noreferrer">
                             {developer.website}
                           </a>
@@ -661,13 +713,13 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
                       )}
                       {developer.support_email && (
                         <li>
-                          <strong>Support:</strong>{' '}
+                          <strong><EnvelopeIcon />Support</strong>
                           <a href={`mailto:${developer.support_email}`}>{developer.support_email}</a>
                         </li>
                       )}
                       {developer.documentation_url && (
                         <li>
-                          <strong>Documentation:</strong>{' '}
+                          <strong><BookOpenIcon />Documentation</strong>
                           <a href={developer.documentation_url} target="_blank" rel="noopener noreferrer">
                             {developer.documentation_url}
                           </a>
@@ -682,11 +734,11 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
               {(developer.github_username || developer.twitter_handle || developer.linkedin_url || developer.discord_username) && (
                 <div className={styles.modalSpecs}>
                   <div className={styles.specGroup}>
-                    <h4>Social</h4>
+                    <h4><UserGroupIcon />Social</h4>
                     <ul>
                       {developer.github_username && (
                         <li>
-                          <strong>GitHub:</strong>{' '}
+                          <strong><LinkIcon />GitHub</strong>
                           <a href={`https://github.com/${developer.github_username}`} target="_blank" rel="noopener noreferrer">
                             @{developer.github_username}
                           </a>
@@ -694,7 +746,7 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
                       )}
                       {developer.twitter_handle && (
                         <li>
-                          <strong>Twitter:</strong>{' '}
+                          <strong><LinkIcon />Twitter</strong>
                           <a href={`https://twitter.com/${developer.twitter_handle}`} target="_blank" rel="noopener noreferrer">
                             @{developer.twitter_handle}
                           </a>
@@ -702,14 +754,17 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
                       )}
                       {developer.linkedin_url && (
                         <li>
-                          <strong>LinkedIn:</strong>{' '}
+                          <strong><LinkIcon />LinkedIn</strong>
                           <a href={developer.linkedin_url} target="_blank" rel="noopener noreferrer">
                             View Profile
                           </a>
                         </li>
                       )}
                       {developer.discord_username && (
-                        <li><strong>Discord:</strong> {developer.discord_username}</li>
+                        <li>
+                          <strong><LinkIcon />Discord</strong>
+                          <span>{developer.discord_username}</span>
+                        </li>
                       )}
                     </ul>
                   </div>
@@ -717,42 +772,61 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
               )}
 
               {/* Professional Section */}
-              {(developer.expertise || developer.featured_work || developer.open_to_collaboration !== null || developer.sponsor_url) && (
+              {(developer.expertise || developer.featured_work || developer.open_to_collaboration || developer.sponsor_url) && (
                 <div className={styles.modalSpecs}>
                   <div className={styles.specGroup}>
-                    <h4>Professional</h4>
-                    <ul>
-                      {developer.expertise && developer.expertise.length > 0 && (
-                        <li>
-                          <strong>Expertise:</strong> {developer.expertise.join(', ')}
-                        </li>
-                      )}
-                      {developer.featured_work && developer.featured_work.length > 0 && (
-                        <li>
-                          <strong>Featured Work:</strong>
-                          <ul className={styles.nestedList}>
-                            {developer.featured_work.map((work, index) => (
-                              <li key={index}>
-                                <a href={work} target="_blank" rel="noopener noreferrer">
-                                  {work}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      )}
-                      {developer.open_to_collaboration && (
-                        <li><strong>Open to Collaboration:</strong> Yes</li>
-                      )}
-                      {developer.sponsor_url && (
-                        <li>
-                          <strong>Sponsor:</strong>{' '}
-                          <a href={developer.sponsor_url} target="_blank" rel="noopener noreferrer">
-                            Support this developer
-                          </a>
-                        </li>
-                      )}
-                    </ul>
+                    <h4><LightBulbIcon />Professional</h4>
+                    {developer.expertise && developer.expertise.length > 0 && (
+                      <div style={{ marginBottom: '1.5rem' }}>
+                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                          <LightBulbIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
+                          Expertise
+                        </strong>
+                        <div className={styles.expertiseBadges}>
+                          {developer.expertise.map((skill, index) => (
+                            <span key={index} className={styles.expertiseBadge}>
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {developer.featured_work && developer.featured_work.length > 0 && (
+                      <div style={{ marginBottom: '1.5rem' }}>
+                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                          <FolderIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
+                          Featured Work
+                        </strong>
+                        <ul className={styles.nestedList}>
+                          {developer.featured_work.map((work, index) => (
+                            <li key={index}>
+                              <a href={work} target="_blank" rel="noopener noreferrer">
+                                {work}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {developer.open_to_collaboration && (
+                      <div style={{ marginBottom: '1.5rem' }}>
+                        <span className={styles.collaborationBadge}>
+                          <HandRaisedIcon style={{ width: '1rem', height: '1rem' }} />
+                          Open to Collaboration
+                        </span>
+                      </div>
+                    )}
+                    {developer.sponsor_url && (
+                      <div style={{ marginBottom: '1.5rem' }}>
+                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                          <HeartIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
+                          Sponsor
+                        </strong>
+                        <a href={developer.sponsor_url} target="_blank" rel="noopener noreferrer">
+                          {developer.sponsor_url}
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -760,7 +834,7 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
               {/* Developer's Agents */}
               <div className={styles.modalSpecs}>
                 <div className={styles.specGroup}>
-                  <h4>Published Agents</h4>
+                  <h4><CpuChipIcon />Published Agents</h4>
                   {agents.length === 0 ? (
                     <p>No agents found for this developer.</p>
                   ) : (
