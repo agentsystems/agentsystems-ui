@@ -106,19 +106,69 @@ export default function Discover() {
   const [isDeveloperLoading, setIsDeveloperLoading] = useState(false)
   const [previousDeveloper, setPreviousDeveloper] = useState<{ info: DeveloperInfo; indexUrl: string } | null>(null)
   const [developerFilter, setDeveloperFilter] = useState<string | null>(null)
-  const [installedAgents, setInstalledAgents] = useState<string[]>([])
+  // Store installed agents as Set of unique identifiers (registry/repo without tag)
+  const [installedAgents, setInstalledAgents] = useState<Set<string>>(new Set())
 
   const indexes = getIndexConnections()
   const enabledIndexes = indexes.filter(idx => idx.enabled)
 
-  // Check which agents are installed
+  // Check which agents are installed by building unique identifiers (registry/repo)
   useEffect(() => {
     const configAgents = getAgents()
-    setInstalledAgents(configAgents.map(a => a.name))
+    const { getRegistryConnections } = useConfigStore.getState()
+    const registries = getRegistryConnections()
+
+    const installedIds = new Set<string>()
+
+    configAgents.forEach(configAgent => {
+      // Find the registry URL for this agent
+      const registry = registries.find(r => r.id === configAgent.registry_connection)
+      if (registry) {
+        // Build unique identifier: registry_url/repo (without tag)
+        const uniqueId = `${registry.url}/${configAgent.repo}`
+        installedIds.add(uniqueId)
+      }
+    })
+
+    setInstalledAgents(installedIds)
   }, [getAgents])
 
-  const isAgentInstalled = (agentName: string) => {
-    return installedAgents.includes(agentName)
+  const isAgentInstalled = (agent: IndexAgent): boolean => {
+    if (!agent.image_repository_url) {
+      return false
+    }
+
+    try {
+      // Parse image URL to get registry and repo
+      const parseImageUrl = (url: string) => {
+        let cleanUrl = url.replace(/^https?:\/\//, '')
+        const parts = cleanUrl.split('/')
+        let registryUrl: string
+        let repoPath: string
+
+        if (parts[0].includes('.') || parts[0].includes(':')) {
+          registryUrl = parts[0]
+          repoPath = parts.slice(1).join('/')
+        } else {
+          registryUrl = 'docker.io'
+          repoPath = cleanUrl
+        }
+
+        // Remove tag if present
+        if (repoPath.includes(':')) {
+          const [path] = repoPath.split(':')
+          repoPath = path
+        }
+
+        return { registryUrl, repoPath }
+      }
+
+      const { registryUrl, repoPath } = parseImageUrl(agent.image_repository_url)
+      const uniqueId = `${registryUrl}/${repoPath}`
+      return installedAgents.has(uniqueId)
+    } catch {
+      return false
+    }
   }
 
   useEffect(() => {
@@ -328,7 +378,16 @@ export default function Discover() {
 
       // Update installed agents list
       const updatedAgents = getAgents()
-      setInstalledAgents(updatedAgents.map(a => a.name))
+      const updatedRegistries = getRegistryConnections()
+      const updatedIds = new Set<string>()
+      updatedAgents.forEach(configAgent => {
+        const registry = updatedRegistries.find(r => r.id === configAgent.registry_connection)
+        if (registry) {
+          const uniqueId = `${registry.url}/${configAgent.repo}`
+          updatedIds.add(uniqueId)
+        }
+      })
+      setInstalledAgents(updatedIds)
 
       alert(`✓ Successfully installed ${agent.name}!\n\nThe agent has been added to your configuration.\n\nRestart AgentSystems to pull the image and start the agent.`)
     } catch (error) {
@@ -353,8 +412,18 @@ export default function Discover() {
       await saveConfig()
 
       // Update installed agents list
+      const { getRegistryConnections } = useConfigStore.getState()
       const updatedAgents = getAgents()
-      setInstalledAgents(updatedAgents.map(a => a.name))
+      const updatedRegistries = getRegistryConnections()
+      const updatedIds = new Set<string>()
+      updatedAgents.forEach(configAgent => {
+        const registry = updatedRegistries.find(r => r.id === configAgent.registry_connection)
+        if (registry) {
+          const uniqueId = `${registry.url}/${configAgent.repo}`
+          updatedIds.add(uniqueId)
+        }
+      })
+      setInstalledAgents(updatedIds)
 
       alert(`✓ Successfully uninstalled ${agent.name}!\n\nThe agent has been removed from your configuration.\n\nRestart AgentSystems to stop the agent.`)
     } catch (error) {
@@ -527,7 +596,7 @@ export default function Discover() {
                 onDeveloperClick={(devName, indexUrl) => fetchDeveloperInfo(devName, indexUrl)}
                 onInstall={() => handleInstallAgent(agent)}
                 onUninstall={() => handleUninstallAgent(agent)}
-                isInstalled={isAgentInstalled(agent.name)}
+                isInstalled={isAgentInstalled(agent)}
               />
             ))}
           </div>
@@ -554,7 +623,7 @@ export default function Discover() {
           }}
           onInstall={() => handleInstallAgent(selectedAgent)}
           onUninstall={() => handleUninstallAgent(selectedAgent)}
-          isInstalled={isAgentInstalled(selectedAgent.name)}
+          isInstalled={isAgentInstalled(selectedAgent)}
         />
       )}
 
