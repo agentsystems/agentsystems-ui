@@ -221,9 +221,105 @@ export default function Discover() {
     }
   }
 
-  const handleInstallAgent = (agent: IndexAgent) => {
-    // TODO: Implement agent installation flow
-    alert(`Installing ${agent.name} is not yet implemented. This will add the agent to your agentsystems-config.yml file.`)
+  const handleInstallAgent = async (agent: IndexAgent) => {
+    if (!agent.image_repository_url) {
+      alert(`Cannot install ${agent.name}: No image repository URL available. This agent has a private image repository.`)
+      return
+    }
+
+    try {
+      // Parse image repository URL (e.g., "docker.io/username/repo:tag")
+      const parseImageUrl = (url: string) => {
+        // Remove protocol if present
+        let cleanUrl = url.replace(/^https?:\/\//, '')
+
+        // Split into registry and path
+        const parts = cleanUrl.split('/')
+        let registryUrl: string
+        let repoPath: string
+        let tag = 'latest'
+
+        // Check if first part looks like a registry domain (contains . or :)
+        if (parts[0].includes('.') || parts[0].includes(':')) {
+          registryUrl = parts[0]
+          repoPath = parts.slice(1).join('/')
+        } else {
+          // Default to docker.io for simple image names
+          registryUrl = 'docker.io'
+          repoPath = cleanUrl
+        }
+
+        // Extract tag if present
+        if (repoPath.includes(':')) {
+          const [path, imageTag] = repoPath.split(':')
+          repoPath = path
+          tag = imageTag
+        }
+
+        return { registryUrl, repoPath, tag }
+      }
+
+      const { registryUrl, repoPath, tag } = parseImageUrl(agent.image_repository_url)
+
+      // Determine registry connection ID and name
+      const registryIdMap: Record<string, string> = {
+        'docker.io': 'dockerhub_public',
+        'ghcr.io': 'github_registry',
+        'gcr.io': 'google_registry'
+      }
+
+      const registryId = registryIdMap[registryUrl] || registryUrl.replace(/[^a-z0-9]/g, '_')
+      const registryName = registryUrl === 'docker.io' ? 'Docker Hub (Public)' :
+                           registryUrl === 'ghcr.io' ? 'GitHub Container Registry' :
+                           registryUrl === 'gcr.io' ? 'Google Container Registry' :
+                           registryUrl
+
+      // Get config store methods
+      const { getRegistryConnections, addRegistryConnection, getAgents, addAgent, saveConfig } = useConfigStore.getState()
+
+      // Check if agent already exists
+      const existingAgents = getAgents()
+      if (existingAgents.some(a => a.name === agent.name)) {
+        alert(`Agent ${agent.name} is already installed in your configuration.`)
+        return
+      }
+
+      // Check if registry connection already exists
+      const existingRegistries = getRegistryConnections()
+      const registryExists = existingRegistries.some(r => r.id === registryId)
+
+      // Add registry connection if it doesn't exist
+      if (!registryExists) {
+        addRegistryConnection({
+          name: registryName,
+          url: registryUrl,
+          enabled: true,
+          authMethod: 'none'
+        })
+      }
+
+      // Add agent
+      addAgent({
+        name: agent.name,
+        repo: repoPath,
+        tag: tag,
+        registry_connection: registryId,
+        egressAllowlist: (agent.required_egress || []).join(', '),
+        labels: {
+          'agent.port': '8000'
+        },
+        envVariables: {},
+        exposePorts: '8000'
+      })
+
+      // Auto-save config to disk
+      await saveConfig()
+
+      alert(`✓ Successfully installed ${agent.name}!\n\nThe agent has been added to your configuration.\n\nRestart AgentSystems to pull the image and start the agent.`)
+    } catch (error) {
+      console.error('Error installing agent:', error)
+      alert(`Failed to install ${agent.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   if (enabledIndexes.length === 0) {
