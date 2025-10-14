@@ -13,11 +13,13 @@ const SplashScreen = lazy(() => import('@components/SplashScreen'))
 const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Agents = lazy(() => import('@pages/Agents'))
 const Marketplace = lazy(() => import('@pages/Marketplace'))
+const Discover = lazy(() => import('@pages/Discover'))
 const Executions = lazy(() => import('@pages/Executions'))
 const Logs = lazy(() => import('@pages/Logs'))
 const ConfigurationOverview = lazy(() => import('@pages/ConfigurationOverview'))
 const CredentialsPage = lazy(() => import('@pages/configuration/CredentialsPage'))
 const RegistriesPage = lazy(() => import('@pages/configuration/RegistriesPage'))
+const IndexConnectionsPage = lazy(() => import('@pages/configuration/IndexConnectionsPage'))
 const AgentsPage = lazy(() => import('@pages/configuration/AgentsPage'))
 const ConnectionPage = lazy(() => import('@pages/configuration/ConnectionPage'))
 const AppearancePage = lazy(() => import('@pages/configuration/AppearancePage'))
@@ -88,6 +90,11 @@ function App() {
                 <Marketplace />
               </Suspense>
             } />
+            <Route path="discover" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Discover />
+              </Suspense>
+            } />
             <Route path="executions" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <Executions />
@@ -111,6 +118,11 @@ function App() {
             <Route path="configuration/registries" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <RegistriesPage />
+              </Suspense>
+            } />
+            <Route path="configuration/indexes" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <IndexConnectionsPage />
               </Suspense>
             } />
             <Route path="configuration/agents" element={

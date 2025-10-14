@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { 
-  HomeIcon, 
+import {
+  HomeIcon,
   CpuChipIcon,
   RectangleStackIcon,
   BoltIcon,
   DocumentTextIcon,
   WrenchScrewdriverIcon,
+  GlobeAltIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
@@ -39,6 +40,7 @@ const navigationSections: NavigationSection[] = [
     title: 'Platform',
     items: [
       { name: 'Agent Ecosystem', href: '/ecosystem', icon: RectangleStackIcon, badge: 'BETA' },
+      { name: 'Discover', href: '/discover', icon: GlobeAltIcon },
       { name: 'Configuration', href: ROUTES.CONFIGURATION, icon: WrenchScrewdriverIcon },
       { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
       { name: 'Support', href: '/support', icon: QuestionMarkCircleIcon },

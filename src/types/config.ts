@@ -52,6 +52,12 @@ export interface RegistryConnection {
   auth: RegistryAuth
 }
 
+export interface IndexConnection {
+  url: string
+  enabled: boolean
+  description?: string
+}
+
 export interface AgentConfig {
   name: string
   repo: string
@@ -74,6 +80,7 @@ export interface AgentConfig {
 export interface AgentSystemsConfig {
   config_version: number
   registry_connections: Record<string, RegistryConnection>
+  index_connections?: Record<string, IndexConnection>
   model_connections?: Record<string, ModelConnection>
   agents: AgentConfig[]
 }
@@ -95,6 +102,14 @@ export interface RegistryConnectionForm {
   usernameEnv?: string
   passwordEnv?: string
   tokenEnv?: string
+}
+
+export interface IndexConnectionForm {
+  id: string
+  name: string
+  url: string
+  enabled: boolean
+  description?: string
 }
 
 export interface ModelConnectionForm {

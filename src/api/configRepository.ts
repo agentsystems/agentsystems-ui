@@ -208,6 +208,26 @@ export const configUtils = {
   }),
 
   /**
+   * Convert index form data to config format
+   */
+  indexFormToConfig: (form: import('@/types/config').IndexConnectionForm) => ({
+    url: form.url,
+    enabled: form.enabled,
+    ...(form.description && { description: form.description })
+  }),
+
+  /**
+   * Convert config format to index form data
+   */
+  configToIndexForm: (id: string, config: import('@/types/config').IndexConnection): import('@/types/config').IndexConnectionForm => ({
+    id,
+    name: id,
+    url: config.url,
+    enabled: config.enabled,
+    description: config.description
+  }),
+
+  /**
    * Convert agent form data to config format
    */
   agentFormToConfig: (form: import('@/types/config').AgentConfigForm): import('@/types/config').AgentConfig => ({
