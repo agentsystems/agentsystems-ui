@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useConfigStore } from '@stores/configStore'
-import { MagnifyingGlassIcon, GlobeAltIcon, ExclamationTriangleIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, GlobeAltIcon, ExclamationTriangleIcon, QuestionMarkCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
 import Card from '@components/common/Card'
 import styles from './Discover.module.css'
 
@@ -21,7 +21,38 @@ interface IndexAgent {
     avatar_url: string | null
   }
   _index_name?: string // Track which index this came from
+  _index_url?: string // Track the index URL for API calls
 }
+
+interface DeveloperInfo {
+  id: string
+  name: string
+  avatar_url: string | null
+  agent_count: number
+  // Profile fields
+  bio?: string | null
+  tagline?: string | null
+  developer_type?: string | null
+  company?: string | null
+  location?: string | null
+  years_experience?: number | null
+  // Contact & Links
+  website?: string | null
+  support_email?: string | null
+  documentation_url?: string | null
+  // Social
+  github_username?: string | null
+  twitter_handle?: string | null
+  linkedin_url?: string | null
+  discord_username?: string | null
+  // Professional
+  expertise?: string[] | null
+  featured_work?: string[] | null
+  open_to_collaboration?: boolean | null
+  sponsor_url?: string | null
+}
+
+type SortOption = 'newest' | 'oldest' | 'alphabetical'
 
 export default function Discover() {
   const { getIndexConnections } = useConfigStore()
@@ -30,6 +61,12 @@ export default function Discover() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<string | 'all'>('all')
+  const [sortBy, setSortBy] = useState<SortOption>('newest')
+  const [selectedAgent, setSelectedAgent] = useState<IndexAgent | null>(null)
+  const [selectedDeveloper, setSelectedDeveloper] = useState<{ info: DeveloperInfo; indexUrl: string } | null>(null)
+  const [isDeveloperLoading, setIsDeveloperLoading] = useState(false)
+  const [previousDeveloper, setPreviousDeveloper] = useState<{ info: DeveloperInfo; indexUrl: string } | null>(null)
+  const [developerFilter, setDeveloperFilter] = useState<string | null>(null)
 
   const indexes = getIndexConnections()
   const enabledIndexes = indexes.filter(idx => idx.enabled)
@@ -64,7 +101,8 @@ export default function Discover() {
           // Tag each agent with the index it came from
           const agents = (data.agents || []).map((agent: IndexAgent) => ({
             ...agent,
-            _index_name: index.name
+            _index_name: index.name,
+            _index_url: index.url
           }))
           return agents
         } catch (err) {
@@ -83,16 +121,66 @@ export default function Discover() {
     }
   }
 
-  // Filter agents based on search query
-  const filteredAgents = agents.filter(agent => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    return (
-      agent.name?.toLowerCase().includes(query) ||
-      agent.description?.toLowerCase().includes(query) ||
-      agent.developer?.name?.toLowerCase().includes(query)
-    )
-  })
+  // Filter and sort agents
+  const filteredAgents = agents
+    .filter(agent => {
+      // Developer filter
+      if (developerFilter && agent.developer.name !== developerFilter) {
+        return false
+      }
+
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const matchesSearch =
+          agent.name?.toLowerCase().includes(query) ||
+          agent.description?.toLowerCase().includes(query) ||
+          agent.developer?.name?.toLowerCase().includes(query)
+        if (!matchesSearch) return false
+      }
+
+      return true
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        case 'alphabetical':
+          return a.name.localeCompare(b.name)
+        default:
+          return 0
+      }
+    })
+
+  const fetchDeveloperInfo = async (developerName: string, indexUrl: string) => {
+    // Show modal immediately with placeholder data
+    const developerAgents = agents.filter(a => a.developer.name === developerName)
+    const placeholderInfo: DeveloperInfo = {
+      id: developerAgents[0]?.developer.id || '',
+      name: developerName,
+      avatar_url: developerAgents[0]?.developer.avatar_url || null,
+      agent_count: developerAgents.length
+    }
+
+    setSelectedDeveloper({ info: placeholderInfo, indexUrl })
+    setIsDeveloperLoading(true)
+
+    try {
+      const response = await fetch(`${indexUrl}/developers/${developerName}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch developer info')
+      }
+      const data = await response.json()
+      setSelectedDeveloper({ info: data, indexUrl })
+    } catch (err) {
+      console.error('Error fetching developer:', err)
+      // Keep the placeholder data we already set
+    } finally {
+      setIsDeveloperLoading(false)
+    }
+  }
 
   const handleInstallAgent = (agent: IndexAgent) => {
     // TODO: Implement agent installation flow
@@ -139,10 +227,25 @@ export default function Discover() {
     <div className={styles.discover}>
       <div className={styles.header}>
         <div>
-          <h1>Discover Agents</h1>
-          <p className={styles.subtitle}>
-            Browse and install community agents from {enabledIndexes.length} connected {enabledIndexes.length === 1 ? 'index' : 'indexes'}
-          </p>
+          {developerFilter ? (
+            <>
+              <div className={styles.backLink} onClick={() => setDeveloperFilter(null)}>
+                <ArrowLeftIcon className={styles.backIcon} />
+                Back to All Agents
+              </div>
+              <h1>{developerFilter}</h1>
+              <p className={styles.subtitle}>
+                {filteredAgents.length} {filteredAgents.length === 1 ? 'agent' : 'agents'} by this developer
+              </p>
+            </>
+          ) : (
+            <>
+              <h1>Discover Agents</h1>
+              <p className={styles.subtitle}>
+                Browse and install community agents from {enabledIndexes.length} connected {enabledIndexes.length === 1 ? 'index' : 'indexes'}
+              </p>
+            </>
+          )}
         </div>
         <a
           href="https://docs.agentsystems.ai/user-guide/discover-agents"
@@ -176,20 +279,35 @@ export default function Discover() {
           />
         </div>
 
-        <div className={styles.indexFilter}>
-          <label>Index:</label>
-          <select
-            value={selectedIndex}
-            onChange={(e) => setSelectedIndex(e.target.value)}
-            className={styles.select}
-          >
-            <option value="all">All Indexes</option>
-            {enabledIndexes.map(index => (
-              <option key={index.id} value={index.id}>
-                {index.name}
-              </option>
-            ))}
-          </select>
+        <div className={styles.filters}>
+          <div className={styles.filterGroup}>
+            <label>Index:</label>
+            <select
+              value={selectedIndex}
+              onChange={(e) => setSelectedIndex(e.target.value)}
+              className={styles.select}
+            >
+              <option value="all">All Indexes</option>
+              {enabledIndexes.map(index => (
+                <option key={index.id} value={index.id}>
+                  {index.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.filterGroup}>
+            <label>Sort:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className={styles.select}
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="alphabetical">Alphabetical</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -229,11 +347,58 @@ export default function Discover() {
               <AgentCard
                 key={agent.id}
                 agent={agent}
+                onClick={() => setSelectedAgent(agent)}
+                onDeveloperClick={(devName, indexUrl) => fetchDeveloperInfo(devName, indexUrl)}
                 onInstall={() => handleInstallAgent(agent)}
               />
             ))}
           </div>
         </section>
+      )}
+
+      {/* Agent Detail Modal */}
+      {selectedAgent && (
+        <AgentDetailModal
+          agent={selectedAgent}
+          onClose={() => {
+            setSelectedAgent(null)
+            setPreviousDeveloper(null)
+          }}
+          onBack={previousDeveloper ? () => {
+            setSelectedDeveloper(previousDeveloper)
+            setSelectedAgent(null)
+            setPreviousDeveloper(null)
+          } : undefined}
+          onDeveloperClick={(devName, indexUrl) => {
+            fetchDeveloperInfo(devName, indexUrl)
+            setSelectedAgent(null)
+            setPreviousDeveloper(null)
+          }}
+          onInstall={() => handleInstallAgent(selectedAgent)}
+        />
+      )}
+
+      {/* Developer Detail Modal */}
+      {selectedDeveloper && (
+        <DeveloperModal
+          developer={selectedDeveloper.info}
+          agents={agents.filter(a => a.developer.name === selectedDeveloper.info.name)}
+          onClose={() => {
+            setSelectedDeveloper(null)
+            setPreviousDeveloper(null)
+          }}
+          onAgentClick={(agent) => {
+            setPreviousDeveloper(selectedDeveloper)
+            setSelectedAgent(agent)
+            setSelectedDeveloper(null)
+          }}
+          onViewAll={() => {
+            setDeveloperFilter(selectedDeveloper.info.name)
+            setSelectedDeveloper(null)
+            setPreviousDeveloper(null)
+          }}
+          isLoading={isDeveloperLoading}
+        />
       )}
     </div>
   )
@@ -242,20 +407,31 @@ export default function Discover() {
 // Agent Card Component
 interface AgentCardProps {
   agent: IndexAgent
+  onClick: () => void
+  onDeveloperClick: (developerName: string, indexUrl: string) => void
   onInstall: () => void
 }
 
-function AgentCard({ agent, onInstall }: AgentCardProps) {
+function AgentCard({ agent, onClick, onDeveloperClick, onInstall }: AgentCardProps) {
   return (
-    <Card className={styles.agentCard}>
+    <Card className={styles.agentCard} onClick={onClick}>
       <div className={styles.cardHeader}>
         <h3>{agent.name}</h3>
       </div>
 
       <div className={styles.developerInfo}>
-        <span className={styles.developerName}>
-          by {agent.developer.name}
-        </span>
+        <span className={styles.developerLabel}>by </span>
+        <button
+          className={styles.developerLink}
+          onClick={(e) => {
+            e.stopPropagation()
+            if (agent._index_url) {
+              onDeveloperClick(agent.developer.name, agent._index_url)
+            }
+          }}
+        >
+          {agent.developer.name}
+        </button>
       </div>
 
       <p className={styles.description}>{agent.description}</p>
@@ -295,5 +471,342 @@ function AgentCard({ agent, onInstall }: AgentCardProps) {
         </button>
       </div>
     </Card>
+  )
+}
+
+// Agent Detail Modal Component
+interface AgentDetailModalProps {
+  agent: IndexAgent
+  onClose: () => void
+  onBack?: () => void
+  onDeveloperClick: (developerName: string, indexUrl: string) => void
+  onInstall: () => void
+}
+
+function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall }: AgentDetailModalProps) {
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div>
+            {onBack && (
+              <div className={styles.backLink} onClick={onBack}>
+                <ArrowLeftIcon className={styles.backIcon} />
+                Back to Developer
+              </div>
+            )}
+            <h2>{agent.name}</h2>
+            <p className={styles.modalDeveloper}>
+              by{' '}
+              <button
+                className={styles.developerLink}
+                onClick={() => {
+                  if (agent._index_url) {
+                    onDeveloperClick(agent.developer.name, agent._index_url)
+                  }
+                }}
+              >
+                {agent.developer.name}
+              </button>
+            </p>
+          </div>
+          <button className={styles.closeButton} onClick={onClose}>×</button>
+        </div>
+
+        <div className={styles.modalBody}>
+          <div className={styles.modalDescription}>
+            <p>{agent.description}</p>
+          </div>
+
+          <div className={styles.modalSpecs}>
+            <div className={styles.specGroup}>
+              <h4>Repository Details</h4>
+              <ul>
+                <li>
+                  <strong>Image:</strong>{' '}
+                  <code>{agent.image_repository_url}</code>
+                </li>
+                {agent.source_repository_url && (
+                  <li>
+                    <strong>Source:</strong>{' '}
+                    <a href={agent.source_repository_url} target="_blank" rel="noopener noreferrer">
+                      {agent.source_repository_url}
+                    </a>
+                  </li>
+                )}
+                <li>
+                  <strong>Access:</strong> {agent.image_repository_access}
+                </li>
+              </ul>
+            </div>
+
+            {agent._index_name && (
+              <div className={styles.specGroup}>
+                <h4>Index Information</h4>
+                <ul>
+                  <li>
+                    <strong>Index:</strong> {agent._index_name}
+                  </li>
+                  <li>
+                    <strong>Developer:</strong> {agent.developer.name}
+                  </li>
+                  <li>
+                    <strong>Listed:</strong> {new Date(agent.created_at).toLocaleDateString()}
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.modalFooter}>
+          <button className="btn btn-lg btn-ghost" onClick={onClose}>
+            Close
+          </button>
+          {agent.source_repository_url && (
+            <a
+              href={agent.source_repository_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-lg btn-subtle"
+            >
+              View Source
+            </a>
+          )}
+          <button className="btn btn-lg btn-bright" onClick={onInstall}>
+            Install
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Developer Detail Modal Component
+interface DeveloperModalProps {
+  developer: DeveloperInfo
+  agents: IndexAgent[]
+  onClose: () => void
+  onAgentClick: (agent: IndexAgent) => void
+  onViewAll: () => void
+  isLoading: boolean
+}
+
+function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, isLoading }: DeveloperModalProps) {
+  const previewAgents = agents.slice(0, 3)
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div className={styles.developerHeaderInfo}>
+            {developer.avatar_url ? (
+              <img
+                src={developer.avatar_url}
+                alt={developer.name}
+                className={styles.developerAvatar}
+              />
+            ) : (
+              <div className={styles.developerAvatarPlaceholder}>
+                {developer.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <h2>{developer.name}</h2>
+              <p className={styles.modalDeveloper}>
+                {developer.agent_count} {developer.agent_count === 1 ? 'agent' : 'agents'}
+              </p>
+            </div>
+          </div>
+          <button className={styles.closeButton} onClick={onClose}>×</button>
+        </div>
+
+        <div className={styles.modalBody}>
+          {isLoading ? (
+            <div className={styles.loading}>
+              <div className={styles.spinner} />
+              <p>Loading developer info...</p>
+            </div>
+          ) : (
+            <>
+              {/* About Section */}
+              {(developer.tagline || developer.bio || developer.developer_type || developer.company || developer.location || developer.years_experience) && (
+                <div className={styles.modalSpecs}>
+                  <div className={styles.specGroup}>
+                    <h4>About</h4>
+                    <ul>
+                      {developer.tagline && <li><strong>Tagline:</strong> {developer.tagline}</li>}
+                      {developer.bio && <li><strong>Bio:</strong> {developer.bio}</li>}
+                      {developer.developer_type && <li><strong>Type:</strong> {developer.developer_type}</li>}
+                      {developer.company && <li><strong>Company:</strong> {developer.company}</li>}
+                      {developer.location && <li><strong>Location:</strong> {developer.location}</li>}
+                      {developer.years_experience && <li><strong>Experience:</strong> {developer.years_experience} years</li>}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Contact & Links Section */}
+              {(developer.website || developer.support_email || developer.documentation_url) && (
+                <div className={styles.modalSpecs}>
+                  <div className={styles.specGroup}>
+                    <h4>Contact & Links</h4>
+                    <ul>
+                      {developer.website && (
+                        <li>
+                          <strong>Website:</strong>{' '}
+                          <a href={developer.website} target="_blank" rel="noopener noreferrer">
+                            {developer.website}
+                          </a>
+                        </li>
+                      )}
+                      {developer.support_email && (
+                        <li>
+                          <strong>Support:</strong>{' '}
+                          <a href={`mailto:${developer.support_email}`}>{developer.support_email}</a>
+                        </li>
+                      )}
+                      {developer.documentation_url && (
+                        <li>
+                          <strong>Documentation:</strong>{' '}
+                          <a href={developer.documentation_url} target="_blank" rel="noopener noreferrer">
+                            {developer.documentation_url}
+                          </a>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Social Section */}
+              {(developer.github_username || developer.twitter_handle || developer.linkedin_url || developer.discord_username) && (
+                <div className={styles.modalSpecs}>
+                  <div className={styles.specGroup}>
+                    <h4>Social</h4>
+                    <ul>
+                      {developer.github_username && (
+                        <li>
+                          <strong>GitHub:</strong>{' '}
+                          <a href={`https://github.com/${developer.github_username}`} target="_blank" rel="noopener noreferrer">
+                            @{developer.github_username}
+                          </a>
+                        </li>
+                      )}
+                      {developer.twitter_handle && (
+                        <li>
+                          <strong>Twitter:</strong>{' '}
+                          <a href={`https://twitter.com/${developer.twitter_handle}`} target="_blank" rel="noopener noreferrer">
+                            @{developer.twitter_handle}
+                          </a>
+                        </li>
+                      )}
+                      {developer.linkedin_url && (
+                        <li>
+                          <strong>LinkedIn:</strong>{' '}
+                          <a href={developer.linkedin_url} target="_blank" rel="noopener noreferrer">
+                            View Profile
+                          </a>
+                        </li>
+                      )}
+                      {developer.discord_username && (
+                        <li><strong>Discord:</strong> {developer.discord_username}</li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Professional Section */}
+              {(developer.expertise || developer.featured_work || developer.open_to_collaboration !== null || developer.sponsor_url) && (
+                <div className={styles.modalSpecs}>
+                  <div className={styles.specGroup}>
+                    <h4>Professional</h4>
+                    <ul>
+                      {developer.expertise && developer.expertise.length > 0 && (
+                        <li>
+                          <strong>Expertise:</strong> {developer.expertise.join(', ')}
+                        </li>
+                      )}
+                      {developer.featured_work && developer.featured_work.length > 0 && (
+                        <li>
+                          <strong>Featured Work:</strong>
+                          <ul className={styles.nestedList}>
+                            {developer.featured_work.map((work, index) => (
+                              <li key={index}>
+                                <a href={work} target="_blank" rel="noopener noreferrer">
+                                  {work}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      )}
+                      {developer.open_to_collaboration && (
+                        <li><strong>Open to Collaboration:</strong> Yes</li>
+                      )}
+                      {developer.sponsor_url && (
+                        <li>
+                          <strong>Sponsor:</strong>{' '}
+                          <a href={developer.sponsor_url} target="_blank" rel="noopener noreferrer">
+                            Support this developer
+                          </a>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Developer's Agents */}
+              <div className={styles.modalSpecs}>
+                <div className={styles.specGroup}>
+                  <h4>Published Agents</h4>
+                  {agents.length === 0 ? (
+                    <p>No agents found for this developer.</p>
+                  ) : (
+                    <>
+                      <div className={styles.developerAgentsList}>
+                        {previewAgents.map(agent => (
+                          <div
+                            key={agent.id}
+                            className={styles.developerAgentItem}
+                            onClick={() => onAgentClick(agent)}
+                          >
+                            <div>
+                              <div className={styles.developerAgentName}>{agent.name}</div>
+                              <div className={styles.developerAgentDescription}>
+                                {agent.description || 'No description'}
+                              </div>
+                            </div>
+                            {agent._index_name && (
+                              <span className={styles.indexBadge}>
+                                <GlobeAltIcon className={styles.indexIcon} />
+                                {agent._index_name}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        className={`btn btn-md btn-subtle ${styles.viewAllButton}`}
+                        onClick={onViewAll}
+                      >
+                        View All
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className={styles.modalFooter}>
+          <button className="btn btn-lg btn-ghost" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
