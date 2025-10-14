@@ -34,7 +34,7 @@ interface IndexAgent {
   id: string
   name: string
   description: string
-  image_repository_url: string
+  image_repository_url: string | null
   source_repository_url: string | null
   listing_status: string
   image_repository_access: string
@@ -482,9 +482,11 @@ function AgentCard({ agent, onClick, onDeveloperClick, onInstall }: AgentCardPro
             {agent._index_name}
           </span>
         )}
-        <span className={styles.imageRepo}>
-          {agent.image_repository_url.replace('docker.io/', '')}
-        </span>
+        {agent.image_repository_url && (
+          <span className={styles.imageRepo}>
+            {agent.image_repository_url.replace('docker.io/', '')}
+          </span>
+        )}
       </div>
 
       <div className={styles.cardActions}>
