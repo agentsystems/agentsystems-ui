@@ -773,22 +773,24 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall 
             </div>
           )}
 
-          <div className={styles.modalSpecs}>
-            <div className={styles.specGroup}>
-              <h4><CubeIcon />Image Repository</h4>
-              <ul>
-                <li>
-                  <strong>URL:</strong>{' '}
-                  <span style={{ fontFamily: 'var(--font-mono)' }}>{agent.image_repository_url}</span>
-                </li>
-                <li>
-                  <strong>Access:</strong> {agent.image_repository_access}
-                </li>
-              </ul>
+          {agent.image_repository_url && agent.image_repository_access === 'public' && (
+            <div className={styles.modalSpecs}>
+              <div className={styles.specGroup}>
+                <h4><CubeIcon />Image Repository</h4>
+                <ul>
+                  <li>
+                    <strong>URL:</strong>{' '}
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{agent.image_repository_url}</span>
+                  </li>
+                  <li>
+                    <strong>Access:</strong> Public (open access)
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
+          )}
 
-          {agent.source_repository_url && (
+          {agent.source_repository_url && agent.source_repository_access === 'public' && (
             <div className={styles.modalSpecs}>
               <div className={styles.specGroup}>
                 <h4><CodeBracketIcon />Source Repository</h4>
@@ -800,7 +802,7 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall 
                     </a>
                   </li>
                   <li>
-                    <strong>Access:</strong> {agent.source_repository_access}
+                    <strong>Access:</strong> Public (open source)
                   </li>
                 </ul>
               </div>

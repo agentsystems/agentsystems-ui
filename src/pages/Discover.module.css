@@ -417,7 +417,8 @@
   max-width: 1000px;
   width: 90%;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
@@ -427,6 +428,7 @@
   align-items: flex-start;
   padding: 2rem;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .modalHeader h2 {
@@ -465,6 +467,9 @@
 .modalBody {
   padding: 2rem;
   background: var(--background);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .modalDescription {
@@ -636,9 +641,12 @@
 .modalFooter {
   display: flex;
   gap: 0.75rem;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   border-top: 1px solid var(--border);
   justify-content: flex-end;
+  flex-shrink: 0;
+  background: var(--surface);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 }
 
 /* Responsive design */
