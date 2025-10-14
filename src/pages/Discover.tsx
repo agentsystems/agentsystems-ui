@@ -107,6 +107,9 @@ export default function Discover() {
   const [previousDeveloper, setPreviousDeveloper] = useState<{ info: DeveloperInfo; indexUrl: string } | null>(null)
   const [developerFilter, setDeveloperFilter] = useState<string | null>(null)
   const [installedAgents, setInstalledAgents] = useState<string[]>([])
+  const [agentToInstall, setAgentToInstall] = useState<IndexAgent | null>(null)
+  const [customAgentName, setCustomAgentName] = useState('')
+  const [nameError, setNameError] = useState<string | null>(null)
 
   const indexes = getIndexConnections()
   const enabledIndexes = indexes.filter(idx => idx.enabled)
@@ -232,9 +235,30 @@ export default function Discover() {
     }
   }
 
-  const handleInstallAgent = async (agent: IndexAgent) => {
+  const handleInstallAgent = (agent: IndexAgent) => {
     if (!agent.image_repository_url) {
       alert(`Cannot install ${agent.name}: No image repository URL available. This agent has a private image repository.`)
+      return
+    }
+
+    // Show install modal with name input
+    setAgentToInstall(agent)
+    setCustomAgentName(agent.name)
+    setNameError(null)
+  }
+
+  const confirmInstallAgent = async () => {
+    if (!agentToInstall) return
+
+    // Validate name
+    const existingAgents = getAgents()
+    if (existingAgents.some(a => a.name === customAgentName)) {
+      setNameError(`Agent name "${customAgentName}" already exists.`)
+      return
+    }
+
+    if (!customAgentName.trim()) {
+      setNameError('Agent name cannot be empty.')
       return
     }
 
@@ -270,7 +294,7 @@ export default function Discover() {
         return { registryUrl, repoPath, tag }
       }
 
-      const { registryUrl, repoPath, tag } = parseImageUrl(agent.image_repository_url)
+      const { registryUrl, repoPath, tag } = parseImageUrl(agentToInstall.image_repository_url)
 
       // Determine registry connection ID and name
       const registryIdMap: Record<string, string> = {
@@ -286,14 +310,7 @@ export default function Discover() {
                            registryUrl
 
       // Get config store methods
-      const { getRegistryConnections, addRegistryConnection, getAgents, addAgent, saveConfig } = useConfigStore.getState()
-
-      // Check if agent already exists
-      const existingAgents = getAgents()
-      if (existingAgents.some(a => a.name === agent.name)) {
-        alert(`Agent ${agent.name} is already installed in your configuration.`)
-        return
-      }
+      const { getRegistryConnections, addRegistryConnection, addAgent, saveConfig } = useConfigStore.getState()
 
       // Check if registry connection already exists
       const existingRegistries = getRegistryConnections()
@@ -309,13 +326,13 @@ export default function Discover() {
         })
       }
 
-      // Add agent
+      // Add agent with custom name
       addAgent({
-        name: agent.name,
+        name: customAgentName,
         repo: repoPath,
         tag: tag,
         registry_connection: registryId,
-        egressAllowlist: (agent.required_egress || []).join(', '),
+        egressAllowlist: (agentToInstall.required_egress || []).join(', '),
         labels: {
           'agent.port': '8000'
         },
@@ -330,10 +347,15 @@ export default function Discover() {
       const updatedAgents = getAgents()
       setInstalledAgents(updatedAgents.map(a => a.name))
 
-      alert(`✓ Successfully installed ${agent.name}!\n\nThe agent has been added to your configuration.\n\nRestart AgentSystems to pull the image and start the agent.`)
+      // Close modal
+      setAgentToInstall(null)
+      setCustomAgentName('')
+      setNameError(null)
+
+      alert(`✓ Successfully installed ${customAgentName}!\n\nThe agent has been added to your configuration.\n\nRestart AgentSystems to pull the image and start the agent.`)
     } catch (error) {
       console.error('Error installing agent:', error)
-      alert(`Failed to install ${agent.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setNameError(error instanceof Error ? error.message : 'Unknown error')
     }
   }
 
@@ -579,6 +601,105 @@ export default function Discover() {
           }}
           isLoading={isDeveloperLoading}
         />
+      )}
+
+      {/* Install Name Modal */}
+      {agentToInstall && (
+        <div className={styles.modalOverlay} onClick={() => {
+          setAgentToInstall(null)
+          setCustomAgentName('')
+          setNameError(null)
+        }}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h2>Install Agent</h2>
+                <p className={styles.modalDeveloper}>
+                  {agentToInstall.name} by {agentToInstall.developer.name}
+                </p>
+              </div>
+              <button className={styles.closeButton} onClick={() => {
+                setAgentToInstall(null)
+                setCustomAgentName('')
+                setNameError(null)
+              }}>×</button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className={styles.modalDescription}>
+                <p>Choose a unique name for this agent. The name will be used as the Docker container name.</p>
+              </div>
+
+              <div style={{ marginTop: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                  Agent Name
+                </label>
+                <input
+                  type="text"
+                  value={customAgentName}
+                  onChange={(e) => {
+                    setCustomAgentName(e.target.value)
+                    setNameError(null)
+                  }}
+                  className={styles.searchInput}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: nameError ? '1px solid var(--error)' : '1px solid var(--border)',
+                    borderRadius: '0.375rem'
+                  }}
+                  placeholder="Enter agent name"
+                  autoFocus
+                />
+
+                {nameError && (
+                  <div style={{
+                    marginTop: '0.5rem',
+                    padding: '0.75rem',
+                    backgroundColor: 'var(--error-bg, rgba(239, 68, 68, 0.1))',
+                    border: '1px solid var(--error)',
+                    borderRadius: '0.375rem',
+                    color: 'var(--error)',
+                    fontSize: '0.875rem'
+                  }}>
+                    <ExclamationTriangleIcon style={{ width: '1rem', height: '1rem', display: 'inline', marginRight: '0.5rem' }} />
+                    {nameError}
+                  </div>
+                )}
+
+                {customAgentName !== agentToInstall.name && !nameError && (
+                  <div style={{
+                    marginTop: '0.5rem',
+                    fontSize: '0.875rem',
+                    color: 'var(--text-muted)'
+                  }}>
+                    Original name: {agentToInstall.name}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className="btn btn-lg btn-ghost"
+                onClick={() => {
+                  setAgentToInstall(null)
+                  setCustomAgentName('')
+                  setNameError(null)
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-lg btn-bright"
+                onClick={confirmInstallAgent}
+                disabled={!customAgentName.trim()}
+              >
+                Install
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -60,6 +60,9 @@ export default function AgentsPage() {
       newErrors.name = 'Agent name is required'
     } else if (!/^[a-z0-9-]+$/.test(data.name)) {
       newErrors.name = 'Name must be lowercase letters, numbers, and hyphens only'
+    } else if (!editingId && agents.some(a => a.name === data.name)) {
+      // Only check for duplicates when adding a new agent (not editing)
+      newErrors.name = `Agent name "${data.name}" already exists. Please choose a unique name.`
     }
 
     if (!data.repo) {
