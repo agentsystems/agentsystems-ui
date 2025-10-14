@@ -94,7 +94,7 @@ interface DeveloperInfo {
 type SortOption = 'newest' | 'oldest' | 'alphabetical'
 
 export default function Discover() {
-  const { getIndexConnections } = useConfigStore()
+  const { getIndexConnections, getAgents } = useConfigStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [agents, setAgents] = useState<IndexAgent[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -106,9 +106,20 @@ export default function Discover() {
   const [isDeveloperLoading, setIsDeveloperLoading] = useState(false)
   const [previousDeveloper, setPreviousDeveloper] = useState<{ info: DeveloperInfo; indexUrl: string } | null>(null)
   const [developerFilter, setDeveloperFilter] = useState<string | null>(null)
+  const [installedAgents, setInstalledAgents] = useState<string[]>([])
 
   const indexes = getIndexConnections()
   const enabledIndexes = indexes.filter(idx => idx.enabled)
+
+  // Check which agents are installed
+  useEffect(() => {
+    const configAgents = getAgents()
+    setInstalledAgents(configAgents.map(a => a.name))
+  }, [getAgents])
+
+  const isAgentInstalled = (agentName: string) => {
+    return installedAgents.includes(agentName)
+  }
 
   useEffect(() => {
     fetchAgents()
@@ -315,10 +326,40 @@ export default function Discover() {
       // Auto-save config to disk
       await saveConfig()
 
+      // Update installed agents list
+      const updatedAgents = getAgents()
+      setInstalledAgents(updatedAgents.map(a => a.name))
+
       alert(`✓ Successfully installed ${agent.name}!\n\nThe agent has been added to your configuration.\n\nRestart AgentSystems to pull the image and start the agent.`)
     } catch (error) {
       console.error('Error installing agent:', error)
       alert(`Failed to install ${agent.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  const handleUninstallAgent = async (agent: IndexAgent) => {
+    if (!confirm(`Are you sure you want to uninstall ${agent.name}?`)) {
+      return
+    }
+
+    try {
+      // Get config store methods
+      const { deleteAgent, saveConfig, getAgents } = useConfigStore.getState()
+
+      // Delete agent
+      deleteAgent(agent.name)
+
+      // Auto-save config to disk
+      await saveConfig()
+
+      // Update installed agents list
+      const updatedAgents = getAgents()
+      setInstalledAgents(updatedAgents.map(a => a.name))
+
+      alert(`✓ Successfully uninstalled ${agent.name}!\n\nThe agent has been removed from your configuration.\n\nRestart AgentSystems to stop the agent.`)
+    } catch (error) {
+      console.error('Error uninstalling agent:', error)
+      alert(`Failed to uninstall ${agent.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -485,6 +526,8 @@ export default function Discover() {
                 onClick={() => setSelectedAgent(agent)}
                 onDeveloperClick={(devName, indexUrl) => fetchDeveloperInfo(devName, indexUrl)}
                 onInstall={() => handleInstallAgent(agent)}
+                onUninstall={() => handleUninstallAgent(agent)}
+                isInstalled={isAgentInstalled(agent.name)}
               />
             ))}
           </div>
@@ -510,6 +553,8 @@ export default function Discover() {
             setPreviousDeveloper(null)
           }}
           onInstall={() => handleInstallAgent(selectedAgent)}
+          onUninstall={() => handleUninstallAgent(selectedAgent)}
+          isInstalled={isAgentInstalled(selectedAgent.name)}
         />
       )}
 
@@ -545,9 +590,11 @@ interface AgentCardProps {
   onClick: () => void
   onDeveloperClick: (developerName: string, indexUrl: string) => void
   onInstall: () => void
+  onUninstall: () => void
+  isInstalled: boolean
 }
 
-function AgentCard({ agent, onClick, onDeveloperClick, onInstall }: AgentCardProps) {
+function AgentCard({ agent, onClick, onDeveloperClick, onInstall, onUninstall, isInstalled }: AgentCardProps) {
   return (
     <Card className={styles.agentCard} onClick={onClick}>
       <div className={styles.cardHeader}>
@@ -597,15 +644,27 @@ function AgentCard({ agent, onClick, onDeveloperClick, onInstall }: AgentCardPro
             View Source
           </a>
         )}
-        <button
-          className="btn btn-sm btn-subtle"
-          onClick={(e) => {
-            e.stopPropagation()
-            onInstall()
-          }}
-        >
-          Install
-        </button>
+        {isInstalled ? (
+          <button
+            className="btn btn-sm btn-subtle"
+            onClick={(e) => {
+              e.stopPropagation()
+              onUninstall()
+            }}
+          >
+            Uninstall
+          </button>
+        ) : (
+          <button
+            className="btn btn-sm btn-subtle"
+            onClick={(e) => {
+              e.stopPropagation()
+              onInstall()
+            }}
+          >
+            Install
+          </button>
+        )}
       </div>
     </Card>
   )
@@ -618,9 +677,11 @@ interface AgentDetailModalProps {
   onBack?: () => void
   onDeveloperClick: (developerName: string, indexUrl: string) => void
   onInstall: () => void
+  onUninstall: () => void
+  isInstalled: boolean
 }
 
-function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall }: AgentDetailModalProps) {
+function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall, onUninstall, isInstalled }: AgentDetailModalProps) {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -941,9 +1002,15 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall 
               View Source
             </a>
           )}
-          <button className="btn btn-lg btn-subtle" onClick={onInstall}>
-            Install
-          </button>
+          {isInstalled ? (
+            <button className="btn btn-lg btn-subtle" onClick={onUninstall}>
+              Uninstall
+            </button>
+          ) : (
+            <button className="btn btn-lg btn-subtle" onClick={onInstall}>
+              Install
+            </button>
+          )}
         </div>
       </div>
     </div>
