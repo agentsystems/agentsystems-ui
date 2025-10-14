@@ -96,13 +96,13 @@
 }
 
 .errorText {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--error);
   margin-top: 0.25rem;
 }
 
 .hint {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
 
@@ -219,7 +219,7 @@
   align-items: center;
   padding: 0.125rem 0.5rem;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -254,14 +254,14 @@
 }
 
 .detailLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-muted);
   min-width: 3rem;
 }
 
 .detailValue {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
 }
 

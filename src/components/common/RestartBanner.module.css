@@ -87,7 +87,7 @@
 .subtitle {
   display: block;
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   margin-top: 0.25rem;
 }
 
@@ -97,11 +97,11 @@
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .changesList h4 {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 0.5rem;

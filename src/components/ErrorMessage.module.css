@@ -84,7 +84,7 @@
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   overflow: auto;
   max-height: 200px;

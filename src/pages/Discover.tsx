@@ -21,7 +21,9 @@ import {
   HeartIcon,
   CpuChipIcon,
   LinkIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  CodeBracketIcon,
+  CubeIcon
 } from '@heroicons/react/24/outline'
 import Card from '@components/common/Card'
 import styles from './Discover.module.css'
@@ -483,7 +485,7 @@ function AgentCard({ agent, onClick, onDeveloperClick, onInstall }: AgentCardPro
           </a>
         )}
         <button
-          className="btn btn-sm btn-bright"
+          className="btn btn-sm btn-subtle"
           onClick={(e) => {
             e.stopPropagation()
             onInstall()
@@ -542,29 +544,42 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall 
 
           <div className={styles.modalSpecs}>
             <div className={styles.specGroup}>
-              <h4>Repository Details</h4>
+              <h4><CubeIcon />Image Repository</h4>
               <ul>
                 <li>
-                  <strong>Image:</strong>{' '}
-                  <code>{agent.image_repository_url}</code>
+                  <strong>URL:</strong>{' '}
+                  <span style={{ fontFamily: 'var(--font-mono)' }}>{agent.image_repository_url}</span>
                 </li>
-                {agent.source_repository_url && (
-                  <li>
-                    <strong>Source:</strong>{' '}
-                    <a href={agent.source_repository_url} target="_blank" rel="noopener noreferrer">
-                      {agent.source_repository_url}
-                    </a>
-                  </li>
-                )}
                 <li>
                   <strong>Access:</strong> {agent.image_repository_access}
                 </li>
               </ul>
             </div>
+          </div>
 
-            {agent._index_name && (
+          {agent.source_repository_url && (
+            <div className={styles.modalSpecs}>
               <div className={styles.specGroup}>
-                <h4>Index Information</h4>
+                <h4><CodeBracketIcon />Source Repository</h4>
+                <ul>
+                  <li>
+                    <strong>URL:</strong>{' '}
+                    <a href={agent.source_repository_url} target="_blank" rel="noopener noreferrer">
+                      {agent.source_repository_url}
+                    </a>
+                  </li>
+                  <li>
+                    <strong>Access:</strong> {agent.source_repository_access}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {agent._index_name && (
+            <div className={styles.modalSpecs}>
+              <div className={styles.specGroup}>
+                <h4><GlobeAltIcon />Index Information</h4>
                 <ul>
                   <li>
                     <strong>Index:</strong> {agent._index_name}
@@ -577,8 +592,8 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall 
                   </li>
                 </ul>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         <div className={styles.modalFooter}>
@@ -595,7 +610,7 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall 
               View Source
             </a>
           )}
-          <button className="btn btn-lg btn-bright" onClick={onInstall}>
+          <button className="btn btn-lg btn-subtle" onClick={onInstall}>
             Install
           </button>
         </div>
@@ -778,7 +793,7 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
                     <h4><LightBulbIcon />Professional</h4>
                     {developer.expertise && developer.expertise.length > 0 && (
                       <div style={{ marginBottom: '1.5rem' }}>
-                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
                           <LightBulbIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
                           Expertise
                         </strong>
@@ -793,7 +808,7 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
                     )}
                     {developer.featured_work && developer.featured_work.length > 0 && (
                       <div style={{ marginBottom: '1.5rem' }}>
-                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
                           <FolderIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
                           Featured Work
                         </strong>
@@ -818,7 +833,7 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
                     )}
                     {developer.sponsor_url && (
                       <div style={{ marginBottom: '1.5rem' }}>
-                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
                           <HeartIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
                           Sponsor
                         </strong>

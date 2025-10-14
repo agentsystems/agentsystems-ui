@@ -96,13 +96,13 @@
 }
 
 .errorText {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--error);
   margin-top: 0.25rem;
 }
 
 .hint {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
 
@@ -141,7 +141,7 @@
   border-radius: 4px;
   background: var(--surface);
   color: var(--text);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-family: var(--font-mono);
 }
 
@@ -151,7 +151,7 @@
   border-radius: 4px;
   background: var(--surface);
   color: var(--text);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .envVarKey:focus, .envVarValue:focus {
@@ -272,7 +272,7 @@
 }
 
 .detailLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-muted);
   min-width: 4rem;
@@ -280,7 +280,7 @@
 }
 
 .detailValue {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   word-break: break-all;
 }

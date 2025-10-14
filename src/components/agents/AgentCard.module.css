@@ -20,7 +20,7 @@
 }
 
 .agentName {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   margin-bottom: 2px;
   font-family: var(--font-mono);
@@ -28,7 +28,7 @@
 }
 
 .agentVersion {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-weight: 500;
@@ -36,7 +36,7 @@
 }
 
 .agentImage {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-muted);
   font-family: var(--font-mono);
   word-break: break-all;
@@ -66,7 +66,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   text-align: center;
   cursor: pointer;

@@ -104,7 +104,7 @@
 }
 
 .detailLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -113,7 +113,7 @@
 
 .detailValue {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   background: var(--surface);
   padding: 0.375rem 0.5rem;
