@@ -23,7 +23,9 @@ import {
   LinkIcon,
   UserGroupIcon,
   CodeBracketIcon,
-  CubeIcon
+  CubeIcon,
+  WrenchScrewdriverIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline'
 import Card from '@components/common/Card'
 import styles from './Discover.module.css'
@@ -44,6 +46,19 @@ interface IndexAgent {
     name: string
     avatar_url: string | null
   }
+  // Discovery & Classification
+  context?: string | null
+  primary_function?: string | null
+  readiness_level?: string | null
+  // Compatibility Requirements
+  model_requirements?: string[] | null
+  required_integrations?: any[] | null
+  required_egress?: string[] | null
+  input_types?: any[] | null
+  output_types?: any[] | null
+  input_schema?: Record<string, any> | null
+  // Flexible metadata
+  facets?: Record<string, any> | null
   _index_name?: string // Track which index this came from
   _index_url?: string // Track the index URL for API calls
 }
@@ -541,6 +556,222 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall 
           <div className={styles.modalDescription}>
             <p>{agent.description}</p>
           </div>
+
+          {/* Agent Details */}
+          {(agent.context || agent.primary_function || agent.readiness_level) && (
+            <div className={styles.modalSpecs}>
+              <div className={styles.specGroup}>
+                <h4><CpuChipIcon />Agent Details</h4>
+                <ul>
+                  {agent.context && (
+                    <li>
+                      <strong>Context:</strong>{' '}
+                      <span className={styles.badge}>{agent.context}</span>
+                    </li>
+                  )}
+                  {agent.primary_function && (
+                    <li>
+                      <strong>Primary Function:</strong>{' '}
+                      <span className={styles.badge}>{agent.primary_function}</span>
+                    </li>
+                  )}
+                  {agent.readiness_level && (
+                    <li>
+                      <strong>Readiness:</strong>{' '}
+                      <span className={styles.badge}>{agent.readiness_level}</span>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Requirements */}
+          {((agent.model_requirements && agent.model_requirements.length > 0) || (agent.required_egress && agent.required_egress.length > 0)) && (
+            <div className={styles.modalSpecs}>
+              <div className={styles.specGroup}>
+                <h4><WrenchScrewdriverIcon />Requirements</h4>
+                {agent.model_requirements && agent.model_requirements.length > 0 && (
+                  <>
+                    <strong style={{ display: 'block', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Model Requirements:</strong>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                      {agent.model_requirements.map((model, index) => (
+                        <code key={index} style={{ padding: '0.25rem 0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '0.25rem', fontSize: '0.875rem' }}>
+                          {model}
+                        </code>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {agent.required_egress && agent.required_egress.length > 0 && (
+                  <>
+                    <strong style={{ display: 'block', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Network Access:</strong>
+                    <ul className={styles.nestedList}>
+                      {agent.required_egress.map((url, index) => (
+                        <li key={index}>
+                          <code style={{ fontSize: '0.875rem' }}>{url}</code>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Input Parameters */}
+          {agent.input_schema && Object.keys(agent.input_schema).length > 0 && (
+            <div className={styles.modalSpecs}>
+              <div className={styles.specGroup}>
+                <h4><CodeBracketIcon />Input Parameters</h4>
+                <ul>
+                  {Object.entries(agent.input_schema).map(([fieldName, fieldConfig]: [string, any]) => (
+                    <li key={fieldName} style={{ marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                        <code style={{ fontWeight: 600 }}>{fieldName}</code>
+                        {fieldConfig.required ? (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--error)' }}>required</span>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>optional</span>
+                        )}
+                      </div>
+                      {fieldConfig.label && (
+                        <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                          {fieldConfig.label}
+                        </div>
+                      )}
+                      {fieldConfig.description && (
+                        <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                          {fieldConfig.description}
+                        </div>
+                      )}
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                        Type: {fieldConfig.type}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Input/Output Types */}
+          {((agent.input_types && agent.input_types.length > 0) || (agent.output_types && agent.output_types.length > 0)) && (
+            <div className={styles.modalSpecs}>
+              <div className={styles.specGroup}>
+                <h4><DocumentTextIcon />Data Types</h4>
+                {agent.input_types && agent.input_types.length > 0 && (
+                  <>
+                    <strong style={{ display: 'block', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Input Types:</strong>
+                    <ul className={styles.nestedList}>
+                      {agent.input_types.map((type: any, index: number) => (
+                        <li key={index}>
+                          <strong>{type.type}:</strong> {type.mime_types?.join(', ') || 'N/A'}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {agent.output_types && agent.output_types.length > 0 && (
+                  <>
+                    <strong style={{ display: 'block', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Output Types:</strong>
+                    <ul className={styles.nestedList}>
+                      {agent.output_types.map((type: any, index: number) => (
+                        <li key={index}>
+                          <strong>{type.type}:</strong> {type.mime_types?.join(', ') || 'N/A'}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Facets - Agent Characteristics */}
+          {agent.facets && Object.keys(agent.facets).length > 0 && (
+            <div className={styles.modalSpecs}>
+              <div className={styles.specGroup}>
+                <h4><LightBulbIcon />Agent Characteristics</h4>
+                <ul>
+                  {agent.facets.autonomy && (
+                    <li>
+                      <strong>Autonomy Level:</strong>{' '}
+                      <span className={styles.badge}>{agent.facets.autonomy}</span>
+                    </li>
+                  )}
+                  {agent.facets.risk_tier && (
+                    <li>
+                      <strong>Risk Tier:</strong>{' '}
+                      <span className={styles.badge}>{agent.facets.risk_tier}</span>
+                    </li>
+                  )}
+                  {agent.facets.latency && (
+                    <li>
+                      <strong>Latency:</strong>{' '}
+                      <span className={styles.badge}>{agent.facets.latency}</span>
+                    </li>
+                  )}
+                  {agent.facets.cost_profile && (
+                    <li>
+                      <strong>Cost:</strong>{' '}
+                      <span className={styles.badge}>{agent.facets.cost_profile}</span>
+                    </li>
+                  )}
+                  {agent.facets.domains && agent.facets.domains.length > 0 && (
+                    <li>
+                      <strong>Domains:</strong>{' '}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+                        {agent.facets.domains.map((domain: string, index: number) => (
+                          <span key={index} className={styles.badge}>{domain}</span>
+                        ))}
+                      </div>
+                    </li>
+                  )}
+                  {agent.facets.modalities && agent.facets.modalities.length > 0 && (
+                    <li>
+                      <strong>Modalities:</strong>{' '}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+                        {agent.facets.modalities.map((modality: string, index: number) => (
+                          <span key={index} className={styles.badge}>{modality}</span>
+                        ))}
+                      </div>
+                    </li>
+                  )}
+                  {agent.facets.model_tooling && agent.facets.model_tooling.length > 0 && (
+                    <li>
+                      <strong>Model Tooling:</strong>{' '}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+                        {agent.facets.model_tooling.map((tool: string, index: number) => (
+                          <span key={index} className={styles.badge}>{tool}</span>
+                        ))}
+                      </div>
+                    </li>
+                  )}
+                  {agent.facets.industries && agent.facets.industries.length > 0 && (
+                    <li>
+                      <strong>Industries:</strong>{' '}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+                        {agent.facets.industries.map((industry: string, index: number) => (
+                          <span key={index} className={styles.badge}>{industry}</span>
+                        ))}
+                      </div>
+                    </li>
+                  )}
+                  {agent.facets.integrations && agent.facets.integrations.length > 0 && (
+                    <li>
+                      <strong>Integrations:</strong>{' '}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+                        {agent.facets.integrations.map((integration: string, index: number) => (
+                          <span key={index} className={styles.badge}>{integration}</span>
+                        ))}
+                      </div>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          )}
 
           <div className={styles.modalSpecs}>
             <div className={styles.specGroup}>
