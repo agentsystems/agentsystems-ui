@@ -220,7 +220,16 @@ export default function IndexConnectionsPage() {
                 type="text"
                 value={formData.url}
                 onChange={(e) => {
-                  setFormData(prev => ({ ...prev, url: e.target.value }))
+                  const newUrl = e.target.value
+                  setFormData(prev => {
+                    // If URL changes while enabled, uncheck enabled to require re-acknowledgement
+                    const shouldDisable = prev.enabled && prev.url && newUrl !== prev.url
+                    return {
+                      ...prev,
+                      url: newUrl,
+                      enabled: shouldDisable ? false : prev.enabled
+                    }
+                  })
                   if (errors.url) setErrors(prev => ({ ...prev, url: '' }))
                 }}
                 className={`${styles.input} ${errors.url ? styles.inputError : ''}`}
@@ -255,11 +264,14 @@ export default function IndexConnectionsPage() {
                   checked={formData.enabled}
                   onChange={(e) => handleEnableChange(e.target.checked)}
                   className={styles.checkbox}
+                  disabled={!formData.url}
                 />
                 Enabled
               </label>
               <span className={styles.hint}>
-                Enable to browse agents from this index
+                {formData.url
+                  ? 'Enable to browse agents from this index'
+                  : 'Provide an Index API URL first'}
               </span>
             </div>
           </div>
