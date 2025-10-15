@@ -96,7 +96,7 @@ interface DeveloperInfo {
 type SortOption = 'newest' | 'oldest' | 'alphabetical'
 
 export default function Discover() {
-  const { getIndexConnections, getAgents } = useConfigStore()
+  const { getIndexConnections, getAgents, isLoading: isConfigLoading } = useConfigStore()
   const { toasts, removeToast, showSuccess, showError } = useToast()
   const [searchQuery, setSearchQuery] = useState('')
   const [agents, setAgents] = useState<IndexAgent[]>([])
@@ -117,14 +117,17 @@ export default function Discover() {
   const [hasApprovedEgress, setHasApprovedEgress] = useState(false)
   const [agentToUninstall, setAgentToUninstall] = useState<IndexAgent | null>(null)
 
-  const indexes = getIndexConnections()
+  // Wait for config to load before reading indexes
+  const indexes = isConfigLoading ? [] : getIndexConnections()
   const enabledIndexes = indexes.filter(idx => idx.enabled)
 
-  // Check which agents are installed
+  // Check which agents are installed (wait for config to load)
   useEffect(() => {
-    const configAgents = getAgents()
-    setInstalledAgents(configAgents.map(a => a.name))
-  }, [getAgents])
+    if (!isConfigLoading) {
+      const configAgents = getAgents()
+      setInstalledAgents(configAgents.map(a => a.name))
+    }
+  }, [getAgents, isConfigLoading])
 
   const isAgentInstalled = (agent: IndexAgent) => {
     // Check if this agent is installed by matching the source agent ID in labels
@@ -150,9 +153,12 @@ export default function Discover() {
     return configAgents.some(configAgent => configAgent.name === agent.name)
   }
 
+  // Fetch agents when config loads or when selected index changes
   useEffect(() => {
-    fetchAgents()
-  }, [selectedIndex])
+    if (!isConfigLoading) {
+      fetchAgents()
+    }
+  }, [selectedIndex, isConfigLoading])
 
   const fetchAgents = async () => {
     setIsLoading(true)
@@ -434,6 +440,40 @@ export default function Discover() {
     }
   }
 
+  // Show loading state while config is loading
+  if (isConfigLoading) {
+    return (
+      <div className={styles.discover}>
+        <div className={styles.header}>
+          <div>
+            <h1>Discover Agents</h1>
+            <p className={styles.subtitle}>
+              Browse and install community agents from connected indexes
+            </p>
+          </div>
+          <a
+            href="https://docs.agentsystems.ai/user-guide/discover-agents"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.docsLink}
+            title="View documentation"
+          >
+            <QuestionMarkCircleIcon className={styles.docsIcon} />
+            <span>View Docs</span>
+          </a>
+        </div>
+
+        <Card>
+          <div className={styles.loading}>
+            <div className={styles.spinner} />
+            <p>Loading configuration...</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show empty state if no enabled indexes after config loads
   if (enabledIndexes.length === 0) {
     return (
       <div className={styles.discover}>

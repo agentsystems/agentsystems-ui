@@ -78,7 +78,7 @@ export const useConfigStore = create<ConfigState>()((set, get) => ({
   // Initial state
   config: defaultConfig,
   envVars: {},
-  isLoading: false,
+  isLoading: true,  // Start as loading until loadConfig() completes
   isSaving: false,
   error: null,
   lastSaved: null,
