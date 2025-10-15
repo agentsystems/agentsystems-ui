@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useConfigStore } from '@stores/configStore'
+import { useToast } from '@hooks/useToast'
 import {
   MagnifyingGlassIcon,
   GlobeAltIcon,
@@ -28,6 +29,7 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline'
 import Card from '@components/common/Card'
+import Toast from '@components/Toast'
 import styles from './Discover.module.css'
 
 interface IndexAgent {
@@ -95,6 +97,7 @@ type SortOption = 'newest' | 'oldest' | 'alphabetical'
 
 export default function Discover() {
   const { getIndexConnections, getAgents } = useConfigStore()
+  const { toasts, removeToast, showSuccess, showError } = useToast()
   const [searchQuery, setSearchQuery] = useState('')
   const [agents, setAgents] = useState<IndexAgent[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -110,6 +113,9 @@ export default function Discover() {
   const [agentToInstall, setAgentToInstall] = useState<IndexAgent | null>(null)
   const [customAgentName, setCustomAgentName] = useState('')
   const [nameError, setNameError] = useState<string | null>(null)
+  const [hasAcknowledged, setHasAcknowledged] = useState(false)
+  const [hasApprovedEgress, setHasApprovedEgress] = useState(false)
+  const [agentToUninstall, setAgentToUninstall] = useState<IndexAgent | null>(null)
 
   const indexes = getIndexConnections()
   const enabledIndexes = indexes.filter(idx => idx.enabled)
@@ -237,7 +243,7 @@ export default function Discover() {
 
   const handleInstallAgent = (agent: IndexAgent) => {
     if (!agent.image_repository_url) {
-      alert(`Cannot install ${agent.name}: No image repository URL available. This agent has a private image repository.`)
+      showError(`Cannot install ${agent.name}: No image repository URL available. This agent has a private image repository.`)
       return
     }
 
@@ -245,6 +251,8 @@ export default function Discover() {
     setAgentToInstall(agent)
     setCustomAgentName(agent.name)
     setNameError(null)
+    setHasAcknowledged(false)
+    setHasApprovedEgress(false)
   }
 
   const confirmInstallAgent = async () => {
@@ -351,25 +359,30 @@ export default function Discover() {
       setAgentToInstall(null)
       setCustomAgentName('')
       setNameError(null)
+      setHasAcknowledged(false)
+      setHasApprovedEgress(false)
 
-      alert(`✓ Successfully installed ${customAgentName}!\n\nThe agent has been added to your configuration.\n\nRestart AgentSystems to pull the image and start the agent.`)
+      showSuccess(`Successfully installed ${customAgentName}! Restart AgentSystems to pull the image and start the agent.`)
     } catch (error) {
       console.error('Error installing agent:', error)
       setNameError(error instanceof Error ? error.message : 'Unknown error')
     }
   }
 
-  const handleUninstallAgent = async (agent: IndexAgent) => {
-    if (!confirm(`Are you sure you want to uninstall ${agent.name}?`)) {
-      return
-    }
+  const handleUninstallAgent = (agent: IndexAgent) => {
+    // Show uninstall modal
+    setAgentToUninstall(agent)
+  }
+
+  const confirmUninstallAgent = async () => {
+    if (!agentToUninstall) return
 
     try {
       // Get config store methods
       const { deleteAgent, saveConfig, getAgents } = useConfigStore.getState()
 
       // Delete agent
-      deleteAgent(agent.name)
+      deleteAgent(agentToUninstall.name)
 
       // Auto-save config to disk
       await saveConfig()
@@ -378,10 +391,14 @@ export default function Discover() {
       const updatedAgents = getAgents()
       setInstalledAgents(updatedAgents.map(a => a.name))
 
-      alert(`✓ Successfully uninstalled ${agent.name}!\n\nThe agent has been removed from your configuration.\n\nRestart AgentSystems to stop the agent.`)
+      // Close modal
+      setAgentToUninstall(null)
+
+      showSuccess(`Successfully uninstalled ${agentToUninstall.name}! Restart AgentSystems to stop the agent.`)
     } catch (error) {
       console.error('Error uninstalling agent:', error)
-      alert(`Failed to uninstall ${agent.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      showError(`Failed to uninstall ${agentToUninstall.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setAgentToUninstall(null)
     }
   }
 
@@ -609,8 +626,10 @@ export default function Discover() {
           setAgentToInstall(null)
           setCustomAgentName('')
           setNameError(null)
+          setHasAcknowledged(false)
+          setHasApprovedEgress(false)
         }}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px' }}>
             <div className={styles.modalHeader}>
               <div>
                 <h2>Install Agent</h2>
@@ -622,6 +641,8 @@ export default function Discover() {
                 setAgentToInstall(null)
                 setCustomAgentName('')
                 setNameError(null)
+                setHasAcknowledged(false)
+                setHasApprovedEgress(false)
               }}>×</button>
             </div>
 
@@ -677,6 +698,117 @@ export default function Discover() {
                   </div>
                 )}
               </div>
+
+              {/* Required Egress Section */}
+              {agentToInstall.required_egress && agentToInstall.required_egress.length > 0 && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                    Required Network Access
+                  </label>
+                  <div style={{
+                    padding: '0.75rem',
+                    backgroundColor: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.875rem',
+                    marginBottom: '0.75rem'
+                  }}>
+                    <p style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
+                      This agent requires access to the following URLs:
+                    </p>
+                    <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                      {agentToInstall.required_egress.map((url, index) => (
+                        <li key={index} style={{ marginBottom: '0.25rem' }}>
+                          <code style={{ fontSize: '0.875rem' }}>{url}</code>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Network Access Approval Checkbox */}
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.75rem',
+                      cursor: 'pointer',
+                      marginTop: '0.75rem'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={hasApprovedEgress}
+                        onChange={(e) => setHasApprovedEgress(e.target.checked)}
+                        style={{
+                          marginTop: '0.25rem',
+                          cursor: 'pointer',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span style={{ fontSize: '0.9rem' }}>
+                        I approve network access to the destinations listed above
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Acknowledgements Section */}
+              <div style={{ marginTop: '1.5rem' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '1rem'
+                }}>
+                  <div style={{
+                    flex: 1,
+                    height: '1px',
+                    backgroundColor: 'var(--border)'
+                  }}></div>
+                  <label style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Acknowledgement
+                  </label>
+                  <div style={{
+                    flex: 1,
+                    height: '1px',
+                    backgroundColor: 'var(--border)'
+                  }}></div>
+                </div>
+
+                {/* Third-Party Software Acknowledgment Checkbox */}
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem',
+                  padding: '1rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  lineHeight: '1.5'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={hasAcknowledged}
+                    onChange={(e) => setHasAcknowledged(e.target.checked)}
+                    style={{
+                      marginTop: '0.25rem',
+                      width: '1rem',
+                      height: '1rem',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <span>
+                    I acknowledge that I am installing third-party software that has not been reviewed, verified, or endorsed by AgentSystems.
+                    I accept sole responsibility for any issues, security vulnerabilities, or damages that may result from installing and running this agent.
+                  </span>
+                </label>
+              </div>
             </div>
 
             <div className={styles.modalFooter}>
@@ -686,6 +818,8 @@ export default function Discover() {
                   setAgentToInstall(null)
                   setCustomAgentName('')
                   setNameError(null)
+                  setHasAcknowledged(false)
+                  setHasApprovedEgress(false)
                 }}
               >
                 Cancel
@@ -693,7 +827,11 @@ export default function Discover() {
               <button
                 className="btn btn-lg btn-bright"
                 onClick={confirmInstallAgent}
-                disabled={!customAgentName.trim()}
+                disabled={
+                  !customAgentName.trim() ||
+                  !hasAcknowledged ||
+                  (agentToInstall.required_egress && agentToInstall.required_egress.length > 0 && !hasApprovedEgress)
+                }
               >
                 Install
               </button>
@@ -701,6 +839,75 @@ export default function Discover() {
           </div>
         </div>
       )}
+
+      {/* Uninstall Confirmation Modal */}
+      {agentToUninstall && (
+        <div className={styles.modalOverlay} onClick={() => setAgentToUninstall(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h2>Uninstall Agent</h2>
+                <p className={styles.modalDeveloper}>
+                  {agentToUninstall.name} by {agentToUninstall.developer.name}
+                </p>
+              </div>
+              <button className={styles.closeButton} onClick={() => setAgentToUninstall(null)}>×</button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className={styles.modalDescription}>
+                <p>{agentToUninstall.description}</p>
+              </div>
+
+              <div style={{
+                marginTop: '1.5rem',
+                padding: '1rem',
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                borderRadius: '0.375rem'
+              }}>
+                <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}>
+                  <ExclamationTriangleIcon style={{ width: '1.25rem', height: '1.25rem', display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom' }} />
+                  Are you sure you want to uninstall this agent?
+                </p>
+                <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                  <li>The agent will be removed from your configuration</li>
+                  <li>You will need to restart AgentSystems to stop the agent container</li>
+                  <li>Any data or state specific to this agent may be lost</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className="btn btn-lg btn-ghost"
+                onClick={() => setAgentToUninstall(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-lg btn-subtle"
+                onClick={confirmUninstallAgent}
+                style={{ color: 'var(--error)' }}
+              >
+                Uninstall
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast notifications */}
+      {toasts.map((toast, index) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          index={index}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
     </div>
   )
 }
