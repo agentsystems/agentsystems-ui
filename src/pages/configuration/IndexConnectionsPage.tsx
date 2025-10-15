@@ -363,6 +363,7 @@ export default function IndexConnectionsPage() {
       {/* Enable Confirmation Modal */}
       {showEnableModal && (
         <EnableConfirmationModal
+          indexUrl={formData.url}
           onConfirm={handleEnableConfirm}
           onCancel={handleEnableCancel}
         />
@@ -385,11 +386,12 @@ export default function IndexConnectionsPage() {
 
 // Enable Confirmation Modal Component
 interface EnableConfirmationModalProps {
+  indexUrl: string
   onConfirm: () => void
   onCancel: () => void
 }
 
-function EnableConfirmationModal({ onConfirm, onCancel }: EnableConfirmationModalProps) {
+function EnableConfirmationModal({ indexUrl, onConfirm, onCancel }: EnableConfirmationModalProps) {
   return (
     <div className={styles.modalOverlay} onClick={onCancel}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -400,8 +402,25 @@ function EnableConfirmationModal({ onConfirm, onCancel }: EnableConfirmationModa
 
         <div className={styles.modalBody}>
           <p>
-            <strong>You are enabling an agent index.</strong>
+            <strong>You are enabling an agent index:</strong>
           </p>
+          <div style={{
+            padding: '0.75rem',
+            background: 'var(--surface-2)',
+            borderRadius: '0.25rem',
+            marginBottom: '1rem',
+            border: '1px solid var(--border)'
+          }}>
+            <code style={{
+              display: 'block',
+              wordBreak: 'break-all',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.875rem',
+              color: 'var(--text)'
+            }}>
+              {indexUrl}
+            </code>
+          </div>
           <p>
             Agents discovered through indexes are provided by third-party developers.
             AgentSystems does not review, endorse, verify, or control any agents listed in indexes.
@@ -418,7 +437,7 @@ function EnableConfirmationModal({ onConfirm, onCancel }: EnableConfirmationModa
             Cancel
           </button>
           <button className="btn btn-lg btn-bright" onClick={onConfirm}>
-            I Understand, Enable Index
+            Enable Index
           </button>
         </div>
       </div>
