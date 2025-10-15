@@ -116,6 +116,8 @@ export default function Discover() {
   const [hasAcknowledged, setHasAcknowledged] = useState(false)
   const [hasApprovedEgress, setHasApprovedEgress] = useState(false)
   const [agentToUninstall, setAgentToUninstall] = useState<IndexAgent | null>(null)
+  const [displayCount, setDisplayCount] = useState(12)
+  const LOAD_MORE_INCREMENT = 12
 
   // Wait for config to load before reading indexes
   const indexes = isConfigLoading ? [] : getIndexConnections()
@@ -238,6 +240,19 @@ export default function Discover() {
           return 0
       }
     })
+
+  // Reset display count when filters change
+  useEffect(() => {
+    setDisplayCount(12)
+  }, [searchQuery, selectedIndex, sortBy, developerFilter])
+
+  // Paginate filtered agents
+  const displayedAgents = filteredAgents.slice(0, displayCount)
+  const hasMore = displayCount < filteredAgents.length
+
+  const handleLoadMore = () => {
+    setDisplayCount(prev => prev + LOAD_MORE_INCREMENT)
+  }
 
   const fetchDeveloperInfo = async (developerName: string, indexUrl: string) => {
     // Show modal immediately with placeholder data
@@ -522,7 +537,7 @@ export default function Discover() {
               </div>
               <h1>{developerFilter}</h1>
               <p className={styles.subtitle}>
-                {filteredAgents.length} {filteredAgents.length === 1 ? 'agent' : 'agents'} by this developer
+                Showing {displayedAgents.length} of {filteredAgents.length} {filteredAgents.length === 1 ? 'agent' : 'agents'} by this developer
               </p>
             </>
           ) : (
@@ -624,25 +639,38 @@ export default function Discover() {
           </div>
         </Card>
       ) : (
-        <section className={styles.section}>
-          <h2>
-            {searchQuery ? `Search Results (${filteredAgents.length})` : `All Agents (${filteredAgents.length})`}
-          </h2>
+        <>
+          <section className={styles.section}>
+            <h2>
+              {searchQuery ? `Search Results (${filteredAgents.length})` : `All Agents (${filteredAgents.length})`}
+            </h2>
 
-          <div className={styles.agentGrid}>
-            {filteredAgents.map(agent => (
-              <AgentCard
-                key={agent.id}
-                agent={agent}
-                onClick={() => setSelectedAgent(agent)}
-                onDeveloperClick={(devName, indexUrl) => fetchDeveloperInfo(devName, indexUrl)}
-                onInstall={() => handleInstallAgent(agent)}
-                onUninstall={() => handleUninstallAgent(agent)}
-                isInstalled={isAgentInstalled(agent)}
-              />
-            ))}
-          </div>
-        </section>
+            <div className={styles.agentGrid}>
+              {displayedAgents.map(agent => (
+                <AgentCard
+                  key={agent.id}
+                  agent={agent}
+                  onClick={() => setSelectedAgent(agent)}
+                  onDeveloperClick={(devName, indexUrl) => fetchDeveloperInfo(devName, indexUrl)}
+                  onInstall={() => handleInstallAgent(agent)}
+                  onUninstall={() => handleUninstallAgent(agent)}
+                  isInstalled={isAgentInstalled(agent)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {hasMore && (
+            <div className={styles.loadMoreContainer}>
+              <button
+                onClick={handleLoadMore}
+                className="btn btn-lg btn-subtle"
+              >
+                Load More ({filteredAgents.length - displayCount} remaining)
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Agent Detail Modal */}
@@ -1002,6 +1030,17 @@ function AgentCard({ agent, onClick, onDeveloperClick, onInstall, onUninstall, i
       </div>
 
       <div className={styles.developerInfo}>
+        {agent.developer.avatar_url ? (
+          <img
+            src={agent.developer.avatar_url}
+            alt={agent.developer.name}
+            className={styles.developerAvatar}
+          />
+        ) : (
+          <div className={styles.developerAvatarPlaceholder}>
+            {agent.developer.name.charAt(0).toUpperCase()}
+          </div>
+        )}
         <span className={styles.developerLabel}>by </span>
         <button
           className={styles.developerLink}
