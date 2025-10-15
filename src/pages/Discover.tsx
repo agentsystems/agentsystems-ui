@@ -32,6 +32,14 @@ import Card from '@components/common/Card'
 import Toast from '@components/Toast'
 import styles from './Discover.module.css'
 
+interface FieldConfig {
+  required?: boolean
+  label?: string
+  description?: string
+  type?: string
+  [key: string]: unknown
+}
+
 interface IndexAgent {
   id: string
   name: string
@@ -54,13 +62,13 @@ interface IndexAgent {
   readiness_level?: string | null
   // Compatibility Requirements
   model_requirements?: string[] | null
-  required_integrations?: any[] | null
+  required_integrations?: Record<string, unknown>[] | null
   required_egress?: string[] | null
-  input_types?: any[] | null
-  output_types?: any[] | null
-  input_schema?: Record<string, any> | null
+  input_types?: Array<{ type: string; mime_types?: string[] }> | null
+  output_types?: Array<{ type: string; mime_types?: string[] }> | null
+  input_schema?: Record<string, FieldConfig> | null
   // Flexible metadata
-  facets?: Record<string, any> | null
+  facets?: Record<string, unknown> | null
   _index_name?: string // Track which index this came from
   _index_url?: string // Track the index URL for API calls
 }
@@ -109,7 +117,6 @@ export default function Discover() {
   const [isDeveloperLoading, setIsDeveloperLoading] = useState(false)
   const [previousDeveloper, setPreviousDeveloper] = useState<{ info: DeveloperInfo; indexUrl: string } | null>(null)
   const [developerFilter, setDeveloperFilter] = useState<string | null>(null)
-  const [installedAgents, setInstalledAgents] = useState<string[]>([])
   const [agentToInstall, setAgentToInstall] = useState<IndexAgent | null>(null)
   const [customAgentName, setCustomAgentName] = useState('')
   const [nameError, setNameError] = useState<string | null>(null)
@@ -123,13 +130,7 @@ export default function Discover() {
   const indexes = isConfigLoading ? [] : getIndexConnections()
   const enabledIndexes = indexes.filter(idx => idx.enabled)
 
-  // Check which agents are installed (wait for config to load)
-  useEffect(() => {
-    if (!isConfigLoading) {
-      const configAgents = getAgents()
-      setInstalledAgents(configAgents.map(a => a.name))
-    }
-  }, [getAgents, isConfigLoading])
+  // Note: Agent installation status is checked dynamically via isAgentInstalled()
 
   const isAgentInstalled = (agent: IndexAgent) => {
     // Check if this agent is installed by matching the source agent ID in labels
@@ -160,6 +161,7 @@ export default function Discover() {
     if (!isConfigLoading) {
       fetchAgents()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIndex, isConfigLoading])
 
   const fetchAgents = async () => {
@@ -315,7 +317,7 @@ export default function Discover() {
       // Parse image repository URL (e.g., "docker.io/username/repo:tag")
       const parseImageUrl = (url: string) => {
         // Remove protocol if present
-        let cleanUrl = url.replace(/^https?:\/\//, '')
+        const cleanUrl = url.replace(/^https?:\/\//, '')
 
         // Split into registry and path
         const parts = cleanUrl.split('/')
@@ -343,7 +345,8 @@ export default function Discover() {
         return { registryUrl, repoPath, tag }
       }
 
-      const { registryUrl, repoPath, tag } = parseImageUrl(agentToInstall.image_repository_url)
+      // At this point, image_repository_url is guaranteed to be non-null due to the check at line 288
+      const { registryUrl, repoPath, tag } = parseImageUrl(agentToInstall.image_repository_url!)
 
       // Determine registry connection ID and name
       const registryIdMap: Record<string, string> = {
@@ -394,10 +397,6 @@ export default function Discover() {
       // Auto-save config to disk
       await saveConfig()
 
-      // Update installed agents list
-      const updatedAgents = getAgents()
-      setInstalledAgents(updatedAgents.map(a => a.name))
-
       // Close modal
       setAgentToInstall(null)
       setCustomAgentName('')
@@ -439,10 +438,6 @@ export default function Discover() {
 
       // Auto-save config to disk
       await saveConfig()
-
-      // Update installed agents list
-      const updatedAgents = getAgents()
-      setInstalledAgents(updatedAgents.map(a => a.name))
 
       // Close modal
       setAgentToUninstall(null)
@@ -1216,7 +1211,7 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall,
               <div className={styles.specGroup}>
                 <h4><CodeBracketIcon />Input Parameters</h4>
                 <ul>
-                  {Object.entries(agent.input_schema).map(([fieldName, fieldConfig]: [string, any]) => (
+                  {Object.entries(agent.input_schema).map(([fieldName, fieldConfig]) => (
                     <li key={fieldName} style={{ marginBottom: '1rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                         <code style={{ fontWeight: 600 }}>{fieldName}</code>
@@ -1255,7 +1250,7 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall,
                   <>
                     <strong style={{ display: 'block', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Input Types:</strong>
                     <ul className={styles.nestedList}>
-                      {agent.input_types.map((type: any, index: number) => (
+                      {agent.input_types.map((type, index: number) => (
                         <li key={index}>
                           <strong>{type.type}:</strong> {type.mime_types?.join(', ') || 'N/A'}
                         </li>
@@ -1267,7 +1262,7 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall,
                   <>
                     <strong style={{ display: 'block', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Output Types:</strong>
                     <ul className={styles.nestedList}>
-                      {agent.output_types.map((type: any, index: number) => (
+                      {agent.output_types.map((type, index: number) => (
                         <li key={index}>
                           <strong>{type.type}:</strong> {type.mime_types?.join(', ') || 'N/A'}
                         </li>
@@ -1653,7 +1648,7 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
                         </ul>
                       </div>
                     )}
-                    {developer.open_to_collaboration && (
+                    {developer.open_to_collaboration === true && (
                       <div style={{ marginBottom: '1.5rem' }}>
                         <span className={styles.collaborationBadge}>
                           <HandRaisedIcon style={{ width: '1rem', height: '1rem' }} />
