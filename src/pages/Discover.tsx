@@ -126,8 +126,13 @@ export default function Discover() {
     setInstalledAgents(configAgents.map(a => a.name))
   }, [getAgents])
 
-  const isAgentInstalled = (agentName: string) => {
-    return installedAgents.includes(agentName)
+  const isAgentInstalled = (agent: IndexAgent) => {
+    // Check if this agent is installed by looking for the source agent ID in labels
+    const configAgents = getAgents()
+    return configAgents.some(configAgent =>
+      configAgent.labels?.['index.source.agent.id'] === agent.id ||
+      configAgent.name === agent.name
+    )
   }
 
   useEffect(() => {
@@ -334,7 +339,7 @@ export default function Discover() {
         })
       }
 
-      // Add agent with custom name
+      // Add agent with custom name and metadata to track source
       addAgent({
         name: customAgentName,
         repo: repoPath,
@@ -342,7 +347,9 @@ export default function Discover() {
         registry_connection: registryId,
         egressAllowlist: (agentToInstall.required_egress || []).join(', '),
         labels: {
-          'agent.port': '8000'
+          'agent.port': '8000',
+          'index.source.agent.id': agentToInstall.id,
+          'index.source.agent.name': agentToInstall.name
         },
         envVariables: {},
         exposePorts: '8000'
@@ -381,8 +388,18 @@ export default function Discover() {
       // Get config store methods
       const { deleteAgent, saveConfig, getAgents } = useConfigStore.getState()
 
-      // Delete agent
-      deleteAgent(agentToUninstall.name)
+      // Find the installed agent by matching the source agent ID in labels
+      const configAgents = getAgents()
+      const installedAgent = configAgents.find(configAgent =>
+        configAgent.labels?.['index.source.agent.id'] === agentToUninstall.id
+      )
+
+      if (!installedAgent) {
+        throw new Error('Agent not found in configuration')
+      }
+
+      // Delete agent using its actual configured name
+      deleteAgent(installedAgent.name)
 
       // Auto-save config to disk
       await saveConfig()
@@ -394,7 +411,7 @@ export default function Discover() {
       // Close modal
       setAgentToUninstall(null)
 
-      showSuccess(`Successfully uninstalled ${agentToUninstall.name}! Restart AgentSystems to stop the agent.`)
+      showSuccess(`Successfully uninstalled ${installedAgent.name}! Restart AgentSystems to stop the agent.`)
     } catch (error) {
       console.error('Error uninstalling agent:', error)
       showError(`Failed to uninstall ${agentToUninstall.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -566,7 +583,7 @@ export default function Discover() {
                 onDeveloperClick={(devName, indexUrl) => fetchDeveloperInfo(devName, indexUrl)}
                 onInstall={() => handleInstallAgent(agent)}
                 onUninstall={() => handleUninstallAgent(agent)}
-                isInstalled={isAgentInstalled(agent.name)}
+                isInstalled={isAgentInstalled(agent)}
               />
             ))}
           </div>
@@ -593,7 +610,7 @@ export default function Discover() {
           }}
           onInstall={() => handleInstallAgent(selectedAgent)}
           onUninstall={() => handleUninstallAgent(selectedAgent)}
-          isInstalled={isAgentInstalled(selectedAgent.name)}
+          isInstalled={isAgentInstalled(selectedAgent)}
         />
       )}
 
