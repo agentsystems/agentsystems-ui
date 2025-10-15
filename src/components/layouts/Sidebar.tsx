@@ -81,6 +81,7 @@ export default function Sidebar() {
                 aria-label={`Navigate to ${item.name} page`}
                 data-tour={
                   item.name.toLowerCase() === 'agents' ? 'agents-nav' :
+                  item.name.toLowerCase() === 'discover' ? 'discovery-nav' :
                   item.name.toLowerCase() === 'configuration' ? 'settings-nav' :
                   item.name.toLowerCase() === 'support' ? 'support-nav' :
                   undefined

@@ -568,12 +568,12 @@ Each deployment specifies:<br>
       }
     },
 
-    // Step 19: Agent Ecosystem
+    // Step 19: Discover
     {
       element: '[data-tour="discovery-nav"]',
       popover: {
-        title: 'Agent Ecosystem 🌐',
-        description: 'Discover and install community and commercial AI agents.<br><br>The <strong>Agent Ecosystem</strong> provides:<br>• <strong>Pre-built agents:</strong> Common tasks ready to use<br>• <strong>Community solutions:</strong> Contributed by developers<br>• <strong>Enterprise templates:</strong> Production-ready agents<br>• <strong>One-click deployment:</strong> Easy installation',
+        title: 'Discover Agents 🌐',
+        description: 'Discover and install community and commercial AI agents.<br><br>The <strong>Discover</strong> page provides:<br>• <strong>Pre-built agents:</strong> Common tasks ready to use<br>• <strong>Community solutions:</strong> Contributed by developers<br>• <strong>Enterprise templates:</strong> Production-ready agents<br>• <strong>One-click deployment:</strong> Easy installation',
         side: 'right',
         align: 'start'
       },
