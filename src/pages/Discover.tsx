@@ -127,12 +127,27 @@ export default function Discover() {
   }, [getAgents])
 
   const isAgentInstalled = (agent: IndexAgent) => {
-    // Check if this agent is installed by looking for the source agent ID in labels
+    // Check if this agent is installed by matching the source agent ID in labels
     const configAgents = getAgents()
-    return configAgents.some(configAgent =>
-      configAgent.labels?.['index.source.agent.id'] === agent.id ||
-      configAgent.name === agent.name
+
+    // First, try to match by index source ID (most accurate)
+    const matchById = configAgents.some(configAgent =>
+      configAgent.labels?.['index.source.agent.id'] === agent.id
     )
+    if (matchById) return true
+
+    // Fallback: match by name only for agents installed before ID tracking was added
+    // This only works if there's no ambiguity (no other agents with tracking labels using this name)
+    const hasAnyTrackedAgent = configAgents.some(configAgent =>
+      configAgent.labels?.['index.source.agent.id'] && configAgent.name === agent.name
+    )
+    if (hasAnyTrackedAgent) {
+      // If there's already a tracked agent with this name, don't match by name alone
+      return false
+    }
+
+    // Only match by name if no tracked agents use this name
+    return configAgents.some(configAgent => configAgent.name === agent.name)
   }
 
   useEffect(() => {
