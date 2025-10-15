@@ -82,14 +82,14 @@
 }
 
 .resourceHeader h3 {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text);
   margin: 0 0 4px 0;
 }
 
 .resourceHeader p {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.4;
   margin: 0;
@@ -104,7 +104,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -133,7 +133,7 @@
 }
 
 .statusCard h3 {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text);
   margin: 0 0 16px 0;
@@ -150,7 +150,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .statusIndicator {
@@ -192,7 +192,7 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 16px;
   cursor: pointer;
   text-decoration: underline;
   padding: 0;
@@ -219,7 +219,7 @@
 }
 
 .feedbackContent h3 {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--warning);
   margin: 0 0 8px 0;
@@ -238,7 +238,7 @@
   color: var(--bg);
   border: none;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;

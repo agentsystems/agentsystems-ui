@@ -14,6 +14,7 @@ import {
   RocketLaunchIcon,
   LinkIcon,
   PaintBrushIcon,
+  GlobeAltIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
@@ -73,6 +74,7 @@ export default function ConfigurationOverview() {
   
   const {
     getRegistryConnections,
+    getIndexConnections,
     getAgents,
     getEnvVars,
     getModelConnections,
@@ -98,6 +100,7 @@ export default function ConfigurationOverview() {
 
   // Calculate status for each configuration area
   const registries = getRegistryConnections()
+  const indexes = getIndexConnections()
   const agents = getAgents()
   const credentials = getEnvVars()
   const modelConnections = getModelConnections()
@@ -125,6 +128,16 @@ export default function ConfigurationOverview() {
     if (enabled.length === 0) return { status: 'error' as const, text: 'All disabled', description: 'Enable at least one model connection' }
     if (disabled.length > 0) return { status: 'warning' as const, text: `${enabled.length} enabled`, description: `${disabled.length} models disabled` }
     return { status: 'healthy' as const, text: `${modelConnections.length} connected`, description: 'All model connections enabled and ready' }
+  })()
+
+  // Index Connections Status
+  const indexesStatus = (() => {
+    if (indexes.length === 0) return { status: 'warning' as const, text: 'No indexes', description: 'Add index connections to discover community agents' }
+    const disabled = indexes.filter(i => !i.enabled)
+    const enabled = indexes.filter(i => i.enabled)
+    if (enabled.length === 0) return { status: 'warning' as const, text: 'All disabled', description: `${indexes.length} indexes configured but not enabled` }
+    if (disabled.length > 0) return { status: 'healthy' as const, text: `${enabled.length} enabled`, description: `${disabled.length} indexes disabled` }
+    return { status: 'healthy' as const, text: `${indexes.length} connected`, description: 'All index connections enabled' }
   })()
 
   // Registries Status
@@ -265,6 +278,17 @@ export default function ConfigurationOverview() {
               href="/configuration/models"
               onClick={() => handleCardClick('/configuration/models')}
               tourId="model-connections-card"
+            />
+
+            <ConfigCard
+              title="Index Connections"
+              icon={GlobeAltIcon}
+              status={indexesStatus.status}
+              statusText={indexesStatus.text}
+              description={indexesStatus.description}
+              href="/configuration/indexes"
+              onClick={() => handleCardClick('/configuration/indexes')}
+              tourId="index-connections-card"
             />
 
             <ConfigCard

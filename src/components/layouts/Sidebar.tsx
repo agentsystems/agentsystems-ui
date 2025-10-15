@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { 
-  HomeIcon, 
+import {
+  HomeIcon,
   CpuChipIcon,
-  RectangleStackIcon,
   BoltIcon,
   DocumentTextIcon,
   WrenchScrewdriverIcon,
+  GlobeAltIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 import { useAudio } from '@hooks/useAudio'
@@ -31,16 +31,21 @@ const navigationSections: NavigationSection[] = [
     title: 'Main',
     items: [
       { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: HomeIcon },
+      { name: 'Discover', href: '/discover', icon: GlobeAltIcon },
       { name: 'Agents', href: ROUTES.AGENTS, icon: CpuChipIcon },
       { name: 'Executions', href: ROUTES.EXECUTIONS, icon: BoltIcon },
     ]
   },
   {
-    title: 'Platform',
+    title: 'System',
     items: [
-      { name: 'Agent Ecosystem', href: '/ecosystem', icon: RectangleStackIcon, badge: 'BETA' },
       { name: 'Configuration', href: ROUTES.CONFIGURATION, icon: WrenchScrewdriverIcon },
       { name: 'Logs', href: ROUTES.LOGS, icon: DocumentTextIcon },
+    ]
+  },
+  {
+    title: 'Help',
+    items: [
       { name: 'Support', href: '/support', icon: QuestionMarkCircleIcon },
     ]
   }
@@ -76,8 +81,8 @@ export default function Sidebar() {
                 aria-label={`Navigate to ${item.name} page`}
                 data-tour={
                   item.name.toLowerCase() === 'agents' ? 'agents-nav' :
+                  item.name.toLowerCase() === 'discover' ? 'discovery-nav' :
                   item.name.toLowerCase() === 'configuration' ? 'settings-nav' :
-                  item.name.toLowerCase() === 'agent ecosystem' ? 'discovery-nav' :
                   item.name.toLowerCase() === 'support' ? 'support-nav' :
                   undefined
                 }

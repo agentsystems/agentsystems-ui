@@ -6,6 +6,7 @@ import SkipLinks from '@components/SkipLinks'
 import LoadingSpinner from '@components/LoadingSpinner'
 import ScrollToTop from '@components/ScrollToTop'
 import { useThemeStore } from '@stores/themeStore'
+import { useConfigStore } from '@stores/configStore'
 import { useScanline } from '@hooks/useScanline'
 
 // Lazy-loaded components for code splitting
@@ -13,11 +14,13 @@ const SplashScreen = lazy(() => import('@components/SplashScreen'))
 const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Agents = lazy(() => import('@pages/Agents'))
 const Marketplace = lazy(() => import('@pages/Marketplace'))
+const Discover = lazy(() => import('@pages/Discover'))
 const Executions = lazy(() => import('@pages/Executions'))
 const Logs = lazy(() => import('@pages/Logs'))
 const ConfigurationOverview = lazy(() => import('@pages/ConfigurationOverview'))
 const CredentialsPage = lazy(() => import('@pages/configuration/CredentialsPage'))
 const RegistriesPage = lazy(() => import('@pages/configuration/RegistriesPage'))
+const IndexConnectionsPage = lazy(() => import('@pages/configuration/IndexConnectionsPage'))
 const AgentsPage = lazy(() => import('@pages/configuration/AgentsPage'))
 const ConnectionPage = lazy(() => import('@pages/configuration/ConnectionPage'))
 const AppearancePage = lazy(() => import('@pages/configuration/AppearancePage'))
@@ -27,6 +30,7 @@ const Support = lazy(() => import('@pages/Support'))
 
 function App() {
   const { theme, scanlineEnabled, initTheme } = useThemeStore()
+  const { loadConfig } = useConfigStore()
 
   // Initialize scanline timing system
   useScanline()
@@ -34,6 +38,11 @@ function App() {
   useEffect(() => {
     initTheme()
   }, [initTheme])
+
+  // Load configuration from YAML file on mount (single source of truth)
+  useEffect(() => {
+    loadConfig()
+  }, [loadConfig])
 
   useEffect(() => {
     // Fallback to 'dark' if theme is not yet loaded from localStorage
@@ -88,6 +97,11 @@ function App() {
                 <Marketplace />
               </Suspense>
             } />
+            <Route path="discover" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Discover />
+              </Suspense>
+            } />
             <Route path="executions" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <Executions />
@@ -111,6 +125,11 @@ function App() {
             <Route path="configuration/registries" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <RegistriesPage />
+              </Suspense>
+            } />
+            <Route path="configuration/indexes" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <IndexConnectionsPage />
               </Suspense>
             } />
             <Route path="configuration/agents" element={

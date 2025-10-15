@@ -1,8 +1,8 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { 
-  AgentSystemsConfig, 
-  RegistryConnectionForm, 
+import {
+  AgentSystemsConfig,
+  RegistryConnectionForm,
+  IndexConnectionForm,
   AgentConfigForm,
   ModelConnectionForm
 } from '../types/config'
@@ -31,7 +31,13 @@ interface ConfigState {
   addRegistryConnection: (registry: Omit<RegistryConnectionForm, 'id'>) => void
   updateRegistryConnection: (id: string, updates: Partial<RegistryConnectionForm>) => void
   deleteRegistryConnection: (id: string) => void
-  
+
+  // Index connection management
+  getIndexConnections: () => IndexConnectionForm[]
+  addIndexConnection: (index: Omit<IndexConnectionForm, 'id'>) => void
+  updateIndexConnection: (id: string, updates: Partial<IndexConnectionForm>) => void
+  deleteIndexConnection: (id: string) => void
+
   // Model connection management
   getModelConnections: () => ModelConnectionForm[]
   addModelConnection: (model: Omit<ModelConnectionForm, 'id'>) => void
@@ -63,23 +69,22 @@ interface ConfigState {
 const defaultConfig: AgentSystemsConfig = {
   config_version: 1,
   registry_connections: {},
+  index_connections: {},
   model_connections: {},
   agents: []
 }
 
-export const useConfigStore = create<ConfigState>()(
-  persist(
-    (set, get) => ({
-      // Initial state
-      config: defaultConfig,
-      envVars: {},
-      isLoading: false,
-      isSaving: false,
-      error: null,
-      lastSaved: null,
-      hasUnsavedChanges: false,
-      restartRequired: false,
-      changesSinceRestart: [],
+export const useConfigStore = create<ConfigState>()((set, get) => ({
+  // Initial state
+  config: defaultConfig,
+  envVars: {},
+  isLoading: true,  // Start as loading until loadConfig() completes
+  isSaving: false,
+  error: null,
+  lastSaved: null,
+  hasUnsavedChanges: false,
+  restartRequired: false,
+  changesSinceRestart: [],
 
       // Load configuration from files
       loadConfig: async () => {
@@ -184,7 +189,7 @@ export const useConfigStore = create<ConfigState>()(
         set((state) => {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { [id]: _, ...remainingConnections } = state.config.registry_connections
-          
+
           // Remove agents that use this registry connection
           const filteredAgents = state.config.agents.filter(
             agent => agent.registry_connection !== id
@@ -199,6 +204,71 @@ export const useConfigStore = create<ConfigState>()(
             hasUnsavedChanges: true,
             restartRequired: true,
             changesSinceRestart: [...state.changesSinceRestart, `Deleted registry: ${id}`]
+          }
+        })
+      },
+
+      // Index connection management
+      getIndexConnections: () => {
+        const state = get()
+        if (!state.config.index_connections) return []
+
+        return Object.entries(state.config.index_connections).map(([id, connection]) =>
+          configUtils.configToIndexForm(id, connection)
+        )
+      },
+
+      addIndexConnection: (index) => {
+        const id = index.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
+        const connection = configUtils.indexFormToConfig({ ...index, id })
+
+        set((state) => ({
+          config: {
+            ...state.config,
+            index_connections: {
+              ...state.config.index_connections,
+              [id]: connection
+            }
+          },
+          hasUnsavedChanges: true
+        }))
+      },
+
+      updateIndexConnection: (id, updates) => {
+        set((state) => {
+          const existing = state.config.index_connections?.[id]
+          if (!existing) return state
+
+          const currentForm = configUtils.configToIndexForm(id, existing)
+          const updatedForm = { ...currentForm, ...updates }
+          const updatedConnection = configUtils.indexFormToConfig(updatedForm)
+
+          return {
+            config: {
+              ...state.config,
+              index_connections: {
+                ...state.config.index_connections,
+                [id]: updatedConnection
+              }
+            },
+            hasUnsavedChanges: true
+          }
+        })
+      },
+
+      deleteIndexConnection: (id) => {
+        set((state) => {
+          if (!state.config.index_connections) return state
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [id]: _, ...remainingConnections } = state.config.index_connections
+
+          return {
+            config: {
+              ...state.config,
+              index_connections: remainingConnections
+            },
+            hasUnsavedChanges: true
           }
         })
       },
@@ -460,19 +530,4 @@ export const useConfigStore = create<ConfigState>()(
           changesSinceRestart: []
         })
       }
-    }),
-    {
-      name: 'agentsystems-config-store',
-      partialize: (state) => ({
-        config: state.config,
-        envVars: state.envVars,
-        lastSaved: state.lastSaved
-      }),
-      onRehydrateStorage: () => (state) => {
-        if (state && state.lastSaved && typeof state.lastSaved === 'string') {
-          state.lastSaved = new Date(state.lastSaved)
-        }
-      }
-    }
-  )
-)
+    }))

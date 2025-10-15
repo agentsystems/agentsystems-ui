@@ -151,7 +151,7 @@
 
 .threadId {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
   background-color: var(--surface-2);
   padding: 0.125rem 0.5rem;
@@ -159,7 +159,7 @@
 }
 
 .state {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   padding: 0.125rem 0.5rem;
   border-radius: 4px;
   font-weight: 500;
@@ -190,7 +190,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   font-family: var(--font-mono);
 }
@@ -263,7 +263,7 @@
 }
 
 .fileSize {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
   font-family: var(--font-mono);
 }
@@ -369,7 +369,7 @@
 }
 
 .previewFileInfo {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
   font-family: var(--font-mono);
 }

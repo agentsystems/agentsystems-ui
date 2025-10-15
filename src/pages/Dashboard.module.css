@@ -20,7 +20,7 @@
 
 .tourButton {
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: 14px;
   opacity: 0.6;
   border: 1px solid var(--color-border);
   background: var(--color-surface);

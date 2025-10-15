@@ -164,7 +164,7 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
-  font-size: 14px;
+  font-size: 16px;
   overflow-x: hidden;
   min-height: 100vh;
   transition: all 0.3s ease;
@@ -267,30 +267,30 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.025em;
 }
 
-h1 { 
-  font-size: 2rem; 
+h1 {
+  font-size: 2.5rem;
   font-weight: 700;
   letter-spacing: -0.5px;
 }
-h2 { 
-  font-size: 1.5rem; 
+h2 {
+  font-size: 1.75rem;
   font-weight: 600;
   letter-spacing: -0.25px;
 }
-h3 { 
-  font-size: 1.25rem; 
+h3 {
+  font-size: 1.5rem;
   font-weight: 600;
 }
-h4 { 
-  font-size: 1.125rem; 
+h4 {
+  font-size: 1.25rem;
   font-weight: 600;
 }
-h5 { 
-  font-size: 1rem; 
+h5 {
+  font-size: 1.2rem;
   font-weight: 500;
 }
-h6 { 
-  font-size: 0.875rem; 
+h6 {
+  font-size: 1rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -393,13 +393,13 @@ a:hover {
 /* Size variants */
 .btn-sm {
   padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   min-height: 32px;
 }
 
 .btn-lg {
   padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   min-height: 40px;
 }
 

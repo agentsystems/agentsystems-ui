@@ -1,4 +1,4 @@
-.agentsPage {
+.indexConnectionsPage {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0;
@@ -82,6 +82,25 @@
 .docsIcon {
   width: 1rem;
   height: 1rem;
+}
+
+.disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: var(--warning);
+}
+
+.disclaimer svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
 }
 
 .formCard {
@@ -172,57 +191,29 @@
   color: var(--text-muted);
 }
 
-.advancedToggle {
-  padding: 1rem 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+.linkHint {
+  color: var(--accent);
+  text-decoration: none;
 }
 
-.advancedSection {
+.linkHint:hover {
+  text-decoration: underline;
+}
+
+.checkboxLabel {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.envVarsContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.envVarRow {
-  display: grid;
-  grid-template-columns: 1fr 2fr auto;
-  gap: 0.5rem;
   align-items: center;
-}
-
-.envVarKey {
-  padding: 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-2);
-  color: var(--text);
+  gap: 0.5rem;
   font-size: 0.875rem;
-  font-family: var(--font-mono);
-}
-
-.envVarValue {
-  padding: 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-2);
+  font-weight: 500;
   color: var(--text);
-  font-size: 0.875rem;
+  cursor: pointer;
 }
 
-.envVarKey:focus, .envVarValue:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
 }
 
 .formActions {
@@ -308,11 +299,37 @@
   color: var(--text-muted);
 }
 
-.agentName {
+.indexName {
   font-family: var(--font-mono);
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.statusBadge.enabled {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.statusBadge.disabled {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .itemActions {
@@ -328,7 +345,7 @@
 
 .detailRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
 }
 
@@ -336,14 +353,12 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-muted);
-  min-width: 4rem;
-  flex-shrink: 0;
+  min-width: 3rem;
 }
 
 .detailValue {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  word-break: break-all;
 }
 
 .detailValue code {
@@ -359,11 +374,6 @@
     grid-template-columns: 1fr;
   }
 
-  .envVarRow {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
   .itemHeader {
     flex-direction: column;
     align-items: flex-start;
@@ -374,15 +384,81 @@
     align-self: stretch;
     justify-content: flex-end;
   }
+}
 
-  .detailRow {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
 
-  .detailLabel {
-    min-width: auto;
-  }
+.modalContent {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modalIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalBody p {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.modalBody p:last-child {
+  margin-bottom: 0;
+}
+
+.modalBody p strong {
+  color: var(--text);
+}
+
+.modalFooter {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  justify-content: flex-end;
 }
 
 /* Cyber theme overrides */
@@ -395,19 +471,25 @@
   color: var(--accent);
 }
 
-.theme-cyber .advancedSection {
-  background: rgba(0, 0, 0, 0.3);
-  border-color: var(--accent);
-}
-
-.theme-cyber .envVarKey, .theme-cyber .envVarValue {
-  background: rgba(0, 0, 0, 0.5);
-  border-color: var(--accent);
-  color: var(--accent);
+.theme-cyber .statusBadge.enabled {
+  background: rgba(0, 255, 0, 0.2);
+  border-color: rgba(0, 255, 0, 0.4);
+  color: var(--success);
+  text-shadow: 0 0 4px var(--success);
 }
 
 .theme-cyber .detailValue code {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--accent);
   color: var(--accent);
+}
+
+.theme-cyber .disclaimer {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--warning);
+  text-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+}
+
+.theme-cyber .modalContent {
+  box-shadow: 0 0 20px var(--accent), 0 10px 40px rgba(0, 0, 0, 0.5);
 }
