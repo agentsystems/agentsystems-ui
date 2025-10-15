@@ -60,6 +60,14 @@ export default function RestartBanner() {
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
               <button
                 type="button"
+                onClick={() => setIsRestarting(false)}
+                className="btn btn-sm btn-ghost"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
                 onClick={() => {
                   clearRestartRequired()
                   setIsRestarting(false)
@@ -68,15 +76,7 @@ export default function RestartBanner() {
                 }}
                 className="btn btn-sm btn-bright"
               >
-                Restart executed and completed
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setIsRestarting(false)}
-                className="btn btn-sm btn-ghost"
-              >
-                Cancel
+                Restart Complete
               </button>
             </div>
           </div>

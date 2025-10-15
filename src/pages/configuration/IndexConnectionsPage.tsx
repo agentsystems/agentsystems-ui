@@ -166,7 +166,7 @@ export default function IndexConnectionsPage() {
       <div className={styles.header}>
         <div>
           <h1>Index Connections</h1>
-          <p>Connect to agent indexes to discover and browse agents published by the community. Multiple indexes can be enabled to access agents from different sources.</p>
+          <p>Discover and browse community agents from public indexes.</p>
         </div>
         <a
           href="https://docs.agentsystems.ai/configuration/index-connections"
