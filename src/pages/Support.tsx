@@ -96,7 +96,7 @@ export default function Support() {
             </div>
             <button 
               className={styles.resourceButton}
-              onClick={() => handleExternalLink('https://discord.com/invite/bXgbDNpj')}
+              onClick={() => handleExternalLink('https://discord.com/invite/JsxDxQ5zfV')}
             >
               <LinkIcon className={styles.buttonIcon} />
               Discord Community
