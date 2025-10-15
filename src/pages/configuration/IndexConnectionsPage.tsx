@@ -166,7 +166,7 @@ export default function IndexConnectionsPage() {
       <div className={styles.header}>
         <div>
           <h1>Index Connections</h1>
-          <p>Connect to agent indexes to browse and install community agents</p>
+          <p>Connect to agent indexes to discover and browse agents published by the community. Multiple indexes can be enabled to access agents from different sources.</p>
         </div>
         <a
           href="https://docs.agentsystems.ai/configuration/index-connections"
@@ -178,14 +178,6 @@ export default function IndexConnectionsPage() {
           <QuestionMarkCircleIcon className={styles.docsIcon} />
           <span>View Docs</span>
         </a>
-      </div>
-
-      {/* Disclaimer Banner */}
-      <div className={styles.disclaimer}>
-        <ExclamationTriangleIcon />
-        <div>
-          <strong>Index Connections:</strong> Connecting to agent indexes allows discovery of agents from third-party developers. AgentSystems does not review, endorse, verify, or control agents listed in any index. You are solely responsible for evaluating and deciding what to install. Review all agent details, code, and requirements before installation.
-        </div>
       </div>
 
       {/* Add/Edit Form */}
@@ -400,12 +392,12 @@ function EnableConfirmationModal({ onConfirm, onCancel }: EnableConfirmationModa
           </p>
           <p>
             Agents discovered through indexes are provided by third-party developers.
-            AgentSystems does not review, endorse, verify, or control any agents.
+            AgentSystems does not review, endorse, verify, or control any agents listed in indexes.
             You are solely responsible for reviewing agent code, permissions, network access,
             and security before installation.
           </p>
           <p>
-            <strong>Install at your own risk.</strong> Do you wish to proceed?
+            <strong>Install agents at your own risk.</strong> Do you wish to proceed?
           </p>
         </div>
 

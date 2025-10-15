@@ -561,13 +561,6 @@ export default function Discover() {
         </a>
       </div>
 
-      <div className={styles.disclaimer}>
-        <ExclamationTriangleIcon />
-        <div>
-          <strong>Third-Party Agents:</strong> All agents listed here are provided by third-party developers. AgentSystems does not review, endorse, verify, or control any agents. You are solely responsible for reviewing agent code, permissions, network access, and security before installation. Install at your own risk.
-        </div>
-      </div>
-
       {/* Search and Filters */}
       <div className={styles.searchSection}>
         <div className={styles.searchBar}>
@@ -904,7 +897,7 @@ export default function Discover() {
                     }}
                   />
                   <span>
-                    I acknowledge that I am installing third-party software that has not been reviewed, verified, or endorsed by AgentSystems.
+                    I acknowledge that I am installing third-party software that has not been reviewed, endorsed, verified, or controlled by AgentSystems.
                     I accept sole responsibility for any issues, security vulnerabilities, or damages that may result from installing and running this agent.
                   </span>
                 </label>
