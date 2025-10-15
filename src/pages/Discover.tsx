@@ -918,7 +918,7 @@ export default function Discover() {
                 disabled={
                   !customAgentName.trim() ||
                   !hasAcknowledged ||
-                  (agentToInstall.required_egress && agentToInstall.required_egress.length > 0 && !hasApprovedEgress)
+                  ((agentToInstall.required_egress?.length ?? 0) > 0 && !hasApprovedEgress)
                 }
               >
                 Install
@@ -1280,75 +1280,75 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall,
               <div className={styles.specGroup}>
                 <h4><LightBulbIcon />Agent Characteristics</h4>
                 <ul>
-                  {agent.facets.autonomy && (
+                  {(agent.facets.autonomy as string | undefined) && (
                     <li>
                       <strong>Autonomy Level:</strong>{' '}
-                      <span className={styles.badge}>{agent.facets.autonomy}</span>
+                      <span className={styles.badge}>{String(agent.facets.autonomy)}</span>
                     </li>
                   )}
-                  {agent.facets.risk_tier && (
+                  {(agent.facets.risk_tier as string | undefined) && (
                     <li>
                       <strong>Risk Tier:</strong>{' '}
-                      <span className={styles.badge}>{agent.facets.risk_tier}</span>
+                      <span className={styles.badge}>{String(agent.facets.risk_tier)}</span>
                     </li>
                   )}
-                  {agent.facets.latency && (
+                  {(agent.facets.latency as string | undefined) && (
                     <li>
                       <strong>Latency:</strong>{' '}
-                      <span className={styles.badge}>{agent.facets.latency}</span>
+                      <span className={styles.badge}>{String(agent.facets.latency)}</span>
                     </li>
                   )}
-                  {agent.facets.cost_profile && (
+                  {(agent.facets.cost_profile as string | undefined) && (
                     <li>
                       <strong>Cost:</strong>{' '}
-                      <span className={styles.badge}>{agent.facets.cost_profile}</span>
+                      <span className={styles.badge}>{String(agent.facets.cost_profile)}</span>
                     </li>
                   )}
-                  {agent.facets.domains && agent.facets.domains.length > 0 && (
+                  {Array.isArray(agent.facets.domains) && agent.facets.domains.length > 0 && (
                     <li>
                       <strong>Domains:</strong>{' '}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
-                        {agent.facets.domains.map((domain: string, index: number) => (
+                        {(agent.facets.domains as string[]).map((domain, index) => (
                           <span key={index} className={styles.badge}>{domain}</span>
                         ))}
                       </div>
                     </li>
                   )}
-                  {agent.facets.modalities && agent.facets.modalities.length > 0 && (
+                  {Array.isArray(agent.facets.modalities) && agent.facets.modalities.length > 0 && (
                     <li>
                       <strong>Modalities:</strong>{' '}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
-                        {agent.facets.modalities.map((modality: string, index: number) => (
+                        {(agent.facets.modalities as string[]).map((modality, index) => (
                           <span key={index} className={styles.badge}>{modality}</span>
                         ))}
                       </div>
                     </li>
                   )}
-                  {agent.facets.model_tooling && agent.facets.model_tooling.length > 0 && (
+                  {Array.isArray(agent.facets.model_tooling) && agent.facets.model_tooling.length > 0 && (
                     <li>
                       <strong>Model Tooling:</strong>{' '}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
-                        {agent.facets.model_tooling.map((tool: string, index: number) => (
+                        {(agent.facets.model_tooling as string[]).map((tool, index) => (
                           <span key={index} className={styles.badge}>{tool}</span>
                         ))}
                       </div>
                     </li>
                   )}
-                  {agent.facets.industries && agent.facets.industries.length > 0 && (
+                  {Array.isArray(agent.facets.industries) && agent.facets.industries.length > 0 && (
                     <li>
                       <strong>Industries:</strong>{' '}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
-                        {agent.facets.industries.map((industry: string, index: number) => (
+                        {(agent.facets.industries as string[]).map((industry, index) => (
                           <span key={index} className={styles.badge}>{industry}</span>
                         ))}
                       </div>
                     </li>
                   )}
-                  {agent.facets.integrations && agent.facets.integrations.length > 0 && (
+                  {Array.isArray(agent.facets.integrations) && agent.facets.integrations.length > 0 && (
                     <li>
                       <strong>Integrations:</strong>{' '}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
-                        {agent.facets.integrations.map((integration: string, index: number) => (
+                        {(agent.facets.integrations as string[]).map((integration, index) => (
                           <span key={index} className={styles.badge}>{integration}</span>
                         ))}
                       </div>
