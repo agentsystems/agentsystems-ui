@@ -6,6 +6,7 @@ import SkipLinks from '@components/SkipLinks'
 import LoadingSpinner from '@components/LoadingSpinner'
 import ScrollToTop from '@components/ScrollToTop'
 import { useThemeStore } from '@stores/themeStore'
+import { useConfigStore } from '@stores/configStore'
 import { useScanline } from '@hooks/useScanline'
 
 // Lazy-loaded components for code splitting
@@ -29,6 +30,7 @@ const Support = lazy(() => import('@pages/Support'))
 
 function App() {
   const { theme, scanlineEnabled, initTheme } = useThemeStore()
+  const { loadConfig } = useConfigStore()
 
   // Initialize scanline timing system
   useScanline()
@@ -36,6 +38,11 @@ function App() {
   useEffect(() => {
     initTheme()
   }, [initTheme])
+
+  // Load configuration from YAML file on mount (single source of truth)
+  useEffect(() => {
+    loadConfig()
+  }, [loadConfig])
 
   useEffect(() => {
     // Fallback to 'dark' if theme is not yet loaded from localStorage

@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import {
   AgentSystemsConfig,
   RegistryConnectionForm,
@@ -75,19 +74,17 @@ const defaultConfig: AgentSystemsConfig = {
   agents: []
 }
 
-export const useConfigStore = create<ConfigState>()(
-  persist(
-    (set, get) => ({
-      // Initial state
-      config: defaultConfig,
-      envVars: {},
-      isLoading: false,
-      isSaving: false,
-      error: null,
-      lastSaved: null,
-      hasUnsavedChanges: false,
-      restartRequired: false,
-      changesSinceRestart: [],
+export const useConfigStore = create<ConfigState>()((set, get) => ({
+  // Initial state
+  config: defaultConfig,
+  envVars: {},
+  isLoading: false,
+  isSaving: false,
+  error: null,
+  lastSaved: null,
+  hasUnsavedChanges: false,
+  restartRequired: false,
+  changesSinceRestart: [],
 
       // Load configuration from files
       loadConfig: async () => {
@@ -533,19 +530,4 @@ export const useConfigStore = create<ConfigState>()(
           changesSinceRestart: []
         })
       }
-    }),
-    {
-      name: 'agentsystems-config-store',
-      partialize: (state) => ({
-        config: state.config,
-        envVars: state.envVars,
-        lastSaved: state.lastSaved
-      }),
-      onRehydrateStorage: () => (state) => {
-        if (state && state.lastSaved && typeof state.lastSaved === 'string') {
-          state.lastSaved = new Date(state.lastSaved)
-        }
-      }
-    }
-  )
-)
+    }))
