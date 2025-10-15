@@ -219,23 +219,26 @@
 }
 
 .developerInfo .developerAvatar {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
   object-fit: cover;
   flex-shrink: 0;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: smooth;
+  filter: contrast(1.05) brightness(1.02);
 }
 
 .developerInfo .developerAvatarPlaceholder {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 600;
   flex-shrink: 0;
 }
