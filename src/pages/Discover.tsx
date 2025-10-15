@@ -898,7 +898,7 @@ export default function Discover() {
                   />
                   <span>
                     I acknowledge that I am installing third-party software that has not been reviewed, endorsed, verified, or controlled by AgentSystems.
-                    I accept sole responsibility for any issues, security vulnerabilities, or damages that may result from installing and running this agent.
+                    I am responsible for evaluating this agent's security, permissions, and suitability before use. I accept responsibility for any issues, security vulnerabilities, or damages that may result from installing and running this agent.
                   </span>
                 </label>
               </div>

@@ -428,7 +428,7 @@ function EnableConfirmationModal({ indexUrl, onConfirm, onCancel }: EnableConfir
             and security before installation.
           </p>
           <p>
-            <strong>Install agents at your own risk.</strong> Do you wish to proceed?
+            <strong>By enabling this index, you acknowledge these risks.</strong> Do you wish to proceed?
           </p>
         </div>
 
