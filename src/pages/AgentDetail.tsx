@@ -63,7 +63,6 @@ export default function AgentDetail() {
   // Developer modal state
   const [selectedDeveloper, setSelectedDeveloper] = useState<DeveloperInfo | null>(null)
   const [isDeveloperLoading, setIsDeveloperLoading] = useState(false)
-  const [developerIndexUrl, setDeveloperIndexUrl] = useState<string | null>(null)
   const [developerAgents, setDeveloperAgents] = useState<Array<{
     id: string
     name: string
@@ -338,7 +337,6 @@ export default function AgentDetail() {
     }
 
     setSelectedDeveloper(placeholderInfo)
-    setDeveloperIndexUrl(indexUrl)
     setIsDeveloperLoading(true)
     setDeveloperAgents([])
     setIsLoadingAgents(true)
