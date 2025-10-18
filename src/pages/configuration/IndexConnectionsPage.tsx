@@ -233,7 +233,7 @@ export default function IndexConnectionsPage() {
                   if (errors.url) setErrors(prev => ({ ...prev, url: '' }))
                 }}
                 className={`${styles.input} ${errors.url ? styles.inputError : ''}`}
-                placeholder="https://index-api.agentsystems.ai"
+                placeholder="https://agentsystems.github.io/agent-index"
                 required
               />
               {errors.url && (

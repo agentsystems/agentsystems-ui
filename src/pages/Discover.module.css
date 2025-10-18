@@ -480,6 +480,13 @@
   color: var(--text-muted);
 }
 
+.modalDeveloperFullName {
+  margin: 0.25rem 0 0.5rem 0;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
 .closeButton {
   background: none;
   border: none;
