@@ -41,8 +41,10 @@ interface FieldConfig {
 }
 
 interface IndexAgent {
-  id: string
+  id?: string // Legacy field
+  _id: string // New ID format: "developer/agent"
   name: string
+  version: string
   description: string
   image_repository_url: string | null
   source_repository_url: string | null
@@ -50,12 +52,11 @@ interface IndexAgent {
   image_repository_access: string
   source_repository_access: string
   created_at: string
+  // Developer info - now flat structure from GitHub Pages API
+  developer: string // GitHub username
   developer_id: string
-  developer: {
-    id: string
-    name: string
-    avatar_url: string | null
-  }
+  developer_name: string // Full name for display
+  developer_avatar_url: string | null
   // Discovery & Classification
   context?: string | null
   primary_function?: string | null
@@ -138,7 +139,8 @@ export default function Discover() {
 
     // First, try to match by index source ID (most accurate)
     const matchById = configAgents.some(configAgent =>
-      configAgent.labels?.['index.source.agent.id'] === agent.id
+      configAgent.labels?.['index.source.agent.id'] === agent._id ||
+      configAgent.labels?.['index.source.agent.id'] === agent.id  // Legacy support
     )
     if (matchById) return true
 
@@ -182,7 +184,7 @@ export default function Discover() {
 
       const fetchPromises = indexesToFetch.map(async (index) => {
         try {
-          const response = await fetch(`${index.url}/agents`)
+          const response = await fetch(`${index.url}/index.json`)
           if (!response.ok) {
             throw new Error(`Failed to fetch from ${index.name}`)
           }
@@ -214,7 +216,7 @@ export default function Discover() {
   const filteredAgents = agents
     .filter(agent => {
       // Developer filter
-      if (developerFilter && agent.developer.name !== developerFilter) {
+      if (developerFilter && agent.developer !== developerFilter) {
         return false
       }
 
@@ -224,7 +226,8 @@ export default function Discover() {
         const matchesSearch =
           agent.name?.toLowerCase().includes(query) ||
           agent.description?.toLowerCase().includes(query) ||
-          agent.developer?.name?.toLowerCase().includes(query)
+          agent.developer?.toLowerCase().includes(query) ||
+          agent.developer_name?.toLowerCase().includes(query)
         if (!matchesSearch) return false
       }
 
@@ -258,11 +261,11 @@ export default function Discover() {
 
   const fetchDeveloperInfo = async (developerName: string, indexUrl: string) => {
     // Show modal immediately with placeholder data
-    const developerAgents = agents.filter(a => a.developer.name === developerName)
+    const developerAgents = agents.filter(a => a.developer === developerName)
     const placeholderInfo: DeveloperInfo = {
-      id: developerAgents[0]?.developer.id || '',
-      name: developerName,
-      avatar_url: developerAgents[0]?.developer.avatar_url || null,
+      id: developerAgents[0]?.developer_id || developerName,
+      name: developerAgents[0]?.developer_name || developerName,
+      avatar_url: developerAgents[0]?.developer_avatar_url || null,
       agent_count: developerAgents.length
     }
 
@@ -270,12 +273,38 @@ export default function Discover() {
     setIsDeveloperLoading(true)
 
     try {
-      const response = await fetch(`${indexUrl}/developers/${developerName}`)
+      const response = await fetch(`${indexUrl}/@${developerName}/profile.json`)
       if (!response.ok) {
         throw new Error('Failed to fetch developer info')
       }
       const data = await response.json()
-      setSelectedDeveloper({ info: data, indexUrl })
+
+      // Map GitHub Pages API structure to UI structure
+      const developerInfo: DeveloperInfo = {
+        id: data._id || data.developer || developerName,
+        name: data.name || developerName,
+        avatar_url: data.avatar_url || null,
+        agent_count: data._agent_count || developerAgents.length,
+        bio: data.bio,
+        tagline: data.tagline,
+        developer_type: data.type,
+        company: data.company,
+        location: data.location,
+        years_experience: data.years_experience,
+        website: data.website,
+        support_email: data.support_email,
+        documentation_url: data.documentation_url,
+        github_username: data.github_username,
+        twitter_handle: data.twitter_handle,
+        linkedin_url: data.linkedin_url,
+        discord_username: data.discord_username,
+        expertise: data.expertise,
+        featured_work: data.featured_work,
+        open_to_collaboration: data.open_to_collaboration,
+        sponsor_url: data.sponsor_url,
+      }
+
+      setSelectedDeveloper({ info: developerInfo, indexUrl })
     } catch (err) {
       console.error('Error fetching developer:', err)
       // Keep the placeholder data we already set
@@ -301,7 +330,7 @@ export default function Discover() {
   const confirmInstallAgent = async () => {
     if (!agentToInstall) return
 
-    // Validate name
+    // Check name
     const existingAgents = getAgents()
     if (existingAgents.some(a => a.name === customAgentName)) {
       setNameError(`Agent name "${customAgentName}" already exists.`)
@@ -387,7 +416,7 @@ export default function Discover() {
         egressAllowlist: (agentToInstall.required_egress || []).join(', '),
         labels: {
           'agent.port': '8000',
-          'index.source.agent.id': agentToInstall.id,
+          'index.source.agent.id': agentToInstall._id,
           'index.source.agent.name': agentToInstall.name
         },
         envVariables: {},
@@ -426,7 +455,8 @@ export default function Discover() {
       // Find the installed agent by matching the source agent ID in labels
       const configAgents = getAgents()
       const installedAgent = configAgents.find(configAgent =>
-        configAgent.labels?.['index.source.agent.id'] === agentToUninstall.id
+        configAgent.labels?.['index.source.agent.id'] === agentToUninstall._id ||
+        configAgent.labels?.['index.source.agent.id'] === agentToUninstall.id  // Legacy support
       )
 
       if (!installedAgent) {
@@ -689,7 +719,7 @@ export default function Discover() {
       {selectedDeveloper && (
         <DeveloperModal
           developer={selectedDeveloper.info}
-          agents={agents.filter(a => a.developer.name === selectedDeveloper.info.name)}
+          agents={agents.filter(a => a.developer === selectedDeveloper.info.id)}
           onClose={() => {
             setSelectedDeveloper(null)
             setPreviousDeveloper(null)
@@ -700,7 +730,7 @@ export default function Discover() {
             setSelectedDeveloper(null)
           }}
           onViewAll={() => {
-            setDeveloperFilter(selectedDeveloper.info.name)
+            setDeveloperFilter(selectedDeveloper.info.id)
             setSelectedDeveloper(null)
             setPreviousDeveloper(null)
           }}
@@ -722,7 +752,7 @@ export default function Discover() {
               <div>
                 <h2>Install Agent</h2>
                 <p className={styles.modalDeveloper}>
-                  {agentToInstall.name} by {agentToInstall.developer.name}
+                  {agentToInstall.name} by @{agentToInstall.developer}
                 </p>
               </div>
               <button className={styles.closeButton} onClick={() => {
@@ -936,7 +966,7 @@ export default function Discover() {
               <div>
                 <h2>Uninstall Agent</h2>
                 <p className={styles.modalDeveloper}>
-                  {agentToUninstall.name} by {agentToUninstall.developer.name}
+                  {agentToUninstall.name} by @{agentToUninstall.developer}
                 </p>
               </div>
               <button className={styles.closeButton} onClick={() => setAgentToUninstall(null)}>×</button>
@@ -1018,15 +1048,16 @@ function AgentCard({ agent, onClick, onDeveloperClick, onInstall, onUninstall, i
       </div>
 
       <div className={styles.developerInfo}>
-        {agent.developer.avatar_url ? (
+        {agent.developer_avatar_url || agent.developer ? (
           <img
-            src={agent.developer.avatar_url}
-            alt={agent.developer.name}
+            src={agent.developer_avatar_url || `https://github.com/${agent.developer}.png?size=40`}
+            alt={agent.developer}
             className={styles.developerAvatar}
+            title={agent.developer_name || agent.developer}
           />
         ) : (
           <div className={styles.developerAvatarPlaceholder}>
-            {agent.developer.name.charAt(0).toUpperCase()}
+            {agent.developer.charAt(0).toUpperCase()}
           </div>
         )}
         <span className={styles.developerLabel}>by </span>
@@ -1035,11 +1066,12 @@ function AgentCard({ agent, onClick, onDeveloperClick, onInstall, onUninstall, i
           onClick={(e) => {
             e.stopPropagation()
             if (agent._index_url) {
-              onDeveloperClick(agent.developer.name, agent._index_url)
+              onDeveloperClick(agent.developer, agent._index_url)
             }
           }}
+          title={agent.developer_name !== agent.developer ? agent.developer_name : undefined}
         >
-          {agent.developer.name}
+          @{agent.developer}
         </button>
       </div>
 
@@ -1127,11 +1159,12 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall,
                 className={styles.developerLink}
                 onClick={() => {
                   if (agent._index_url) {
-                    onDeveloperClick(agent.developer.name, agent._index_url)
+                    onDeveloperClick(agent.developer, agent._index_url)
                   }
                 }}
+                title={agent.developer_name !== agent.developer ? agent.developer_name : undefined}
               >
-                {agent.developer.name}
+                @{agent.developer}
               </button>
             </p>
           </div>
@@ -1404,7 +1437,7 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall,
                     <strong>Index:</strong> {agent._index_name}
                   </li>
                   <li>
-                    <strong>Developer:</strong> {agent.developer.name}
+                    <strong>Developer:</strong> @{agent.developer}
                   </li>
                   <li>
                     <strong>Listed:</strong> {new Date(agent.created_at).toLocaleDateString()}
@@ -1461,19 +1494,25 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <div className={styles.developerHeaderInfo}>
-            {developer.avatar_url ? (
+            {developer.avatar_url || developer.id ? (
               <img
-                src={developer.avatar_url}
-                alt={developer.name}
+                src={developer.avatar_url || `https://github.com/${developer.id}.png?size=80`}
+                alt={developer.id}
                 className={styles.developerAvatar}
+                title={developer.name !== developer.id ? developer.name : undefined}
               />
             ) : (
               <div className={styles.developerAvatarPlaceholder}>
-                {developer.name.charAt(0).toUpperCase()}
+                {developer.id.charAt(0).toUpperCase()}
               </div>
             )}
             <div>
-              <h2>{developer.name}</h2>
+              <h2>@{developer.id}</h2>
+              {developer.name && developer.name !== developer.id && (
+                <p className={styles.modalDeveloperFullName}>
+                  {developer.name}
+                </p>
+              )}
               <p className={styles.modalDeveloper}>
                 {developer.agent_count} {developer.agent_count === 1 ? 'agent' : 'agents'}
               </p>
