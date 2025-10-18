@@ -201,7 +201,7 @@ export default function IndexConnectionsPage() {
                   if (errors.name) setErrors(prev => ({ ...prev, name: '' }))
                 }}
                 className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
-                placeholder="agentsystems"
+                placeholder="agentsystems-community"
                 disabled={!!editingId}
                 required
               />
@@ -209,7 +209,7 @@ export default function IndexConnectionsPage() {
                 <span className={styles.errorText}>{errors.name}</span>
               )}
               <span className={styles.hint}>
-                Lowercase letters, numbers, and underscores only
+                Lowercase letters, numbers, hyphens, and underscores only
               </span>
             </div>
 
@@ -253,7 +253,7 @@ export default function IndexConnectionsPage() {
                   setFormData(prev => ({ ...prev, description: e.target.value }))
                 }}
                 className={styles.input}
-                placeholder="Community-contributed agent marketplace"
+                placeholder="AgentSystems community index"
               />
             </div>
 
