@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
-import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, UserIcon, BriefcaseIcon, MapPinIcon, CalendarIcon, ChatBubbleLeftRightIcon, BuildingOfficeIcon, IdentificationIcon, EnvelopeIcon, BookOpenIcon, LightBulbIcon, FolderIcon, HandRaisedIcon, HeartIcon, LinkIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { useConfigStore } from '@stores/configStore'
 import { getAgentButtonText } from '@utils/agentHelpers'
@@ -17,6 +17,35 @@ import { API_DEFAULTS } from '@constants/app'
 import type { InvocationResult, Execution } from '../types/api'
 import styles from './AgentDetail.module.css'
 
+// Developer info interface for modal
+interface DeveloperInfo {
+  id: string
+  name: string
+  avatar_url: string | null
+  agent_count: number
+  // Profile fields
+  bio?: string | null
+  tagline?: string | null
+  developer_type?: string | null
+  company?: string | null
+  location?: string | null
+  years_experience?: number | null
+  // Contact & Links
+  website?: string | null
+  support_email?: string | null
+  documentation_url?: string | null
+  // Social
+  github_username?: string | null
+  twitter_handle?: string | null
+  linkedin_url?: string | null
+  discord_username?: string | null
+  // Professional
+  expertise?: string[] | null
+  featured_work?: string[] | null
+  open_to_collaboration?: boolean | null
+  sponsor_url?: string | null
+}
+
 export default function AgentDetail() {
   const { agentName } = useParams<{ agentName: string }>()
   const navigate = useNavigate()
@@ -30,6 +59,17 @@ export default function AgentDetail() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [currentTime, setCurrentTime] = useState(new Date())
   const previousAgentState = useRef<string | undefined>()
+
+  // Developer modal state
+  const [selectedDeveloper, setSelectedDeveloper] = useState<DeveloperInfo | null>(null)
+  const [isDeveloperLoading, setIsDeveloperLoading] = useState(false)
+  const [developerAgents, setDeveloperAgents] = useState<Array<{
+    id: string
+    name: string
+    description: string
+    _index_name?: string
+  }>>([])
+  const [isLoadingAgents, setIsLoadingAgents] = useState(false)
 
   // Get agent state from agents list
   const { data: agentsData } = useQuery({
@@ -259,30 +299,123 @@ export default function AgentDetail() {
     },
   })
 
+  const handleDeveloperClick = async (developerName: string) => {
+    // Check if agent has index source labels to determine index URL
+    const indexSourceId = agentConfig?.labels?.['index.source.agent.id']
+    console.log('Developer click - agent config:', agentConfig)
+    console.log('Developer click - index source ID:', indexSourceId)
+
+    if (!indexSourceId) {
+      showError('Developer profile unavailable for local agents. This feature requires an agent from an index.')
+      return
+    }
+
+    // Get the index URL from config
+    const { getIndexConnections } = useConfigStore.getState()
+    const indexes = getIndexConnections()
+    const enabledIndexes = indexes.filter(idx => idx.enabled)
+
+    console.log('Enabled indexes:', enabledIndexes)
+
+    if (enabledIndexes.length === 0) {
+      showError('No enabled index connections found.')
+      return
+    }
+
+    // For now, try the first enabled index - in production you'd want to track which index the agent came from
+    const indexUrl = enabledIndexes[0].url
+    const fetchUrl = `${indexUrl}/developers/${developerName}`
+
+    console.log('Fetching developer from:', fetchUrl)
+
+    // Show modal immediately with placeholder data
+    const placeholderInfo: DeveloperInfo = {
+      id: '',
+      name: developerName,
+      avatar_url: null,
+      agent_count: 1
+    }
+
+    setSelectedDeveloper(placeholderInfo)
+    setIsDeveloperLoading(true)
+    setDeveloperAgents([])
+    setIsLoadingAgents(true)
+
+    try {
+      // Fetch developer info and agents list in parallel
+      const [developerResponse, agentsResponse] = await Promise.all([
+        fetch(fetchUrl),
+        fetch(`${indexUrl}/agents`)
+      ])
+
+      console.log('Developer fetch response status:', developerResponse.status)
+      console.log('Agents fetch response status:', agentsResponse.status)
+
+      // Handle developer response
+      if (!developerResponse.ok) {
+        const errorText = await developerResponse.text()
+        console.error('Developer fetch failed:', developerResponse.status, errorText)
+        throw new Error(`Failed to fetch developer info: ${developerResponse.status}`)
+      }
+
+      const developerData = await developerResponse.json()
+      console.log('Developer data received:', developerData)
+      setSelectedDeveloper(developerData)
+
+      // Handle agents response
+      if (agentsResponse.ok) {
+        const agentsData = await agentsResponse.json()
+        console.log('Agents data received:', agentsData)
+
+        // Filter agents by this developer
+        const developerAgentsList = (agentsData.agents || [])
+          .filter((agent: { developer: { name: string } }) => agent.developer.name === developerName)
+          .map((agent: { id: string; name: string; description: string }) => ({
+            id: agent.id,
+            name: agent.name,
+            description: agent.description,
+            _index_name: enabledIndexes[0].name
+          }))
+
+        console.log(`Found ${developerAgentsList.length} agents by ${developerName}`)
+        setDeveloperAgents(developerAgentsList)
+      } else {
+        console.warn('Failed to fetch agents list:', agentsResponse.status)
+      }
+    } catch (err) {
+      console.error('Error fetching developer:', err)
+      showError(`Failed to load developer profile: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      // Keep the placeholder data
+    } finally {
+      setIsDeveloperLoading(false)
+      setIsLoadingAgents(false)
+    }
+  }
+
   const handleInvoke = () => {
     playClickSound()
-    
+
     // Clear previous results and status
     setInvocationResult(null)
     setPollingStatus('')
-    
+
     // Rate limiting to prevent spam
     if (!rateLimiter.isAllowed('agent-invoke', 10, 60000)) {
       showError('Too many invocation attempts. Please wait a moment before trying again.')
       return
     }
-    
+
     try {
       // Sanitize JSON input before parsing
       const sanitizedPayload = sanitizeJsonString(invokePayload)
       const payload = JSON.parse(sanitizedPayload)
-      
-      
+
+
       // Update UI with sanitized payload if it was changed
       if (sanitizedPayload !== invokePayload) {
         setInvokePayload(sanitizedPayload)
       }
-      
+
       invokeMutation.mutate({ payload, files: selectedFiles })
     } catch (error) {
       console.error('Invalid JSON payload:', error)
@@ -389,31 +522,107 @@ export default function AgentDetail() {
             </div>
           ) : metadata ? (
             <div className={styles.runtimeSection} data-tour="agent-metadata">
-              <h3 className={styles.sectionHeader}>Runtime Metadata</h3>
-              <div className={styles.metadataGrid}>
-                <div className={styles.metadataItem}>
-                  <label>Name</label>
-                  <span className={styles.metadataValue}>{metadata.name}</span>
+              <div className={styles.sectionHeaderWithBadge}>
+                <h3 className={styles.sectionHeader}>Runtime Metadata</h3>
+                <span className={styles.metadataSourceBadge} title="Live metadata from running agent container">
+                  From agent.yaml
+                </span>
+              </div>
+
+              {/* Core Identity Section */}
+              <div className={styles.metadataSection}>
+                <h4 className={styles.subsectionHeader}>Core Identity</h4>
+                <div className={styles.metadataGrid}>
+                  <div className={styles.metadataItem}>
+                    <label>Name</label>
+                    <span className={styles.metadataValue}>{metadata.name}</span>
+                  </div>
+
+                  <div className={styles.metadataItem}>
+                    <label>Developer</label>
+                    <button
+                      className={styles.developerButton}
+                      onClick={() => handleDeveloperClick(metadata.developer)}
+                      title={agentConfig?.labels?.['index.source.agent.id'] ? 'Click to view developer profile' : 'Developer profile unavailable (local agent)'}
+                      disabled={!agentConfig?.labels?.['index.source.agent.id']}
+                    >
+                      {metadata.developer}
+                    </button>
+                  </div>
+
+                  <div className={styles.metadataItem}>
+                    <label>Version</label>
+                    <span className={styles.metadataValue}>{metadata.version}</span>
+                  </div>
+
+                  <div className={styles.metadataItem}>
+                    <label>Description</label>
+                    <span className={styles.metadataValue}>{metadata.description}</span>
+                  </div>
+
+                  {metadata.author && (
+                    <div className={styles.metadataItem}>
+                      <label>Author</label>
+                      <span className={styles.metadataValue}>{metadata.author}</span>
+                    </div>
+                  )}
+
+                  {metadata.created_at && (
+                    <div className={styles.metadataItem}>
+                      <label>Created</label>
+                      <span className={styles.metadataValue}>{new Date(metadata.created_at).toLocaleDateString()}</span>
+                    </div>
+                  )}
+
+                  {metadata.last_updated && (
+                    <div className={styles.metadataItem}>
+                      <label>Last Updated</label>
+                      <span className={styles.metadataValue}>{new Date(metadata.last_updated).toLocaleDateString()}</span>
+                    </div>
+                  )}
                 </div>
-              
-              <div className={styles.metadataItem}>
-                <label>Developer</label>
-                <span className={styles.metadataValue}>{metadata.developer}</span>
               </div>
-              
-              <div className={styles.metadataItem}>
-                <label>Version</label>
-                <span className={styles.metadataValue}>{metadata.version}</span>
-              </div>
-              
-              <div className={styles.metadataItem}>
-                <label>Description</label>
-                <span className={styles.metadataValue}>{metadata.description}</span>
-              </div>
-              
+
+              {/* Discovery & Classification Section */}
+              {(metadata.context || metadata.primary_function || metadata.readiness_level || metadata.listing_status) && (
+                <div className={styles.metadataSection}>
+                  <h4 className={styles.subsectionHeader}>Discovery & Classification</h4>
+                  <div className={styles.metadataGrid}>
+                    {metadata.context && (
+                      <div className={styles.metadataItem}>
+                        <label>Context</label>
+                        <span className={styles.badge}>{metadata.context}</span>
+                      </div>
+                    )}
+
+                    {metadata.primary_function && (
+                      <div className={styles.metadataItem}>
+                        <label>Primary Function</label>
+                        <span className={styles.badge}>{metadata.primary_function}</span>
+                      </div>
+                    )}
+
+                    {metadata.readiness_level && (
+                      <div className={styles.metadataItem}>
+                        <label>Readiness Level</label>
+                        <span className={styles.badge}>{metadata.readiness_level}</span>
+                      </div>
+                    )}
+
+                    {metadata.listing_status && (
+                      <div className={styles.metadataItem}>
+                        <label>Listing Status</label>
+                        <span className={styles.badge}>{metadata.listing_status}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Model Dependencies Section */}
               {metadata.model_dependencies && metadata.model_dependencies.length > 0 && (
-                <div className={styles.metadataItem}>
-                  <label>Model Dependencies</label>
+                <div className={styles.metadataSection}>
+                  <h4 className={styles.subsectionHeader}>Model Dependencies</h4>
                   <div className={styles.modelDependencies}>
                     {metadata.model_dependencies.map((model, index) => (
                       <span key={index} className={styles.modelTag}>
@@ -423,40 +632,279 @@ export default function AgentDetail() {
                   </div>
                 </div>
               )}
-              
-              {metadata.author && (
-                <div className={styles.metadataItem}>
-                  <label>Author</label>
-                  <span className={styles.metadataValue}>{metadata.author}</span>
+
+              {/* Requirements Section */}
+              {((metadata.required_integrations && metadata.required_integrations.length > 0) ||
+                (metadata.required_egress && metadata.required_egress.length > 0)) && (
+                <div className={styles.metadataSection}>
+                  <h4 className={styles.subsectionHeader}>Requirements</h4>
+
+                  {metadata.required_integrations && metadata.required_integrations.length > 0 && (
+                    <div className={styles.metadataSubsection}>
+                      <label>Required Integrations</label>
+                      <div className={styles.integrationsList}>
+                        {metadata.required_integrations.map((integration, index) => (
+                          <div key={index} className={styles.integrationItem}>
+                            {JSON.stringify(integration)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {metadata.required_egress && metadata.required_egress.length > 0 && (
+                    <div className={styles.metadataSubsection}>
+                      <label>Required Network Access</label>
+                      <ul className={styles.egressList}>
+                        {metadata.required_egress.map((url, index) => (
+                          <li key={index}>
+                            <code>{url}</code>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
-              
-              {metadata.tags && metadata.tags.length > 0 && (
-                <div className={styles.metadataItem}>
-                  <label>Tags</label>
-                  <div className={styles.tags}>
-                    {metadata.tags.map((tag, index) => (
-                      <span key={index} className={styles.tag}>
-                        {tag}
-                      </span>
+
+              {/* Input/Output Types Section */}
+              {((metadata.input_types && metadata.input_types.length > 0) ||
+                (metadata.output_types && metadata.output_types.length > 0)) && (
+                <div className={styles.metadataSection}>
+                  <h4 className={styles.subsectionHeader}>Data Types</h4>
+
+                  {metadata.input_types && metadata.input_types.length > 0 && (
+                    <div className={styles.metadataSubsection}>
+                      <label>Input Types</label>
+                      <ul className={styles.typesList}>
+                        {metadata.input_types.map((type, index) => (
+                          <li key={index}>
+                            <strong>{type.type}:</strong> {type.mime_types?.join(', ') || 'Any'}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {metadata.output_types && metadata.output_types.length > 0 && (
+                    <div className={styles.metadataSubsection}>
+                      <label>Output Types</label>
+                      <ul className={styles.typesList}>
+                        {metadata.output_types.map((type, index) => (
+                          <li key={index}>
+                            <strong>{type.type}:</strong> {type.mime_types?.join(', ') || 'Any'}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Input Schema Section */}
+              {metadata.input_schema && Object.keys(metadata.input_schema).length > 0 && (
+                <div className={styles.metadataSection}>
+                  <h4 className={styles.subsectionHeader}>Input Parameters</h4>
+                  <div className={styles.inputSchemaList}>
+                    {Object.entries(metadata.input_schema).map(([fieldName, fieldConfig]) => (
+                      <div key={fieldName} className={styles.schemaField}>
+                        <div className={styles.schemaFieldHeader}>
+                          <code className={styles.fieldName}>{fieldName}</code>
+                          <span className={fieldConfig.required ? styles.requiredBadge : styles.optionalBadge}>
+                            {fieldConfig.required ? 'required' : 'optional'}
+                          </span>
+                        </div>
+                        {fieldConfig.label && (
+                          <div className={styles.schemaFieldLabel}>{fieldConfig.label}</div>
+                        )}
+                        {fieldConfig.description && (
+                          <div className={styles.schemaFieldDescription}>{fieldConfig.description}</div>
+                        )}
+                        {fieldConfig.type && (
+                          <div className={styles.schemaFieldType}>Type: {fieldConfig.type}</div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
-              
-              {metadata.capabilities && metadata.capabilities.length > 0 && (
-                <div className={styles.metadataItem}>
-                  <label>Capabilities</label>
-                  <div className={styles.capabilities}>
-                    {metadata.capabilities.map((capability, index) => (
-                      <span key={index} className={styles.capability}>
-                        {capability}
-                      </span>
-                    ))}
+
+              {/* Facets Section */}
+              {metadata.facets && Object.keys(metadata.facets).length > 0 && (
+                <div className={styles.metadataSection}>
+                  <h4 className={styles.subsectionHeader}>Agent Characteristics (Facets)</h4>
+                  <div className={styles.facetsGrid}>
+                    {/* Autonomy */}
+                    {(metadata.facets.autonomy as string | undefined) && (
+                      <div className={styles.metadataItem}>
+                        <label>Autonomy Level</label>
+                        <span className={styles.badge}>{String(metadata.facets.autonomy)}</span>
+                      </div>
+                    )}
+
+                    {/* Risk Tier */}
+                    {(metadata.facets.risk_tier as string | undefined) && (
+                      <div className={styles.metadataItem}>
+                        <label>Risk Tier</label>
+                        <span className={styles.badge}>{String(metadata.facets.risk_tier)}</span>
+                      </div>
+                    )}
+
+                    {/* Latency */}
+                    {(metadata.facets.latency as string | undefined) && (
+                      <div className={styles.metadataItem}>
+                        <label>Latency</label>
+                        <span className={styles.badge}>{String(metadata.facets.latency)}</span>
+                      </div>
+                    )}
+
+                    {/* Cost Profile */}
+                    {(metadata.facets.cost_profile as string | undefined) && (
+                      <div className={styles.metadataItem}>
+                        <label>Cost Profile</label>
+                        <span className={styles.badge}>{String(metadata.facets.cost_profile)}</span>
+                      </div>
+                    )}
+
+                    {/* Domains */}
+                    {Array.isArray(metadata.facets.domains) && metadata.facets.domains.length > 0 && (
+                      <div className={styles.metadataItem}>
+                        <label>Domains</label>
+                        <div className={styles.tagList}>
+                          {(metadata.facets.domains as string[]).map((domain, index) => (
+                            <span key={index} className={styles.tag}>{domain}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Modalities */}
+                    {Array.isArray(metadata.facets.modalities) && metadata.facets.modalities.length > 0 && (
+                      <div className={styles.metadataItem}>
+                        <label>Modalities</label>
+                        <div className={styles.tagList}>
+                          {(metadata.facets.modalities as string[]).map((modality, index) => (
+                            <span key={index} className={styles.tag}>{modality}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Model Tooling */}
+                    {Array.isArray(metadata.facets.model_tooling) && metadata.facets.model_tooling.length > 0 && (
+                      <div className={styles.metadataItem}>
+                        <label>Model Tooling</label>
+                        <div className={styles.tagList}>
+                          {(metadata.facets.model_tooling as string[]).map((tool, index) => (
+                            <span key={index} className={styles.tag}>{tool}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Industries */}
+                    {Array.isArray(metadata.facets.industries) && metadata.facets.industries.length > 0 && (
+                      <div className={styles.metadataItem}>
+                        <label>Industries</label>
+                        <div className={styles.tagList}>
+                          {(metadata.facets.industries as string[]).map((industry, index) => (
+                            <span key={index} className={styles.tag}>{industry}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Integrations */}
+                    {Array.isArray(metadata.facets.integrations) && metadata.facets.integrations.length > 0 && (
+                      <div className={styles.metadataItem}>
+                        <label>Integrations</label>
+                        <div className={styles.tagList}>
+                          {(metadata.facets.integrations as string[]).map((integration, index) => (
+                            <span key={index} className={styles.tag}>{integration}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
-              </div>
+
+              {/* Tags & Capabilities (Legacy) */}
+              {((metadata.tags && metadata.tags.length > 0) ||
+                (metadata.capabilities && metadata.capabilities.length > 0)) && (
+                <div className={styles.metadataSection}>
+                  <h4 className={styles.subsectionHeader}>Tags & Capabilities</h4>
+                  <div className={styles.metadataGrid}>
+                    {metadata.tags && metadata.tags.length > 0 && (
+                      <div className={styles.metadataItem}>
+                        <label>Tags</label>
+                        <div className={styles.tags}>
+                          {metadata.tags.map((tag, index) => (
+                            <span key={index} className={styles.tag}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {metadata.capabilities && metadata.capabilities.length > 0 && (
+                      <div className={styles.metadataItem}>
+                        <label>Capabilities</label>
+                        <div className={styles.capabilities}>
+                          {metadata.capabilities.map((capability, index) => (
+                            <span key={index} className={styles.capability}>
+                              {capability}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Repository URLs */}
+              {(metadata.image_repository_url || metadata.source_repository_url) && (
+                <div className={styles.metadataSection}>
+                  <h4 className={styles.subsectionHeader}>Repositories</h4>
+                  <div className={styles.metadataGrid}>
+                    {metadata.image_repository_url && (
+                      <div className={styles.metadataItem}>
+                        <label>Image Repository</label>
+                        <a
+                          href={metadata.image_repository_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.repoLink}
+                        >
+                          {metadata.image_repository_url}
+                        </a>
+                        {metadata.image_repository_access && (
+                          <span className={styles.accessBadge}>{metadata.image_repository_access}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {metadata.source_repository_url && (
+                      <div className={styles.metadataItem}>
+                        <label>Source Repository</label>
+                        <a
+                          href={metadata.source_repository_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.repoLink}
+                        >
+                          {metadata.source_repository_url}
+                        </a>
+                        {metadata.source_repository_access && (
+                          <span className={styles.accessBadge}>{metadata.source_repository_access}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className={styles.errorState}>
@@ -778,6 +1226,296 @@ export default function AgentDetail() {
             </div>
           </div>
         </Card>
+      )}
+
+      {/* Developer Detail Modal */}
+      {selectedDeveloper && (
+        <div className={styles.modalOverlay} onClick={() => setSelectedDeveloper(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.developerHeaderInfo}>
+                {selectedDeveloper.avatar_url ? (
+                  <img
+                    src={selectedDeveloper.avatar_url}
+                    alt={selectedDeveloper.name}
+                    className={styles.developerAvatar}
+                  />
+                ) : (
+                  <div className={styles.developerAvatarPlaceholder}>
+                    {selectedDeveloper.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <h2>{selectedDeveloper.name}</h2>
+                  <p className={styles.modalDeveloper}>
+                    Developer Profile
+                  </p>
+                </div>
+              </div>
+              <button className={styles.closeButton} onClick={() => setSelectedDeveloper(null)}>×</button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {isDeveloperLoading ? (
+                <div className={styles.loading}>
+                  <div className={styles.spinner} />
+                  <p>Loading developer info...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Developer Name (Always show) */}
+                  <div className={styles.modalSpecs}>
+                    <div className={styles.specGroup}>
+                      <h4><UserIcon />Developer</h4>
+                      <p style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600, color: 'var(--text)' }}>
+                        {selectedDeveloper.name}
+                      </p>
+                      {selectedDeveloper.agent_count > 0 && (
+                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                          {selectedDeveloper.agent_count} published {selectedDeveloper.agent_count === 1 ? 'agent' : 'agents'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* About Section */}
+                  {(selectedDeveloper.tagline || selectedDeveloper.bio || selectedDeveloper.developer_type || selectedDeveloper.company || selectedDeveloper.location || selectedDeveloper.years_experience) && (
+                    <div className={styles.modalSpecs}>
+                      <div className={styles.specGroup}>
+                        <h4><UserIcon />About</h4>
+                        <ul>
+                          {selectedDeveloper.tagline && (
+                            <li>
+                              <strong><ChatBubbleLeftRightIcon />Tagline</strong>
+                              <span>{selectedDeveloper.tagline}</span>
+                            </li>
+                          )}
+                          {selectedDeveloper.bio && (
+                            <li>
+                              <strong><IdentificationIcon />Bio</strong>
+                              <span>{selectedDeveloper.bio}</span>
+                            </li>
+                          )}
+                          {selectedDeveloper.developer_type && (
+                            <li>
+                              <strong><BriefcaseIcon />Type</strong>
+                              <span>{selectedDeveloper.developer_type}</span>
+                            </li>
+                          )}
+                          {selectedDeveloper.company && (
+                            <li>
+                              <strong><BuildingOfficeIcon />Company</strong>
+                              <span>{selectedDeveloper.company}</span>
+                            </li>
+                          )}
+                          {selectedDeveloper.location && (
+                            <li>
+                              <strong><MapPinIcon />Location</strong>
+                              <span>{selectedDeveloper.location}</span>
+                            </li>
+                          )}
+                          {selectedDeveloper.years_experience && (
+                            <li>
+                              <strong><CalendarIcon />Experience</strong>
+                              <span>{selectedDeveloper.years_experience} years</span>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact & Links Section */}
+                  {(selectedDeveloper.website || selectedDeveloper.support_email || selectedDeveloper.documentation_url) && (
+                    <div className={styles.modalSpecs}>
+                      <div className={styles.specGroup}>
+                        <h4><GlobeAltIcon />Contact & Links</h4>
+                        <ul>
+                          {selectedDeveloper.website && (
+                            <li>
+                              <strong><GlobeAltIcon />Website</strong>
+                              <a href={selectedDeveloper.website} target="_blank" rel="noopener noreferrer">
+                                {selectedDeveloper.website}
+                              </a>
+                            </li>
+                          )}
+                          {selectedDeveloper.support_email && (
+                            <li>
+                              <strong><EnvelopeIcon />Support</strong>
+                              <a href={`mailto:${selectedDeveloper.support_email}`}>{selectedDeveloper.support_email}</a>
+                            </li>
+                          )}
+                          {selectedDeveloper.documentation_url && (
+                            <li>
+                              <strong><BookOpenIcon />Documentation</strong>
+                              <a href={selectedDeveloper.documentation_url} target="_blank" rel="noopener noreferrer">
+                                {selectedDeveloper.documentation_url}
+                              </a>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Section */}
+                  {(selectedDeveloper.github_username || selectedDeveloper.twitter_handle || selectedDeveloper.linkedin_url || selectedDeveloper.discord_username) && (
+                    <div className={styles.modalSpecs}>
+                      <div className={styles.specGroup}>
+                        <h4><UserGroupIcon />Social</h4>
+                        <ul>
+                          {selectedDeveloper.github_username && (
+                            <li>
+                              <strong><LinkIcon />GitHub</strong>
+                              <a href={`https://github.com/${selectedDeveloper.github_username}`} target="_blank" rel="noopener noreferrer">
+                                @{selectedDeveloper.github_username}
+                              </a>
+                            </li>
+                          )}
+                          {selectedDeveloper.twitter_handle && (
+                            <li>
+                              <strong><LinkIcon />Twitter</strong>
+                              <a href={`https://twitter.com/${selectedDeveloper.twitter_handle}`} target="_blank" rel="noopener noreferrer">
+                                @{selectedDeveloper.twitter_handle}
+                              </a>
+                            </li>
+                          )}
+                          {selectedDeveloper.linkedin_url && (
+                            <li>
+                              <strong><LinkIcon />LinkedIn</strong>
+                              <a href={selectedDeveloper.linkedin_url} target="_blank" rel="noopener noreferrer">
+                                View Profile
+                              </a>
+                            </li>
+                          )}
+                          {selectedDeveloper.discord_username && (
+                            <li>
+                              <strong><LinkIcon />Discord</strong>
+                              <span>{selectedDeveloper.discord_username}</span>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Professional Section */}
+                  {(selectedDeveloper.expertise || selectedDeveloper.featured_work || selectedDeveloper.open_to_collaboration || selectedDeveloper.sponsor_url) && (
+                    <div className={styles.modalSpecs}>
+                      <div className={styles.specGroup}>
+                        <h4><LightBulbIcon />Professional</h4>
+                        {selectedDeveloper.expertise && selectedDeveloper.expertise.length > 0 && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                              <LightBulbIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
+                              Expertise
+                            </strong>
+                            <div className={styles.expertiseBadges}>
+                              {selectedDeveloper.expertise.map((skill, index) => (
+                                <span key={index} className={styles.expertiseBadge}>
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {selectedDeveloper.featured_work && selectedDeveloper.featured_work.length > 0 && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                              <FolderIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
+                              Featured Work
+                            </strong>
+                            <ul className={styles.nestedList}>
+                              {selectedDeveloper.featured_work.map((work, index) => (
+                                <li key={index}>
+                                  <a href={work} target="_blank" rel="noopener noreferrer">
+                                    {work}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {selectedDeveloper.open_to_collaboration === true && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <span className={styles.collaborationBadge}>
+                              <HandRaisedIcon style={{ width: '1rem', height: '1rem' }} />
+                              Open to Collaboration
+                            </span>
+                          </div>
+                        )}
+                        {selectedDeveloper.sponsor_url && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <strong style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                              <HeartIcon style={{ width: '0.875rem', height: '0.875rem', opacity: 0.7 }} />
+                              Sponsor
+                            </strong>
+                            <a href={selectedDeveloper.sponsor_url} target="_blank" rel="noopener noreferrer">
+                              {selectedDeveloper.sponsor_url}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Developer's Agents */}
+                  <div className={styles.modalSpecs}>
+                    <div className={styles.specGroup}>
+                      <h4>
+                        <GlobeAltIcon />
+                        Published Agents {!isLoadingAgents && `(${developerAgents.length})`}
+                      </h4>
+                      {isLoadingAgents ? (
+                        <div className={styles.loading}>
+                          <div className={styles.spinner} />
+                          <p>Loading agents...</p>
+                        </div>
+                      ) : developerAgents.length === 0 ? (
+                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                          No agents found for this developer in the connected index.
+                        </p>
+                      ) : (
+                        <div className={styles.developerAgentsList}>
+                          {developerAgents.slice(0, 10).map(agent => (
+                            <div
+                              key={agent.id}
+                              className={styles.developerAgentItem}
+                            >
+                              <div>
+                                <div className={styles.developerAgentName}>{agent.name}</div>
+                                <div className={styles.developerAgentDescription}>
+                                  {agent.description || 'No description'}
+                                </div>
+                              </div>
+                              {agent._index_name && (
+                                <span className={styles.indexBadge}>
+                                  <GlobeAltIcon className={styles.indexIcon} />
+                                  {agent._index_name}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                          {developerAgents.length > 10 && (
+                            <p style={{ margin: '1rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                              Showing 10 of {developerAgents.length} agents
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button className="btn btn-lg btn-ghost" onClick={() => setSelectedDeveloper(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Toast notifications */}

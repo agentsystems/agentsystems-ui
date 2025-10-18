@@ -9,18 +9,52 @@ export interface AgentsResponse {
   }>
 }
 
+// Field configuration for input schema
+export interface FieldConfig {
+  required?: boolean
+  label?: string
+  description?: string
+  type?: string
+  [key: string]: unknown
+}
+
 export interface AgentMetadata {
+  // Core identity (required in agent.yaml)
   developer: string
   name: string
   version: string
   description: string
   model_dependencies: string[]
-  // Optional fields that might be present
+
+  // Discovery & Classification (optional in agent.yaml)
+  context?: string | null
+  primary_function?: string | null
+  readiness_level?: string | null
+  listing_status?: string | null
+  image_repository_url?: string | null
+  image_repository_access?: string | null
+  source_repository_url?: string | null
+  source_repository_access?: string | null
+
+  // Compatibility Requirements
+  required_integrations?: Record<string, unknown>[] | null
+  required_egress?: string[] | null
+  input_types?: Array<{ type: string; mime_types?: string[] }> | null
+  output_types?: Array<{ type: string; mime_types?: string[] }> | null
+  input_schema?: Record<string, FieldConfig> | null
+
+  // Facets (flexible metadata)
+  facets?: Record<string, unknown> | null
+
+  // Legacy optional fields
   author?: string
   tags?: string[]
   capabilities?: string[]
   created_at?: string
   last_updated?: string
+
+  // Allow for additional custom fields
+  [key: string]: unknown
 }
 
 export interface AgentHealth {
