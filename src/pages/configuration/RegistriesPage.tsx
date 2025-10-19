@@ -13,7 +13,8 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
   ExclamationTriangleIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline'
 import styles from './RegistriesPage.module.css'
 
@@ -28,6 +29,7 @@ export default function RegistriesPage() {
   const [formData, setFormData] = useState<Omit<RegistryConnectionForm, 'id'>>(initialFormData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showForm, setShowForm] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
   
   const { playClickSound } = useAudio()
@@ -103,9 +105,11 @@ export default function RegistriesPage() {
       
       // Save changes to file
       await saveConfig()
-      
+
       setFormData(initialFormData)
       setErrors({})
+      setShowForm(false)
+      setEditingId(null)
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to save registry')
     }
@@ -123,8 +127,9 @@ export default function RegistriesPage() {
       tokenEnv: registry.tokenEnv
     })
     setEditingId(registry.id)
+    setShowForm(true)
     setErrors({})
-    
+
     // Auto-scroll to form
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -154,7 +159,21 @@ export default function RegistriesPage() {
     playClickSound()
     setFormData(initialFormData)
     setEditingId(null)
+    setShowForm(false)
     setErrors({})
+  }
+
+  const handleAddNew = () => {
+    playClickSound()
+    setFormData(initialFormData)
+    setEditingId(null)
+    setShowForm(true)
+    setErrors({})
+
+    // Auto-scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   return (
@@ -174,19 +193,30 @@ export default function RegistriesPage() {
           <h1>Registry Connections</h1>
           <p>Configure connections to Docker registries for agent deployment</p>
         </div>
-        <a
-          href="https://docs.agentsystems.ai/configuration/registry-connections"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.docsLink}
-          title="View documentation"
-        >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
-        </a>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <a
+            href="https://docs.agentsystems.ai/configuration/registry-connections"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost"
+            title="View documentation"
+          >
+            <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+            View Docs
+          </a>
+          <button
+            onClick={handleAddNew}
+            className="btn btn-sm btn-primary"
+            title="Add new registry connection"
+          >
+            <PlusIcon />
+            Add Registry
+          </button>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
+      {showForm && (
       <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
@@ -370,20 +400,19 @@ export default function RegistriesPage() {
               <CheckIcon />
               {editingId ? 'Update' : 'Add'} Registry
             </button>
-            
-            {editingId && (
-              <button 
-                type="button" 
-                onClick={handleCancel}
-                className="btn btn-lg btn-subtle"
-              >
-                <XMarkIcon />
-                Cancel
-              </button>
-            )}
+
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="btn btn-lg btn-subtle"
+            >
+              <XMarkIcon />
+              Cancel
+            </button>
           </div>
         </form>
       </Card>
+      )}
 
       {/* Registries List */}
       <Card>

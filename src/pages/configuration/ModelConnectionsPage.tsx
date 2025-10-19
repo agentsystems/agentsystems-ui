@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAudio } from '@hooks/useAudio'
 import { useToast } from '@hooks/useToast'
@@ -19,6 +19,7 @@ import {
 import styles from './ModelConnectionsPage.module.css'
 
 export default function ModelConnectionsPage() {
+  const [showForm, setShowForm] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
   const { playClickSound } = useAudio()
   const { toasts, removeToast } = useToast()
@@ -54,12 +55,22 @@ export default function ModelConnectionsPage() {
   }
 
   const onEdit = (connection: ModelConnectionForm) => {
+    setShowForm(true)
     handleEdit(connection, scrollToForm)
   }
 
   const onCancel = () => {
     playClickSound()
+    setShowForm(false)
     handleCancel()
+  }
+
+  const onSubmit = async (e: React.FormEvent) => {
+    await handleSubmit(e)
+    // Only hide form if there are no errors (handleSubmit will show toast on error)
+    if (Object.keys(errors).length === 0) {
+      setShowForm(false)
+    }
   }
 
   return (
@@ -79,21 +90,38 @@ export default function ModelConnectionsPage() {
           <h1>Model Connections</h1>
           <p>Configure connections to LLM providers for agent routing</p>
         </div>
-        <a
-          href="https://docs.agentsystems.ai/configuration/model-connections"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.docsLink}
-          title="View documentation"
-        >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
-        </a>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <a
+            href="https://docs.agentsystems.ai/configuration/model-connections"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost"
+            title="View documentation"
+          >
+            <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+            View Docs
+          </a>
+          <button
+            onClick={() => {
+              playClickSound()
+              setShowForm(true)
+              setTimeout(() => {
+                formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }, 100)
+            }}
+            className="btn btn-sm btn-primary"
+            title="Add new model connection"
+          >
+            <PlusIcon />
+            Add Connection
+          </button>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
+      {showForm && (
       <Card className={styles.formCard} ref={formRef}>
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={onSubmit} className={styles.form}>
           <h2>
             <CpuChipIcon />
             {editingId ? `Edit ${formData.model_id || 'Connection'}` : 'Add New Model Connection'}
@@ -148,19 +176,18 @@ export default function ModelConnectionsPage() {
               <PlusIcon />
               {editingId ? 'Update' : 'Add'} Connection
             </button>
-            
-            {editingId && (
-              <button 
-                type="button" 
-                onClick={onCancel}
-                className="btn btn-lg btn-subtle"
-              >
-                Cancel
-              </button>
-            )}
+
+            <button
+              type="button"
+              onClick={onCancel}
+              className="btn btn-lg btn-subtle"
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </Card>
+      )}
 
       {/* Model Connections List */}
       <ModelConnectionsList 

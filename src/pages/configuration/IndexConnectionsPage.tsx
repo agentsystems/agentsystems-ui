@@ -13,7 +13,8 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
   ExclamationTriangleIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline'
 import styles from './IndexConnectionsPage.module.css'
 
@@ -31,6 +32,7 @@ export default function IndexConnectionsPage() {
   const [showEnableModal, setShowEnableModal] = useState(false)
   const [quickEnableIndex, setQuickEnableIndex] = useState<IndexConnectionForm | null>(null)
   const [quickDisableIndex, setQuickDisableIndex] = useState<IndexConnectionForm | null>(null)
+  const [showForm, setShowForm] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
 
   const { playClickSound } = useAudio()
@@ -89,6 +91,8 @@ export default function IndexConnectionsPage() {
 
       setFormData(initialFormData)
       setErrors({})
+      setShowForm(false)
+      setEditingId(null)
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to save index connection')
     }
@@ -103,6 +107,7 @@ export default function IndexConnectionsPage() {
       description: index.description || ''
     })
     setEditingId(index.id)
+    setShowForm(true)
     setErrors({})
 
     // Auto-scroll to form
@@ -129,7 +134,21 @@ export default function IndexConnectionsPage() {
     playClickSound()
     setFormData(initialFormData)
     setEditingId(null)
+    setShowForm(false)
     setErrors({})
+  }
+
+  const handleAddNew = () => {
+    playClickSound()
+    setFormData(initialFormData)
+    setEditingId(null)
+    setShowForm(true)
+    setErrors({})
+
+    // Auto-scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const handleEnableChange = (checked: boolean) => {
@@ -224,19 +243,30 @@ export default function IndexConnectionsPage() {
           <h1>Index Connections</h1>
           <p>Discover and browse community agents from public indexes.</p>
         </div>
-        <a
-          href="https://docs.agentsystems.ai/configuration/index-connections"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.docsLink}
-          title="View documentation"
-        >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
-        </a>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <a
+            href="https://docs.agentsystems.ai/configuration/index-connections"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost"
+            title="View documentation"
+          >
+            <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+            View Docs
+          </a>
+          <button
+            onClick={handleAddNew}
+            className="btn btn-sm btn-primary"
+            title="Add new index connection"
+          >
+            <PlusIcon />
+            Add Connection
+          </button>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
+      {showForm && (
       <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
@@ -338,19 +368,18 @@ export default function IndexConnectionsPage() {
               {editingId ? 'Update' : 'Add'} Index Connection
             </button>
 
-            {editingId && (
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="btn btn-lg btn-subtle"
-              >
-                <XMarkIcon />
-                Cancel
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="btn btn-lg btn-subtle"
+            >
+              <XMarkIcon />
+              Cancel
+            </button>
           </div>
         </form>
       </Card>
+      )}
 
       {/* Index Connections List */}
       <Card>
