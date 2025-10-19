@@ -148,10 +148,11 @@ export default function Discover() {
     }
 
     // Fallback: match by agent ID only (for agents added before index URL tracking)
-    const matchById = configAgents.some(configAgent =>
-      configAgent.labels?.['index.source.agent.id'] === agent._id ||
-      configAgent.labels?.['index.source.agent.id'] === agent.id  // Legacy support
-    )
+    const matchById = configAgents.some(configAgent => {
+      const labelId = configAgent.labels?.['index.source.agent.id']
+      // Only match if the label actually exists (prevent undefined === undefined)
+      return labelId && (labelId === agent._id || labelId === agent.id)
+    })
     if (matchById) return true
 
     // Fallback: match by name only for agents added before ID tracking was implemented
@@ -360,6 +361,17 @@ export default function Discover() {
   const confirmAddAgent = async () => {
     if (!agentToAdd) return
 
+    try {
+      // Reload config from disk to ensure we have the latest state
+      // This prevents overwriting manual YAML edits
+      const { loadConfig } = useConfigStore.getState()
+      await loadConfig()
+    } catch (error) {
+      console.error('Failed to reload config:', error)
+      showError('Failed to reload configuration. Please refresh the page.')
+      return
+    }
+
     // Check name
     const existingAgents = getAgents()
     if (existingAgents.some(a => a.name === customAgentName)) {
@@ -482,8 +494,10 @@ export default function Discover() {
     if (!agentToRemove) return
 
     try {
-      // Get config store methods
-      const { deleteAgent, saveConfig, getAgents } = useConfigStore.getState()
+      // Reload config from disk to ensure we have the latest state
+      // This prevents overwriting manual YAML edits
+      const { loadConfig, deleteAgent, saveConfig, getAgents } = useConfigStore.getState()
+      await loadConfig()
 
       // Find the added agent by matching the source index URL + agent ID in labels
       // This ensures we remove the correct agent when the same developer/agent exists in multiple indexes
