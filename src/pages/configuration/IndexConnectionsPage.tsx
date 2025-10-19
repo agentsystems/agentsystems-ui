@@ -518,13 +518,10 @@ function EnableConfirmationModal({ indexUrl, onConfirm, onCancel }: EnableConfir
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <ExclamationTriangleIcon className={styles.modalIcon} />
-          <h2>Enable Index Connection</h2>
+          <h2>Enable Index Connection?</h2>
         </div>
 
         <div className={styles.modalBody}>
-          <p>
-            <strong>You are enabling an agent index:</strong>
-          </p>
           <div style={{
             padding: '0.75rem',
             background: 'var(--surface-2)',
@@ -543,13 +540,7 @@ function EnableConfirmationModal({ indexUrl, onConfirm, onCancel }: EnableConfir
             </code>
           </div>
           <p>
-            Agents discovered through indexes are provided by third-party developers.
-            AgentSystems does not review, endorse, verify, or control any agents listed in indexes.
-            You are solely responsible for reviewing agent code, permissions, network access,
-            and security before installation.
-          </p>
-          <p>
-            <strong>By enabling this index, you acknowledge these risks.</strong> Do you wish to proceed?
+            This community index lists agents from third-party developers. AgentSystems does not review or endorse software in any index.
           </p>
         </div>
 
