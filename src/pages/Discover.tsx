@@ -5,7 +5,6 @@ import {
   MagnifyingGlassIcon,
   GlobeAltIcon,
   ExclamationTriangleIcon,
-  QuestionMarkCircleIcon,
   ArrowLeftIcon,
   UserIcon,
   BriefcaseIcon,
@@ -118,12 +117,12 @@ export default function Discover() {
   const [isDeveloperLoading, setIsDeveloperLoading] = useState(false)
   const [previousDeveloper, setPreviousDeveloper] = useState<{ info: DeveloperInfo; indexUrl: string } | null>(null)
   const [developerFilter, setDeveloperFilter] = useState<string | null>(null)
-  const [agentToInstall, setAgentToInstall] = useState<IndexAgent | null>(null)
+  const [agentToAdd, setAgentToAdd] = useState<IndexAgent | null>(null)
   const [customAgentName, setCustomAgentName] = useState('')
   const [nameError, setNameError] = useState<string | null>(null)
   const [hasAcknowledged, setHasAcknowledged] = useState(false)
   const [hasApprovedEgress, setHasApprovedEgress] = useState(false)
-  const [agentToUninstall, setAgentToUninstall] = useState<IndexAgent | null>(null)
+  const [agentToRemove, setAgentToRemove] = useState<IndexAgent | null>(null)
   const [displayCount, setDisplayCount] = useState(12)
   const LOAD_MORE_INCREMENT = 12
 
@@ -131,20 +130,31 @@ export default function Discover() {
   const indexes = isConfigLoading ? [] : getIndexConnections()
   const enabledIndexes = indexes.filter(idx => idx.enabled)
 
-  // Note: Agent installation status is checked dynamically via isAgentInstalled()
+  // Note: Agent add status is checked dynamically via isAgentAdded()
 
-  const isAgentInstalled = (agent: IndexAgent) => {
-    // Check if this agent is installed by matching the source agent ID in labels
+  const isAgentAdded = (agent: IndexAgent) => {
+    // Check if this agent is added by matching the source agent ID AND index URL in labels
+    // This ensures uniqueness across multiple indexes that might have the same developer/agent combo
     const configAgents = getAgents()
 
-    // First, try to match by index source ID (most accurate)
+    // Match by index URL + agent ID (most accurate - handles same developer/agent across different indexes)
+    if (agent._index_url) {
+      const matchByIndexAndId = configAgents.some(configAgent =>
+        configAgent.labels?.['index.source.index.url'] === agent._index_url &&
+        (configAgent.labels?.['index.source.agent.id'] === agent._id ||
+         configAgent.labels?.['index.source.agent.id'] === agent.id)  // Legacy support
+      )
+      if (matchByIndexAndId) return true
+    }
+
+    // Fallback: match by agent ID only (for agents added before index URL tracking)
     const matchById = configAgents.some(configAgent =>
       configAgent.labels?.['index.source.agent.id'] === agent._id ||
       configAgent.labels?.['index.source.agent.id'] === agent.id  // Legacy support
     )
     if (matchById) return true
 
-    // Fallback: match by name only for agents installed before ID tracking was added
+    // Fallback: match by name only for agents added before ID tracking was implemented
     // This only works if there's no ambiguity (no other agents with tracking labels using this name)
     const hasAnyTrackedAgent = configAgents.some(configAgent =>
       configAgent.labels?.['index.source.agent.id'] && configAgent.name === agent.name
@@ -313,22 +323,42 @@ export default function Discover() {
     }
   }
 
-  const handleInstallAgent = (agent: IndexAgent) => {
+  const handleAddAgent = (agent: IndexAgent) => {
     if (!agent.image_repository_url) {
-      showError(`Cannot install ${agent.name}: No image repository URL available. This agent has a private image repository.`)
+      showError(`Cannot add ${agent.name}: No image repository URL available. This agent has a private image repository.`)
       return
     }
 
-    // Show install modal with name input
-    setAgentToInstall(agent)
-    setCustomAgentName(agent.name)
+    // Generate smart default name to avoid conflicts
+    const existingAgents = getAgents()
+    let suggestedName = agent.name
+
+    // Check if base name conflicts
+    if (existingAgents.some(a => a.name === suggestedName)) {
+      // Try appending developer name
+      const developer = agent.developer || agent._id.split('/')[0]
+      suggestedName = `${agent.name}-${developer}`
+
+      // If developer variant also conflicts, append number
+      if (existingAgents.some(a => a.name === suggestedName)) {
+        let counter = 2
+        while (existingAgents.some(a => a.name === `${agent.name}-${counter}`)) {
+          counter++
+        }
+        suggestedName = `${agent.name}-${counter}`
+      }
+    }
+
+    // Show add modal with smart default name
+    setAgentToAdd(agent)
+    setCustomAgentName(suggestedName)
     setNameError(null)
     setHasAcknowledged(false)
     setHasApprovedEgress(false)
   }
 
-  const confirmInstallAgent = async () => {
-    if (!agentToInstall) return
+  const confirmAddAgent = async () => {
+    if (!agentToAdd) return
 
     // Check name
     const existingAgents = getAgents()
@@ -375,35 +405,37 @@ export default function Discover() {
       }
 
       // At this point, image_repository_url is guaranteed to be non-null due to the check at line 288
-      const { registryUrl, repoPath, tag } = parseImageUrl(agentToInstall.image_repository_url!)
+      const { registryUrl, repoPath, tag } = parseImageUrl(agentToAdd.image_repository_url!)
 
-      // Determine registry connection ID and name
+      // Get config store methods
+      const { getRegistryConnections, addRegistryConnection, addAgent, saveConfig } = useConfigStore.getState()
+
+      // Check if a registry connection for this URL already exists (any ID)
+      const existingRegistries = getRegistryConnections()
+      const existingRegistry = existingRegistries.find(r => r.url === registryUrl)
+
+      // Hardcoded mapping for well-known registries
       const registryIdMap: Record<string, string> = {
         'docker.io': 'dockerhub_public',
         'ghcr.io': 'github_registry',
         'gcr.io': 'google_registry'
       }
 
-      const registryId = registryIdMap[registryUrl] || registryUrl.replace(/[^a-z0-9]/g, '_')
-      const registryName = registryUrl === 'docker.io' ? 'Docker Hub (Public)' :
-                           registryUrl === 'ghcr.io' ? 'GitHub Container Registry' :
-                           registryUrl === 'gcr.io' ? 'Google Container Registry' :
-                           registryUrl
+      // Use existing registry ID, or create a standard one
+      const registryId = existingRegistry?.id || registryIdMap[registryUrl] || registryUrl.replace(/[^a-z0-9]/g, '_')
 
-      // Get config store methods
-      const { getRegistryConnections, addRegistryConnection, addAgent, saveConfig } = useConfigStore.getState()
+      // Only create new registry connection if one doesn't exist for this URL
+      if (!existingRegistry) {
+        const registryName = registryUrl === 'docker.io' ? 'Docker Hub (Public)' :
+                             registryUrl === 'ghcr.io' ? 'GitHub Container Registry' :
+                             registryUrl === 'gcr.io' ? 'Google Container Registry' :
+                             registryUrl
 
-      // Check if registry connection already exists
-      const existingRegistries = getRegistryConnections()
-      const registryExists = existingRegistries.some(r => r.id === registryId)
-
-      // Add registry connection if it doesn't exist
-      if (!registryExists) {
         addRegistryConnection({
           name: registryName,
           url: registryUrl,
           enabled: true,
-          authMethod: 'none'
+          authMethod: 'none'  // Assumption: all index agents use public images
         })
       }
 
@@ -413,11 +445,12 @@ export default function Discover() {
         repo: repoPath,
         tag: tag,
         registry_connection: registryId,
-        egressAllowlist: (agentToInstall.required_egress || []).join(', '),
+        egressAllowlist: (agentToAdd.required_egress || []).join(', '),
         labels: {
           'agent.port': '8000',
-          'index.source.agent.id': agentToInstall._id,
-          'index.source.agent.name': agentToInstall.name
+          'index.source.agent.id': agentToAdd._id,
+          'index.source.agent.name': agentToAdd.name,
+          'index.source.index.url': agentToAdd._index_url || ''
         },
         envVariables: {},
         exposePorts: '8000'
@@ -427,56 +460,69 @@ export default function Discover() {
       await saveConfig()
 
       // Close modal
-      setAgentToInstall(null)
+      setAgentToAdd(null)
       setCustomAgentName('')
       setNameError(null)
       setHasAcknowledged(false)
       setHasApprovedEgress(false)
 
-      showSuccess(`Successfully installed ${customAgentName}! Restart AgentSystems to pull the image and start the agent.`)
+      showSuccess(`Successfully added ${customAgentName}! Restart AgentSystems to pull the image and start the agent.`)
     } catch (error) {
-      console.error('Error installing agent:', error)
+      console.error('Error adding agent:', error)
       setNameError(error instanceof Error ? error.message : 'Unknown error')
     }
   }
 
-  const handleUninstallAgent = (agent: IndexAgent) => {
-    // Show uninstall modal
-    setAgentToUninstall(agent)
+  const handleRemoveAgent = (agent: IndexAgent) => {
+    // Show remove modal
+    setAgentToRemove(agent)
   }
 
-  const confirmUninstallAgent = async () => {
-    if (!agentToUninstall) return
+  const confirmRemoveAgent = async () => {
+    if (!agentToRemove) return
 
     try {
       // Get config store methods
       const { deleteAgent, saveConfig, getAgents } = useConfigStore.getState()
 
-      // Find the installed agent by matching the source agent ID in labels
+      // Find the added agent by matching the source index URL + agent ID in labels
+      // This ensures we remove the correct agent when the same developer/agent exists in multiple indexes
       const configAgents = getAgents()
-      const installedAgent = configAgents.find(configAgent =>
-        configAgent.labels?.['index.source.agent.id'] === agentToUninstall._id ||
-        configAgent.labels?.['index.source.agent.id'] === agentToUninstall.id  // Legacy support
+
+      // First try to match by index URL + agent ID (most accurate)
+      let addedAgent = configAgents.find(configAgent =>
+        agentToRemove._index_url &&
+        configAgent.labels?.['index.source.index.url'] === agentToRemove._index_url &&
+        (configAgent.labels?.['index.source.agent.id'] === agentToRemove._id ||
+         configAgent.labels?.['index.source.agent.id'] === agentToRemove.id)  // Legacy support
       )
 
-      if (!installedAgent) {
+      // Fallback: match by agent ID only (for agents added before index URL tracking)
+      if (!addedAgent) {
+        addedAgent = configAgents.find(configAgent =>
+          configAgent.labels?.['index.source.agent.id'] === agentToRemove._id ||
+          configAgent.labels?.['index.source.agent.id'] === agentToRemove.id  // Legacy support
+        )
+      }
+
+      if (!addedAgent) {
         throw new Error('Agent not found in configuration')
       }
 
       // Delete agent using its actual configured name
-      deleteAgent(installedAgent.name)
+      deleteAgent(addedAgent.name)
 
       // Auto-save config to disk
       await saveConfig()
 
       // Close modal
-      setAgentToUninstall(null)
+      setAgentToRemove(null)
 
-      showSuccess(`Successfully uninstalled ${installedAgent.name}! Restart AgentSystems to stop the agent.`)
+      showSuccess(`Successfully removed ${addedAgent.name}! Restart AgentSystems to stop the agent.`)
     } catch (error) {
-      console.error('Error uninstalling agent:', error)
-      showError(`Failed to uninstall ${agentToUninstall.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
-      setAgentToUninstall(null)
+      console.error('Error removing agent:', error)
+      showError(`Failed to remove ${agentToRemove.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setAgentToRemove(null)
     }
   }
 
@@ -488,19 +534,9 @@ export default function Discover() {
           <div>
             <h1>Discover Agents</h1>
             <p className={styles.subtitle}>
-              Browse and install community agents from connected indexes
+              Browse and add community agents from connected indexes
             </p>
           </div>
-          <a
-            href="https://docs.agentsystems.ai/user-guide/discover-agents"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.docsLink}
-            title="View documentation"
-          >
-            <QuestionMarkCircleIcon className={styles.docsIcon} />
-            <span>View Docs</span>
-          </a>
         </div>
 
         <Card>
@@ -521,19 +557,9 @@ export default function Discover() {
           <div>
             <h1>Discover Agents</h1>
             <p className={styles.subtitle}>
-              Browse and install community agents from connected indexes
+              Browse and add community agents from connected indexes
             </p>
           </div>
-          <a
-            href="https://docs.agentsystems.ai/user-guide/discover-agents"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.docsLink}
-            title="View documentation"
-          >
-            <QuestionMarkCircleIcon className={styles.docsIcon} />
-            <span>View Docs</span>
-          </a>
         </div>
 
         <Card className={styles.emptyStateCard}>
@@ -541,7 +567,7 @@ export default function Discover() {
             <GlobeAltIcon className={styles.emptyIcon} />
             <h3>No Index Connections Enabled</h3>
             <p>Enable at least one index connection to discover community agents.</p>
-            <a href="/configuration/indexes" className="btn btn-lg btn-bright">
+            <a href="/configuration/index-connections" className="btn btn-lg btn-bright">
               Configure Index Connections
             </a>
           </div>
@@ -569,21 +595,11 @@ export default function Discover() {
             <>
               <h1>Discover Agents</h1>
               <p className={styles.subtitle}>
-                Browse and install community agents from {enabledIndexes.length} connected {enabledIndexes.length === 1 ? 'index' : 'indexes'}
+                Browse and add community agents from {enabledIndexes.length} connected {enabledIndexes.length === 1 ? 'index' : 'indexes'}
               </p>
             </>
           )}
         </div>
-        <a
-          href="https://docs.agentsystems.ai/user-guide/discover-agents"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.docsLink}
-          title="View documentation"
-        >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
-        </a>
       </div>
 
       {/* Search and Filters */}
@@ -670,9 +686,9 @@ export default function Discover() {
                   agent={agent}
                   onClick={() => setSelectedAgent(agent)}
                   onDeveloperClick={(devName, indexUrl) => fetchDeveloperInfo(devName, indexUrl)}
-                  onInstall={() => handleInstallAgent(agent)}
-                  onUninstall={() => handleUninstallAgent(agent)}
-                  isInstalled={isAgentInstalled(agent)}
+                  onAdd={() => handleAddAgent(agent)}
+                  onRemove={() => handleRemoveAgent(agent)}
+                  isAdded={isAgentAdded(agent)}
                 />
               ))}
             </div>
@@ -709,9 +725,9 @@ export default function Discover() {
             setSelectedAgent(null)
             setPreviousDeveloper(null)
           }}
-          onInstall={() => handleInstallAgent(selectedAgent)}
-          onUninstall={() => handleUninstallAgent(selectedAgent)}
-          isInstalled={isAgentInstalled(selectedAgent)}
+          onAdd={() => handleAddAgent(selectedAgent)}
+          onRemove={() => handleRemoveAgent(selectedAgent)}
+          isAdded={isAgentAdded(selectedAgent)}
         />
       )}
 
@@ -738,10 +754,10 @@ export default function Discover() {
         />
       )}
 
-      {/* Install Name Modal */}
-      {agentToInstall && (
+      {/* Add Agent Name Modal */}
+      {agentToAdd && (
         <div className={styles.modalOverlay} onClick={() => {
-          setAgentToInstall(null)
+          setAgentToAdd(null)
           setCustomAgentName('')
           setNameError(null)
           setHasAcknowledged(false)
@@ -750,13 +766,13 @@ export default function Discover() {
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px' }}>
             <div className={styles.modalHeader}>
               <div>
-                <h2>Install Agent</h2>
+                <h2>Add Agent</h2>
                 <p className={styles.modalDeveloper}>
-                  {agentToInstall.name} by @{agentToInstall.developer}
+                  {agentToAdd.name} by @{agentToAdd.developer}
                 </p>
               </div>
               <button className={styles.closeButton} onClick={() => {
-                setAgentToInstall(null)
+                setAgentToAdd(null)
                 setCustomAgentName('')
                 setNameError(null)
                 setHasAcknowledged(false)
@@ -806,19 +822,19 @@ export default function Discover() {
                   </div>
                 )}
 
-                {customAgentName !== agentToInstall.name && !nameError && (
+                {customAgentName !== agentToAdd.name && !nameError && (
                   <div style={{
                     marginTop: '0.5rem',
                     fontSize: '0.875rem',
                     color: 'var(--text-muted)'
                   }}>
-                    Original name: {agentToInstall.name}
+                    Original name: {agentToAdd.name}
                   </div>
                 )}
               </div>
 
               {/* Required Egress Section */}
-              {agentToInstall.required_egress && agentToInstall.required_egress.length > 0 && (
+              {agentToAdd.required_egress && agentToAdd.required_egress.length > 0 && (
                 <div style={{ marginTop: '1.5rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
                     Required Network Access
@@ -835,7 +851,7 @@ export default function Discover() {
                       This agent requires access to the following URLs:
                     </p>
                     <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
-                      {agentToInstall.required_egress.map((url, index) => (
+                      {agentToAdd.required_egress.map((url, index) => (
                         <li key={index} style={{ marginBottom: '0.25rem' }}>
                           <code style={{ fontSize: '0.875rem' }}>{url}</code>
                         </li>
@@ -922,8 +938,7 @@ export default function Discover() {
                     }}
                   />
                   <span>
-                    I acknowledge that I am installing third-party software that has not been reviewed, endorsed, verified, or controlled by AgentSystems.
-                    I am responsible for evaluating this agent's security, permissions, and suitability before use. I accept responsibility for any issues, security vulnerabilities, or damages that may result from installing and running this agent.
+                    I understand that this third-party software has not been reviewed or endorsed by AgentSystems.
                   </span>
                 </label>
               </div>
@@ -933,7 +948,7 @@ export default function Discover() {
               <button
                 className="btn btn-lg btn-ghost"
                 onClick={() => {
-                  setAgentToInstall(null)
+                  setAgentToAdd(null)
                   setCustomAgentName('')
                   setNameError(null)
                   setHasAcknowledged(false)
@@ -944,37 +959,37 @@ export default function Discover() {
               </button>
               <button
                 className="btn btn-lg btn-bright"
-                onClick={confirmInstallAgent}
+                onClick={confirmAddAgent}
                 disabled={
                   !customAgentName.trim() ||
                   !hasAcknowledged ||
-                  ((agentToInstall.required_egress?.length ?? 0) > 0 && !hasApprovedEgress)
+                  ((agentToAdd.required_egress?.length ?? 0) > 0 && !hasApprovedEgress)
                 }
               >
-                Install
+                Add Agent
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Uninstall Confirmation Modal */}
-      {agentToUninstall && (
-        <div className={styles.modalOverlay} onClick={() => setAgentToUninstall(null)}>
+      {/* Remove Confirmation Modal */}
+      {agentToRemove && (
+        <div className={styles.modalOverlay} onClick={() => setAgentToRemove(null)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
             <div className={styles.modalHeader}>
               <div>
-                <h2>Uninstall Agent</h2>
+                <h2>Remove Agent</h2>
                 <p className={styles.modalDeveloper}>
-                  {agentToUninstall.name} by @{agentToUninstall.developer}
+                  {agentToRemove.name} by @{agentToRemove.developer}
                 </p>
               </div>
-              <button className={styles.closeButton} onClick={() => setAgentToUninstall(null)}>×</button>
+              <button className={styles.closeButton} onClick={() => setAgentToRemove(null)}>×</button>
             </div>
 
             <div className={styles.modalBody}>
               <div className={styles.modalDescription}>
-                <p>{agentToUninstall.description}</p>
+                <p>{agentToRemove.description}</p>
               </div>
 
               <div style={{
@@ -986,7 +1001,7 @@ export default function Discover() {
               }}>
                 <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}>
                   <ExclamationTriangleIcon style={{ width: '1.25rem', height: '1.25rem', display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom' }} />
-                  Are you sure you want to uninstall this agent?
+                  Are you sure you want to remove this agent?
                 </p>
                 <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                   <li>The agent will be removed from your configuration</li>
@@ -999,16 +1014,16 @@ export default function Discover() {
             <div className={styles.modalFooter}>
               <button
                 className="btn btn-lg btn-ghost"
-                onClick={() => setAgentToUninstall(null)}
+                onClick={() => setAgentToRemove(null)}
               >
                 Cancel
               </button>
               <button
                 className="btn btn-lg btn-subtle"
-                onClick={confirmUninstallAgent}
+                onClick={confirmRemoveAgent}
                 style={{ color: 'var(--error)' }}
               >
-                Uninstall
+                Remove Agent
               </button>
             </div>
           </div>
@@ -1035,12 +1050,12 @@ interface AgentCardProps {
   agent: IndexAgent
   onClick: () => void
   onDeveloperClick: (developerName: string, indexUrl: string) => void
-  onInstall: () => void
-  onUninstall: () => void
-  isInstalled: boolean
+  onAdd: () => void
+  onRemove: () => void
+  isAdded: boolean
 }
 
-function AgentCard({ agent, onClick, onDeveloperClick, onInstall, onUninstall, isInstalled }: AgentCardProps) {
+function AgentCard({ agent, onClick, onDeveloperClick, onAdd, onRemove, isAdded }: AgentCardProps) {
   return (
     <Card className={styles.agentCard} onClick={onClick}>
       <div className={styles.cardHeader}>
@@ -1103,25 +1118,25 @@ function AgentCard({ agent, onClick, onDeveloperClick, onInstall, onUninstall, i
             View Source
           </a>
         )}
-        {isInstalled ? (
+        {isAdded ? (
           <button
             className="btn btn-sm btn-subtle"
             onClick={(e) => {
               e.stopPropagation()
-              onUninstall()
+              onRemove()
             }}
           >
-            Uninstall
+            Remove
           </button>
         ) : (
           <button
             className="btn btn-sm btn-subtle"
             onClick={(e) => {
               e.stopPropagation()
-              onInstall()
+              onAdd()
             }}
           >
-            Install
+            Add
           </button>
         )}
       </div>
@@ -1135,12 +1150,12 @@ interface AgentDetailModalProps {
   onClose: () => void
   onBack?: () => void
   onDeveloperClick: (developerName: string, indexUrl: string) => void
-  onInstall: () => void
-  onUninstall: () => void
-  isInstalled: boolean
+  onAdd: () => void
+  onRemove: () => void
+  isAdded: boolean
 }
 
-function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall, onUninstall, isInstalled }: AgentDetailModalProps) {
+function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onAdd, onRemove, isAdded }: AgentDetailModalProps) {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -1462,13 +1477,13 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onInstall,
               View Source
             </a>
           )}
-          {isInstalled ? (
-            <button className="btn btn-lg btn-subtle" onClick={onUninstall}>
-              Uninstall
+          {isAdded ? (
+            <button className="btn btn-lg btn-subtle" onClick={onRemove}>
+              Remove
             </button>
           ) : (
-            <button className="btn btn-lg btn-subtle" onClick={onInstall}>
-              Install
+            <button className="btn btn-lg btn-subtle" onClick={onAdd}>
+              Add
             </button>
           )}
         </div>

@@ -13,7 +13,8 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
   ExclamationTriangleIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline'
 import styles from './IndexConnectionsPage.module.css'
 
@@ -29,6 +30,9 @@ export default function IndexConnectionsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showEnableModal, setShowEnableModal] = useState(false)
+  const [quickEnableIndex, setQuickEnableIndex] = useState<IndexConnectionForm | null>(null)
+  const [quickDisableIndex, setQuickDisableIndex] = useState<IndexConnectionForm | null>(null)
+  const [showForm, setShowForm] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
 
   const { playClickSound } = useAudio()
@@ -49,8 +53,8 @@ export default function IndexConnectionsPage() {
 
     if (!data.name) {
       newErrors.name = 'Index name is required'
-    } else if (!/^[a-z0-9_]+$/.test(data.name)) {
-      newErrors.name = 'Name must be lowercase letters, numbers, and underscores only'
+    } else if (!/^[a-z0-9_-]+$/.test(data.name)) {
+      newErrors.name = 'Name must be lowercase letters, numbers, hyphens, and underscores only'
     }
 
     if (!data.url) {
@@ -87,6 +91,8 @@ export default function IndexConnectionsPage() {
 
       setFormData(initialFormData)
       setErrors({})
+      setShowForm(false)
+      setEditingId(null)
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to save index connection')
     }
@@ -101,6 +107,7 @@ export default function IndexConnectionsPage() {
       description: index.description || ''
     })
     setEditingId(index.id)
+    setShowForm(true)
     setErrors({})
 
     // Auto-scroll to form
@@ -127,7 +134,21 @@ export default function IndexConnectionsPage() {
     playClickSound()
     setFormData(initialFormData)
     setEditingId(null)
+    setShowForm(false)
     setErrors({})
+  }
+
+  const handleAddNew = () => {
+    playClickSound()
+    setFormData(initialFormData)
+    setEditingId(null)
+    setShowForm(true)
+    setErrors({})
+
+    // Auto-scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const handleEnableChange = (checked: boolean) => {
@@ -151,6 +172,60 @@ export default function IndexConnectionsPage() {
     setShowEnableModal(false)
   }
 
+  const handleQuickEnable = (index: IndexConnectionForm) => {
+    playClickSound()
+    setQuickEnableIndex(index)
+  }
+
+  const handleQuickEnableConfirm = async () => {
+    if (!quickEnableIndex) return
+
+    playClickSound()
+    try {
+      updateIndexConnection(quickEnableIndex.id, {
+        ...quickEnableIndex,
+        enabled: true
+      })
+      await saveConfig()
+      showSuccess(`Enabled ${quickEnableIndex.name}`)
+      setQuickEnableIndex(null)
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Failed to enable index connection')
+    }
+  }
+
+  const handleQuickEnableCancel = () => {
+    playClickSound()
+    setQuickEnableIndex(null)
+  }
+
+  const handleQuickDisable = (index: IndexConnectionForm) => {
+    playClickSound()
+    setQuickDisableIndex(index)
+  }
+
+  const handleQuickDisableConfirm = async () => {
+    if (!quickDisableIndex) return
+
+    playClickSound()
+    try {
+      updateIndexConnection(quickDisableIndex.id, {
+        ...quickDisableIndex,
+        enabled: false
+      })
+      await saveConfig()
+      showSuccess(`Disabled ${quickDisableIndex.name}`)
+      setQuickDisableIndex(null)
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Failed to disable index connection')
+    }
+  }
+
+  const handleQuickDisableCancel = () => {
+    playClickSound()
+    setQuickDisableIndex(null)
+  }
+
   return (
     <div className={styles.indexConnectionsPage}>
       {/* Breadcrumb Navigation */}
@@ -168,19 +243,30 @@ export default function IndexConnectionsPage() {
           <h1>Index Connections</h1>
           <p>Discover and browse community agents from public indexes.</p>
         </div>
-        <a
-          href="https://docs.agentsystems.ai/configuration/index-connections"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.docsLink}
-          title="View documentation"
-        >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
-        </a>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <a
+            href="https://docs.agentsystems.ai/configuration/index-connections"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost"
+            title="View documentation"
+          >
+            <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+            View Docs
+          </a>
+          <button
+            onClick={handleAddNew}
+            className="btn btn-sm btn-primary"
+            title="Add new index connection"
+          >
+            <PlusIcon />
+            Add Connection
+          </button>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
+      {showForm && (
       <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
@@ -282,19 +368,18 @@ export default function IndexConnectionsPage() {
               {editingId ? 'Update' : 'Add'} Index Connection
             </button>
 
-            {editingId && (
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="btn btn-lg btn-subtle"
-              >
-                <XMarkIcon />
-                Cancel
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="btn btn-lg btn-subtle"
+            >
+              <XMarkIcon />
+              Cancel
+            </button>
           </div>
         </form>
       </Card>
+      )}
 
       {/* Index Connections List */}
       <Card>
@@ -323,6 +408,24 @@ export default function IndexConnectionsPage() {
                     </div>
 
                     <div className={styles.itemActions}>
+                      {!index.enabled ? (
+                        <button
+                          onClick={() => handleQuickEnable(index)}
+                          className="btn btn-sm btn-primary"
+                          title="Enable this index connection"
+                        >
+                          Enable
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleQuickDisable(index)}
+                          className="btn btn-sm btn-ghost"
+                          title="Disable this index connection"
+                        >
+                          Disable
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleEdit(index)}
                         className="btn btn-sm btn-ghost"
@@ -360,12 +463,30 @@ export default function IndexConnectionsPage() {
         )}
       </Card>
 
-      {/* Enable Confirmation Modal */}
+      {/* Enable Confirmation Modal (for edit mode) */}
       {showEnableModal && (
         <EnableConfirmationModal
           indexUrl={formData.url}
           onConfirm={handleEnableConfirm}
           onCancel={handleEnableCancel}
+        />
+      )}
+
+      {/* Quick Enable Confirmation Modal */}
+      {quickEnableIndex && (
+        <EnableConfirmationModal
+          indexUrl={quickEnableIndex.url}
+          onConfirm={handleQuickEnableConfirm}
+          onCancel={handleQuickEnableCancel}
+        />
+      )}
+
+      {/* Quick Disable Confirmation Modal */}
+      {quickDisableIndex && (
+        <DisableConfirmationModal
+          indexName={quickDisableIndex.name}
+          onConfirm={handleQuickDisableConfirm}
+          onCancel={handleQuickDisableCancel}
         />
       )}
 
@@ -397,13 +518,10 @@ function EnableConfirmationModal({ indexUrl, onConfirm, onCancel }: EnableConfir
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <ExclamationTriangleIcon className={styles.modalIcon} />
-          <h2>Enable Index Connection</h2>
+          <h2>Enable Index Connection?</h2>
         </div>
 
         <div className={styles.modalBody}>
-          <p>
-            <strong>You are enabling an agent index:</strong>
-          </p>
           <div style={{
             padding: '0.75rem',
             background: 'var(--surface-2)',
@@ -422,13 +540,7 @@ function EnableConfirmationModal({ indexUrl, onConfirm, onCancel }: EnableConfir
             </code>
           </div>
           <p>
-            Agents discovered through indexes are provided by third-party developers.
-            AgentSystems does not review, endorse, verify, or control any agents listed in indexes.
-            You are solely responsible for reviewing agent code, permissions, network access,
-            and security before installation.
-          </p>
-          <p>
-            <strong>By enabling this index, you acknowledge these risks.</strong> Do you wish to proceed?
+            This community index lists agents from third-party developers. AgentSystems does not review or endorse software in any index.
           </p>
         </div>
 
@@ -438,6 +550,45 @@ function EnableConfirmationModal({ indexUrl, onConfirm, onCancel }: EnableConfir
           </button>
           <button className="btn btn-lg btn-bright" onClick={onConfirm}>
             Enable Index
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Disable Confirmation Modal Component
+interface DisableConfirmationModalProps {
+  indexName: string
+  onConfirm: () => void
+  onCancel: () => void
+}
+
+function DisableConfirmationModal({ indexName, onConfirm, onCancel }: DisableConfirmationModalProps) {
+  return (
+    <div className={styles.modalOverlay} onClick={onCancel}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <QuestionMarkCircleIcon className={styles.modalIcon} />
+          <h2>Disable Index Connection</h2>
+        </div>
+
+        <div className={styles.modalBody}>
+          <p>
+            Are you sure you want to disable <strong>{indexName}</strong>?
+          </p>
+          <p>
+            Agents from this index will no longer appear in the Discover page.
+            You can re-enable it at any time.
+          </p>
+        </div>
+
+        <div className={styles.modalFooter}>
+          <button className="btn btn-lg btn-ghost" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="btn btn-lg btn-primary" onClick={onConfirm}>
+            Disable Index
           </button>
         </div>
       </div>

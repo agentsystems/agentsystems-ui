@@ -15,7 +15,7 @@ import {
   ChevronLeftIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
-import styles from './AgentsPage.module.css'
+import styles from './AgentConnectionsPage.module.css'
 
 const initialFormData: Omit<AgentConfigForm, 'id'> = {
   name: '',
@@ -28,10 +28,11 @@ const initialFormData: Omit<AgentConfigForm, 'id'> = {
   exposePorts: '8000'
 }
 
-export default function AgentsPage() {
+export default function AgentConnectionsPage() {
   const [formData, setFormData] = useState<Omit<AgentConfigForm, 'id'>>(initialFormData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showForm, setShowForm] = useState(false)
   // Advanced options removed - keeping state for potential future use
   // @ts-expect-error - keeping for potential future use
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -102,9 +103,11 @@ export default function AgentsPage() {
       
       // Save changes to config file
       await saveConfig()
-      
+
       setFormData(initialFormData)
       setErrors({})
+      setShowForm(false)
+      setEditingId(null)
       // Advanced section removed
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to save agent')
@@ -124,9 +127,10 @@ export default function AgentsPage() {
       exposePorts: agent.exposePorts
     })
     setEditingId(agent.id)
+    setShowForm(true)
     setErrors({})
     // Advanced section removed - no longer needed
-    
+
     // Auto-scroll to form
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -151,8 +155,22 @@ export default function AgentsPage() {
     playClickSound()
     setFormData(initialFormData)
     setEditingId(null)
+    setShowForm(false)
     setErrors({})
     // Advanced section removed
+  }
+
+  const handleAddNew = () => {
+    playClickSound()
+    setFormData(initialFormData)
+    setEditingId(null)
+    setShowForm(true)
+    setErrors({})
+
+    // Auto-scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   return (
@@ -164,32 +182,43 @@ export default function AgentsPage() {
           <span>Configuration</span>
         </Link>
         <span className={styles.breadcrumbSeparator}>/</span>
-        <span className={styles.breadcrumbCurrent}>Agents</span>
+        <span className={styles.breadcrumbCurrent}>Agent Connections</span>
       </nav>
 
       <div className={styles.header}>
         <div>
-          <h1>Agents</h1>
+          <h1>Agent Connections</h1>
           <p>Configure agent deployments using your registry connections</p>
         </div>
-        <a
-          href="https://docs.agentsystems.ai/configuration/agents"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.docsLink}
-          title="View documentation"
-        >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
-        </a>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <a
+            href="https://docs.agentsystems.ai/configuration/agent-connections"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost"
+            title="View documentation"
+          >
+            <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+            View Docs
+          </a>
+          <button
+            onClick={handleAddNew}
+            className="btn btn-sm btn-primary"
+            title="Add new agent connection"
+          >
+            <PlusIcon />
+            Add Connection
+          </button>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
+      {showForm && (
       <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
             <RocketLaunchIcon />
-            {editingId ? `Edit Agent` : 'Add New Agent'}
+            {editingId ? `Edit Agent Connection` : 'Add New Agent Connection'}
           </h2>
           
           <div className={styles.formRow}>
@@ -386,34 +415,33 @@ export default function AgentsPage() {
           <div className={styles.formActions}>
             <button type="submit" className="btn btn-lg btn-bright">
               <CheckIcon />
-              {editingId ? 'Update' : 'Add'} Agent
+              {editingId ? 'Update' : 'Add'} Connection
             </button>
-            
-            {editingId && (
-              <button 
-                type="button" 
-                onClick={handleCancel}
-                className="btn btn-lg btn-subtle"
-              >
-                <XMarkIcon />
-                Cancel
-              </button>
-            )}
+
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="btn btn-lg btn-subtle"
+            >
+              <XMarkIcon />
+              Cancel
+            </button>
           </div>
         </form>
       </Card>
+      )}
 
-      {/* Agents List */}
+      {/* Agent Connections List */}
       <Card>
         <div className={styles.listHeader}>
-          <h2>Configured Agents ({agents.length})</h2>
+          <h2>Configured Agent Connections ({agents.length})</h2>
         </div>
 
         {agents.length === 0 ? (
           <div className={styles.emptyState}>
             <RocketLaunchIcon />
-            <h3>No agents configured</h3>
-            <p>Add your first agent using the form above</p>
+            <h3>No agent connections configured</h3>
+            <p>Add your first agent connection to get started</p>
           </div>
         ) : (
           <div className={styles.list}>

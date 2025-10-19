@@ -33,6 +33,7 @@ export default function CredentialsPage() {
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [showValues, setShowValues] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showForm, setShowForm] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
   
   const { playClickSound } = useAudio()
@@ -96,6 +97,7 @@ export default function CredentialsPage() {
       
       setFormData(initialFormData)
       setErrors({})
+      setShowForm(false)
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to save environment variable')
     }
@@ -106,7 +108,8 @@ export default function CredentialsPage() {
     setFormData(envVar)
     setEditingKey(envVar.key)
     setErrors({})
-    
+    setShowForm(true)
+
     // Auto-scroll to form
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -139,6 +142,20 @@ export default function CredentialsPage() {
     setFormData(initialFormData)
     setEditingKey(null)
     setErrors({})
+    setShowForm(false)
+  }
+
+  const handleAddNew = () => {
+    playClickSound()
+    setFormData(initialFormData)
+    setEditingKey(null)
+    setShowForm(true)
+    setErrors({})
+
+    // Auto-scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const toggleShowValue = (key: string) => {
@@ -174,19 +191,30 @@ export default function CredentialsPage() {
           <h1>Credentials</h1>
           <p>Manage credentials and environment variables for registry connections</p>
         </div>
-        <a
-          href="https://docs.agentsystems.ai/configuration/credentials"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.docsLink}
-          title="View documentation"
-        >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
-        </a>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <a
+            href="https://docs.agentsystems.ai/configuration/credentials"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost"
+            title="View documentation"
+          >
+            <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+            View Docs
+          </a>
+          <button
+            onClick={handleAddNew}
+            className="btn btn-sm btn-primary"
+            title="Add new credential"
+          >
+            <PlusIcon />
+            Add Credential
+          </button>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
+      {showForm && (
       <Card className={styles.formCard} ref={formRef}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
@@ -245,21 +273,20 @@ export default function CredentialsPage() {
           <div className={styles.formActions}>
             <button type="submit" className="btn btn-lg btn-bright">
               <PlusIcon />
-              {editingKey ? 'Update' : 'Add'} Variable
+              {editingKey ? 'Update' : 'Add'} Credential
             </button>
-            
-            {editingKey && (
-              <button 
-                type="button" 
-                onClick={handleCancel}
-                className="btn btn-lg btn-subtle"
-              >
-                Cancel
-              </button>
-            )}
+
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="btn btn-lg btn-subtle"
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </Card>
+      )}
 
       {/* Environment Variables List */}
       <Card>
