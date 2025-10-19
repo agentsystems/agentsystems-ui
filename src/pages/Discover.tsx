@@ -541,7 +541,7 @@ export default function Discover() {
             <GlobeAltIcon className={styles.emptyIcon} />
             <h3>No Index Connections Enabled</h3>
             <p>Enable at least one index connection to discover community agents.</p>
-            <a href="/configuration/indexes" className="btn btn-lg btn-bright">
+            <a href="/configuration/index-connections" className="btn btn-lg btn-bright">
               Configure Index Connections
             </a>
           </div>

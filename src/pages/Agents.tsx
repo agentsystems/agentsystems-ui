@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { agentsApi } from '@api/agents'
 import { useConfigStore } from '@stores/configStore'
 import AgentFilters from '@components/agents/AgentFilters'
@@ -8,7 +8,9 @@ import AgentGrid from '@components/agents/AgentGrid'
 import ErrorMessage from '@components/ErrorMessage'
 import Toast from '@components/Toast'
 import { useToast } from '@hooks/useToast'
+import { useAudio } from '@hooks/useAudio'
 import { API_DEFAULTS } from '@constants/app'
+import { GlobeAltIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
 import styles from './Agents.module.css'
 
 /**
@@ -29,12 +31,14 @@ import styles from './Agents.module.css'
  */
 export default function Agents() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const { playClickSound } = useAudio()
   const [searchParams] = useSearchParams()
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'running' | 'stopped'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [operatingAgent, setOperatingAgent] = useState<string | null>(null)
   const { toasts, removeToast, showSuccess, showError } = useToast()
-  
+
   // Get agent configurations for image/tag information
   const { getAgents } = useConfigStore()
   const agentConfigs = getAgents()
@@ -96,10 +100,36 @@ export default function Agents() {
     return (
       <div className={styles.agents}>
         <div className={styles.header}>
-          <h1>Agents</h1>
-          <p className={styles.subtitle}>Manage and monitor your deployed agents</p>
+          <div>
+            <h1>Agents</h1>
+            <p className={styles.subtitle}>Manage and monitor your deployed agents</p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={() => {
+                playClickSound()
+                navigate('/discover')
+              }}
+              className="btn btn-sm btn-primary"
+              title="Discover and install community agents"
+            >
+              <GlobeAltIcon style={{ width: '1rem', height: '1rem' }} />
+              Discover Agents
+            </button>
+            <button
+              onClick={() => {
+                playClickSound()
+                navigate('/configuration/agent-connections')
+              }}
+              className="btn btn-sm btn-ghost"
+              title="Configure agent deployment connections"
+            >
+              <WrenchScrewdriverIcon style={{ width: '1rem', height: '1rem' }} />
+              Configure Connections
+            </button>
+          </div>
         </div>
-        <ErrorMessage 
+        <ErrorMessage
           message="Failed to load agents. Please check your connection to the AgentSystems gateway."
           onRetry={() => refetch()}
         />
@@ -144,22 +174,48 @@ export default function Agents() {
   return (
     <div className={styles.agents}>
       <div className={styles.header}>
-        <h1>Agents</h1>
-        <p className={styles.subtitle}>Manage and monitor your deployed agents</p>
-        
-        <AgentFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedFilter={selectedFilter}
-          onFilterChange={setSelectedFilter}
-          filteredCount={filteredAgents.length}
-          totalCount={data?.agents.length || 0}
-          runningCount={runningCount}
-          stoppedCount={stoppedCount}
-          onStopAll={handleStopAll}
-          isStoppingAll={stopMutation.isPending}
-        />
+        <div>
+          <h1>Agents</h1>
+          <p className={styles.subtitle}>Manage and monitor your deployed agents</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={() => {
+              playClickSound()
+              navigate('/discover')
+            }}
+            className="btn btn-sm btn-primary"
+            title="Discover and install community agents"
+          >
+            <GlobeAltIcon style={{ width: '1rem', height: '1rem' }} />
+            Discover Agents
+          </button>
+          <button
+            onClick={() => {
+              playClickSound()
+              navigate('/configuration/agent-connections')
+            }}
+            className="btn btn-sm btn-ghost"
+            title="Configure agent deployment connections"
+          >
+            <WrenchScrewdriverIcon style={{ width: '1rem', height: '1rem' }} />
+            Configure Connections
+          </button>
+        </div>
       </div>
+
+      <AgentFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedFilter={selectedFilter}
+        onFilterChange={setSelectedFilter}
+        filteredCount={filteredAgents.length}
+        totalCount={data?.agents.length || 0}
+        runningCount={runningCount}
+        stoppedCount={stoppedCount}
+        onStopAll={handleStopAll}
+        isStoppingAll={stopMutation.isPending}
+      />
 
       <AgentGrid
         agents={filteredAgents}

@@ -19,9 +19,9 @@ const Executions = lazy(() => import('@pages/Executions'))
 const Logs = lazy(() => import('@pages/Logs'))
 const ConfigurationOverview = lazy(() => import('@pages/ConfigurationOverview'))
 const CredentialsPage = lazy(() => import('@pages/configuration/CredentialsPage'))
-const RegistriesPage = lazy(() => import('@pages/configuration/RegistriesPage'))
+const RegistryConnectionsPage = lazy(() => import('@pages/configuration/RegistryConnectionsPage'))
 const IndexConnectionsPage = lazy(() => import('@pages/configuration/IndexConnectionsPage'))
-const AgentsPage = lazy(() => import('@pages/configuration/AgentsPage'))
+const AgentConnectionsPage = lazy(() => import('@pages/configuration/AgentConnectionsPage'))
 const ConnectionPage = lazy(() => import('@pages/configuration/ConnectionPage'))
 const AppearancePage = lazy(() => import('@pages/configuration/AppearancePage'))
 const ModelConnectionsPage = lazy(() => import('@pages/configuration/ModelConnectionsPage'))
@@ -122,19 +122,19 @@ function App() {
                 <CredentialsPage />
               </Suspense>
             } />
-            <Route path="configuration/registries" element={
+            <Route path="configuration/registry-connections" element={
               <Suspense fallback={<LoadingSpinner />}>
-                <RegistriesPage />
+                <RegistryConnectionsPage />
               </Suspense>
             } />
-            <Route path="configuration/indexes" element={
+            <Route path="configuration/index-connections" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <IndexConnectionsPage />
               </Suspense>
             } />
-            <Route path="configuration/agents" element={
+            <Route path="configuration/agent-connections" element={
               <Suspense fallback={<LoadingSpinner />}>
-                <AgentsPage />
+                <AgentConnectionsPage />
               </Suspense>
             } />
             <Route path="configuration/connection" element={
@@ -147,7 +147,7 @@ function App() {
                 <AppearancePage />
               </Suspense>
             } />
-            <Route path="configuration/models" element={
+            <Route path="configuration/model-connections" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <ModelConnectionsPage />
               </Suspense>

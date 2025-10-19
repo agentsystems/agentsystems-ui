@@ -15,7 +15,7 @@ import {
   ChevronLeftIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
-import styles from './AgentsPage.module.css'
+import styles from './AgentConnectionsPage.module.css'
 
 const initialFormData: Omit<AgentConfigForm, 'id'> = {
   name: '',
@@ -28,7 +28,7 @@ const initialFormData: Omit<AgentConfigForm, 'id'> = {
   exposePorts: '8000'
 }
 
-export default function AgentsPage() {
+export default function AgentConnectionsPage() {
   const [formData, setFormData] = useState<Omit<AgentConfigForm, 'id'>>(initialFormData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -182,17 +182,17 @@ export default function AgentsPage() {
           <span>Configuration</span>
         </Link>
         <span className={styles.breadcrumbSeparator}>/</span>
-        <span className={styles.breadcrumbCurrent}>Agents</span>
+        <span className={styles.breadcrumbCurrent}>Agent Connections</span>
       </nav>
 
       <div className={styles.header}>
         <div>
-          <h1>Agents</h1>
+          <h1>Agent Connections</h1>
           <p>Configure agent deployments using your registry connections</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <a
-            href="https://docs.agentsystems.ai/configuration/agents"
+            href="https://docs.agentsystems.ai/configuration/agent-connections"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-sm btn-ghost"
@@ -204,10 +204,10 @@ export default function AgentsPage() {
           <button
             onClick={handleAddNew}
             className="btn btn-sm btn-primary"
-            title="Add new agent"
+            title="Add new agent connection"
           >
             <PlusIcon />
-            Add Agent
+            Add Connection
           </button>
         </div>
       </div>
@@ -218,7 +218,7 @@ export default function AgentsPage() {
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
             <RocketLaunchIcon />
-            {editingId ? `Edit Agent` : 'Add New Agent'}
+            {editingId ? `Edit Agent Connection` : 'Add New Agent Connection'}
           </h2>
           
           <div className={styles.formRow}>
@@ -415,7 +415,7 @@ export default function AgentsPage() {
           <div className={styles.formActions}>
             <button type="submit" className="btn btn-lg btn-bright">
               <CheckIcon />
-              {editingId ? 'Update' : 'Add'} Agent
+              {editingId ? 'Update' : 'Add'} Connection
             </button>
 
             <button
@@ -431,17 +431,17 @@ export default function AgentsPage() {
       </Card>
       )}
 
-      {/* Agents List */}
+      {/* Agent Connections List */}
       <Card>
         <div className={styles.listHeader}>
-          <h2>Configured Agents ({agents.length})</h2>
+          <h2>Configured Agent Connections ({agents.length})</h2>
         </div>
 
         {agents.length === 0 ? (
           <div className={styles.emptyState}>
             <RocketLaunchIcon />
-            <h3>No agents configured</h3>
-            <p>Add your first agent using the form above</p>
+            <h3>No agent connections configured</h3>
+            <p>Add your first agent connection to get started</p>
           </div>
         ) : (
           <div className={styles.list}>

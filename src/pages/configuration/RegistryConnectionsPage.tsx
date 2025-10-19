@@ -16,7 +16,7 @@ import {
   QuestionMarkCircleIcon,
   PlusIcon
 } from '@heroicons/react/24/outline'
-import styles from './RegistriesPage.module.css'
+import styles from './RegistryConnectionsPage.module.css'
 
 const initialFormData: Omit<RegistryConnectionForm, 'id'> = {
   name: '',
@@ -25,7 +25,7 @@ const initialFormData: Omit<RegistryConnectionForm, 'id'> = {
   authMethod: 'none'
 }
 
-export default function RegistriesPage() {
+export default function RegistryConnectionsPage() {
   const [formData, setFormData] = useState<Omit<RegistryConnectionForm, 'id'>>(initialFormData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -185,7 +185,7 @@ export default function RegistriesPage() {
           <span>Configuration</span>
         </Link>
         <span className={styles.breadcrumbSeparator}>/</span>
-        <span className={styles.breadcrumbCurrent}>Registries</span>
+        <span className={styles.breadcrumbCurrent}>Registry Connections</span>
       </nav>
 
       <div className={styles.header}>
@@ -210,7 +210,7 @@ export default function RegistriesPage() {
             title="Add new registry connection"
           >
             <PlusIcon />
-            Add Registry
+            Add Connection
           </button>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default function RegistriesPage() {
         <form onSubmit={handleSubmit} className={styles.form}>
           <h2>
             <ServerIcon />
-            {editingId ? `Edit Registry` : 'Add New Registry'}
+            {editingId ? `Edit Registry Connection` : 'Add New Registry Connection'}
           </h2>
           
           <div className={styles.formRow}>
@@ -398,7 +398,7 @@ export default function RegistriesPage() {
           <div className={styles.formActions}>
             <button type="submit" className="btn btn-lg btn-bright">
               <CheckIcon />
-              {editingId ? 'Update' : 'Add'} Registry
+              {editingId ? 'Update' : 'Add'} Connection
             </button>
 
             <button
@@ -414,17 +414,17 @@ export default function RegistriesPage() {
       </Card>
       )}
 
-      {/* Registries List */}
+      {/* Registry Connections List */}
       <Card>
         <div className={styles.listHeader}>
-          <h2>Configured Registries ({registries.length})</h2>
+          <h2>Configured Registry Connections ({registries.length})</h2>
         </div>
 
         {registries.length === 0 ? (
           <div className={styles.emptyState}>
             <ServerIcon />
-            <h3>No registries configured</h3>
-            <p>Add your first registry connection using the form above</p>
+            <h3>No registry connections configured</h3>
+            <p>Add your first registry connection to get started</p>
           </div>
         ) : (
           <div className={styles.list}>

@@ -237,16 +237,82 @@ export default function ConfigurationOverview() {
 
       {/* Configuration Categories */}
       <div className={styles.configCategories}>
-        {/* Agent Platform */}
+        {/* Connections */}
         <div className={styles.configCategory}>
           <h2 className={styles.categoryTitle}>
-            Agent Platform
+            Connections
           </h2>
           <p className={styles.categoryDescription}>
-            Configure credentials, registries, AI models, and agent deployments
+            Configure external connections for AI models, agent discovery, registries, and deployments
           </p>
 
           <div className={styles.categoryCards}>
+            <ConfigCard
+              title="Model Connections"
+              icon={CpuChipIcon}
+              status={modelsStatus.status}
+              statusText={modelsStatus.text}
+              description={modelsStatus.description}
+              href="/configuration/model-connections"
+              onClick={() => handleCardClick('/configuration/model-connections')}
+              tourId="model-connections-card"
+            />
+
+            <ConfigCard
+              title="Index Connections"
+              icon={GlobeAltIcon}
+              status={indexesStatus.status}
+              statusText={indexesStatus.text}
+              description={indexesStatus.description}
+              href="/configuration/index-connections"
+              onClick={() => handleCardClick('/configuration/index-connections')}
+              tourId="index-connections-card"
+            />
+
+            <ConfigCard
+              title="Registry Connections"
+              icon={ServerIcon}
+              status={registriesStatus.status}
+              statusText={registriesStatus.text}
+              description={registriesStatus.description}
+              href="/configuration/registry-connections"
+              onClick={() => handleCardClick('/configuration/registry-connections')}
+              tourId="registry-connections-card"
+            />
+
+            <ConfigCard
+              title="Agent Connections"
+              icon={RocketLaunchIcon}
+              status={agentsStatus.status}
+              statusText={agentsStatus.text}
+              description={agentsStatus.description}
+              href="/configuration/agent-connections"
+              onClick={() => handleCardClick('/configuration/agent-connections')}
+              tourId="agent-connections-card"
+            />
+          </div>
+        </div>
+
+        {/* System */}
+        <div className={styles.configCategory}>
+          <h2 className={styles.categoryTitle}>
+            System
+          </h2>
+          <p className={styles.categoryDescription}>
+            Configure platform settings, gateway connection, credentials, and UI preferences
+          </p>
+
+          <div className={styles.categoryCards}>
+            <ConfigCard
+              title="Gateway Connection"
+              icon={LinkIcon}
+              status={connectionStatus.status}
+              statusText={connectionStatus.text}
+              description={connectionStatus.description}
+              href="/configuration/connection"
+              onClick={() => handleCardClick('/configuration/connection')}
+            />
+
             <ConfigCard
               title="Credentials"
               icon={KeyIcon}
@@ -258,72 +324,6 @@ export default function ConfigurationOverview() {
               tourId="credentials-card"
             />
 
-            <ConfigCard
-              title="Registry Connections"
-              icon={ServerIcon}
-              status={registriesStatus.status}
-              statusText={registriesStatus.text}
-              description={registriesStatus.description}
-              href="/configuration/registries"
-              onClick={() => handleCardClick('/configuration/registries')}
-              tourId="registry-connections-card"
-            />
-
-            <ConfigCard
-              title="Model Connections"
-              icon={CpuChipIcon}
-              status={modelsStatus.status}
-              statusText={modelsStatus.text}
-              description={modelsStatus.description}
-              href="/configuration/models"
-              onClick={() => handleCardClick('/configuration/models')}
-              tourId="model-connections-card"
-            />
-
-            <ConfigCard
-              title="Index Connections"
-              icon={GlobeAltIcon}
-              status={indexesStatus.status}
-              statusText={indexesStatus.text}
-              description={indexesStatus.description}
-              href="/configuration/indexes"
-              onClick={() => handleCardClick('/configuration/indexes')}
-              tourId="index-connections-card"
-            />
-
-            <ConfigCard
-              title="Agents"
-              icon={RocketLaunchIcon}
-              status={agentsStatus.status}
-              statusText={agentsStatus.text}
-              description={agentsStatus.description}
-              href="/configuration/agents"
-              onClick={() => handleCardClick('/configuration/agents')}
-              tourId="agents-config-card"
-            />
-          </div>
-        </div>
-
-        {/* Platform Settings */}
-        <div className={styles.configCategory}>
-          <h2 className={styles.categoryTitle}>
-            Platform Settings
-          </h2>
-          <p className={styles.categoryDescription}>
-            Configure gateway connectivity and user interface preferences
-          </p>
-          
-          <div className={styles.categoryCards}>
-            <ConfigCard
-              title="Gateway Connection"
-              icon={LinkIcon}
-              status={connectionStatus.status}
-              statusText={connectionStatus.text}
-              description={connectionStatus.description}
-              href="/configuration/connection"
-              onClick={() => handleCardClick('/configuration/connection')}
-            />
-            
             <ConfigCard
               title="Appearance"
               icon={PaintBrushIcon}
