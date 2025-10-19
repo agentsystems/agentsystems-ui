@@ -329,9 +329,29 @@ export default function Discover() {
       return
     }
 
-    // Show add modal with name input
+    // Generate smart default name to avoid conflicts
+    const existingAgents = getAgents()
+    let suggestedName = agent.name
+
+    // Check if base name conflicts
+    if (existingAgents.some(a => a.name === suggestedName)) {
+      // Try appending developer name
+      const developer = agent.developer || agent._id.split('/')[0]
+      suggestedName = `${agent.name}-${developer}`
+
+      // If developer variant also conflicts, append number
+      if (existingAgents.some(a => a.name === suggestedName)) {
+        let counter = 2
+        while (existingAgents.some(a => a.name === `${agent.name}-${counter}`)) {
+          counter++
+        }
+        suggestedName = `${agent.name}-${counter}`
+      }
+    }
+
+    // Show add modal with smart default name
     setAgentToAdd(agent)
-    setCustomAgentName(agent.name)
+    setCustomAgentName(suggestedName)
     setNameError(null)
     setHasAcknowledged(false)
     setHasApprovedEgress(false)
