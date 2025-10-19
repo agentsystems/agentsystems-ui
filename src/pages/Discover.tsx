@@ -387,33 +387,35 @@ export default function Discover() {
       // At this point, image_repository_url is guaranteed to be non-null due to the check at line 288
       const { registryUrl, repoPath, tag } = parseImageUrl(agentToAdd.image_repository_url!)
 
-      // Determine registry connection ID and name
+      // Get config store methods
+      const { getRegistryConnections, addRegistryConnection, addAgent, saveConfig } = useConfigStore.getState()
+
+      // Check if a registry connection for this URL already exists (any ID)
+      const existingRegistries = getRegistryConnections()
+      const existingRegistry = existingRegistries.find(r => r.url === registryUrl)
+
+      // Hardcoded mapping for well-known registries
       const registryIdMap: Record<string, string> = {
         'docker.io': 'dockerhub_public',
         'ghcr.io': 'github_registry',
         'gcr.io': 'google_registry'
       }
 
-      const registryId = registryIdMap[registryUrl] || registryUrl.replace(/[^a-z0-9]/g, '_')
-      const registryName = registryUrl === 'docker.io' ? 'Docker Hub (Public)' :
-                           registryUrl === 'ghcr.io' ? 'GitHub Container Registry' :
-                           registryUrl === 'gcr.io' ? 'Google Container Registry' :
-                           registryUrl
+      // Use existing registry ID, or create a standard one
+      const registryId = existingRegistry?.id || registryIdMap[registryUrl] || registryUrl.replace(/[^a-z0-9]/g, '_')
 
-      // Get config store methods
-      const { getRegistryConnections, addRegistryConnection, addAgent, saveConfig } = useConfigStore.getState()
+      // Only create new registry connection if one doesn't exist for this URL
+      if (!existingRegistry) {
+        const registryName = registryUrl === 'docker.io' ? 'Docker Hub (Public)' :
+                             registryUrl === 'ghcr.io' ? 'GitHub Container Registry' :
+                             registryUrl === 'gcr.io' ? 'Google Container Registry' :
+                             registryUrl
 
-      // Check if registry connection already exists
-      const existingRegistries = getRegistryConnections()
-      const registryExists = existingRegistries.some(r => r.id === registryId)
-
-      // Add registry connection if it doesn't exist
-      if (!registryExists) {
         addRegistryConnection({
           name: registryName,
           url: registryUrl,
           enabled: true,
-          authMethod: 'none'
+          authMethod: 'none'  // Assumption: all index agents use public images
         })
       }
 
