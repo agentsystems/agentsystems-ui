@@ -5,7 +5,6 @@ import {
   MagnifyingGlassIcon,
   GlobeAltIcon,
   ExclamationTriangleIcon,
-  QuestionMarkCircleIcon,
   ArrowLeftIcon,
   UserIcon,
   BriefcaseIcon,
@@ -516,16 +515,6 @@ export default function Discover() {
               Browse and add community agents from connected indexes
             </p>
           </div>
-          <a
-            href="https://docs.agentsystems.ai/user-guide/discover-agents"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.docsLink}
-            title="View documentation"
-          >
-            <QuestionMarkCircleIcon className={styles.docsIcon} />
-            <span>View Docs</span>
-          </a>
         </div>
 
         <Card>
@@ -549,16 +538,6 @@ export default function Discover() {
               Browse and add community agents from connected indexes
             </p>
           </div>
-          <a
-            href="https://docs.agentsystems.ai/user-guide/discover-agents"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.docsLink}
-            title="View documentation"
-          >
-            <QuestionMarkCircleIcon className={styles.docsIcon} />
-            <span>View Docs</span>
-          </a>
         </div>
 
         <Card className={styles.emptyStateCard}>
@@ -599,16 +578,6 @@ export default function Discover() {
             </>
           )}
         </div>
-        <a
-          href="https://docs.agentsystems.ai/user-guide/discover-agents"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.docsLink}
-          title="View documentation"
-        >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
-        </a>
       </div>
 
       {/* Search and Filters */}

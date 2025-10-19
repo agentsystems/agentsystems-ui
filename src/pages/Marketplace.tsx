@@ -107,11 +107,11 @@ export default function Marketplace() {
           href="https://docs.agentsystems.ai/user-guide/agent-index"
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.docsLink}
+          className="btn btn-sm btn-ghost"
           title="View documentation"
         >
-          <QuestionMarkCircleIcon className={styles.docsIcon} />
-          <span>View Docs</span>
+          <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+          View Docs
         </a>
       </div>
       

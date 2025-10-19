@@ -636,11 +636,11 @@ export default function Executions() {
                       href="https://docs.agentsystems.ai/user-guide/artifacts"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.docsLink}
+                      className="btn btn-sm btn-ghost"
                       title="View documentation"
                     >
-                      <QuestionMarkCircleIcon className={styles.docsIcon} />
-                      <span>View Docs</span>
+                      <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+                      View Docs
                     </a>
                   </div>
                   {artifactsData && (artifactsData.input_files.length > 0 || artifactsData.output_files.length > 0) ? (
@@ -815,11 +815,11 @@ export default function Executions() {
                       href="https://docs.agentsystems.ai/user-guide/audit-logs"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.docsLink}
+                      className="btn btn-sm btn-ghost"
                       title="View documentation"
                     >
-                      <QuestionMarkCircleIcon className={styles.docsIcon} />
-                      <span>View Docs</span>
+                      <QuestionMarkCircleIcon style={{ width: '1rem', height: '1rem' }} />
+                      View Docs
                     </a>
                   </div>
                   <div className={styles.auditSection}>
