@@ -29,6 +29,8 @@ export default function IndexConnectionsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showEnableModal, setShowEnableModal] = useState(false)
+  const [quickEnableIndex, setQuickEnableIndex] = useState<IndexConnectionForm | null>(null)
+  const [quickDisableIndex, setQuickDisableIndex] = useState<IndexConnectionForm | null>(null)
   const formRef = useRef<HTMLDivElement>(null)
 
   const { playClickSound } = useAudio()
@@ -49,8 +51,8 @@ export default function IndexConnectionsPage() {
 
     if (!data.name) {
       newErrors.name = 'Index name is required'
-    } else if (!/^[a-z0-9_]+$/.test(data.name)) {
-      newErrors.name = 'Name must be lowercase letters, numbers, and underscores only'
+    } else if (!/^[a-z0-9_-]+$/.test(data.name)) {
+      newErrors.name = 'Name must be lowercase letters, numbers, hyphens, and underscores only'
     }
 
     if (!data.url) {
@@ -149,6 +151,60 @@ export default function IndexConnectionsPage() {
   const handleEnableCancel = () => {
     playClickSound()
     setShowEnableModal(false)
+  }
+
+  const handleQuickEnable = (index: IndexConnectionForm) => {
+    playClickSound()
+    setQuickEnableIndex(index)
+  }
+
+  const handleQuickEnableConfirm = async () => {
+    if (!quickEnableIndex) return
+
+    playClickSound()
+    try {
+      updateIndexConnection(quickEnableIndex.id, {
+        ...quickEnableIndex,
+        enabled: true
+      })
+      await saveConfig()
+      showSuccess(`Enabled ${quickEnableIndex.name}`)
+      setQuickEnableIndex(null)
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Failed to enable index connection')
+    }
+  }
+
+  const handleQuickEnableCancel = () => {
+    playClickSound()
+    setQuickEnableIndex(null)
+  }
+
+  const handleQuickDisable = (index: IndexConnectionForm) => {
+    playClickSound()
+    setQuickDisableIndex(index)
+  }
+
+  const handleQuickDisableConfirm = async () => {
+    if (!quickDisableIndex) return
+
+    playClickSound()
+    try {
+      updateIndexConnection(quickDisableIndex.id, {
+        ...quickDisableIndex,
+        enabled: false
+      })
+      await saveConfig()
+      showSuccess(`Disabled ${quickDisableIndex.name}`)
+      setQuickDisableIndex(null)
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Failed to disable index connection')
+    }
+  }
+
+  const handleQuickDisableCancel = () => {
+    playClickSound()
+    setQuickDisableIndex(null)
   }
 
   return (
@@ -323,6 +379,24 @@ export default function IndexConnectionsPage() {
                     </div>
 
                     <div className={styles.itemActions}>
+                      {!index.enabled ? (
+                        <button
+                          onClick={() => handleQuickEnable(index)}
+                          className="btn btn-sm btn-primary"
+                          title="Enable this index connection"
+                        >
+                          Enable
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleQuickDisable(index)}
+                          className="btn btn-sm btn-ghost"
+                          title="Disable this index connection"
+                        >
+                          Disable
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleEdit(index)}
                         className="btn btn-sm btn-ghost"
@@ -360,12 +434,30 @@ export default function IndexConnectionsPage() {
         )}
       </Card>
 
-      {/* Enable Confirmation Modal */}
+      {/* Enable Confirmation Modal (for edit mode) */}
       {showEnableModal && (
         <EnableConfirmationModal
           indexUrl={formData.url}
           onConfirm={handleEnableConfirm}
           onCancel={handleEnableCancel}
+        />
+      )}
+
+      {/* Quick Enable Confirmation Modal */}
+      {quickEnableIndex && (
+        <EnableConfirmationModal
+          indexUrl={quickEnableIndex.url}
+          onConfirm={handleQuickEnableConfirm}
+          onCancel={handleQuickEnableCancel}
+        />
+      )}
+
+      {/* Quick Disable Confirmation Modal */}
+      {quickDisableIndex && (
+        <DisableConfirmationModal
+          indexName={quickDisableIndex.name}
+          onConfirm={handleQuickDisableConfirm}
+          onCancel={handleQuickDisableCancel}
         />
       )}
 
@@ -438,6 +530,45 @@ function EnableConfirmationModal({ indexUrl, onConfirm, onCancel }: EnableConfir
           </button>
           <button className="btn btn-lg btn-bright" onClick={onConfirm}>
             Enable Index
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Disable Confirmation Modal Component
+interface DisableConfirmationModalProps {
+  indexName: string
+  onConfirm: () => void
+  onCancel: () => void
+}
+
+function DisableConfirmationModal({ indexName, onConfirm, onCancel }: DisableConfirmationModalProps) {
+  return (
+    <div className={styles.modalOverlay} onClick={onCancel}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <QuestionMarkCircleIcon className={styles.modalIcon} />
+          <h2>Disable Index Connection</h2>
+        </div>
+
+        <div className={styles.modalBody}>
+          <p>
+            Are you sure you want to disable <strong>{indexName}</strong>?
+          </p>
+          <p>
+            Agents from this index will no longer appear in the Discover page.
+            You can re-enable it at any time.
+          </p>
+        </div>
+
+        <div className={styles.modalFooter}>
+          <button className="btn btn-lg btn-ghost" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="btn btn-lg btn-primary" onClick={onConfirm}>
+            Disable Index
           </button>
         </div>
       </div>
