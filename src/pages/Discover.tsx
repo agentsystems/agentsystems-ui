@@ -134,17 +134,28 @@ export default function Discover() {
   // Note: Agent add status is checked dynamically via isAgentAdded()
 
   const isAgentAdded = (agent: IndexAgent) => {
-    // Check if this agent is added by matching the source agent ID in labels
+    // Check if this agent is added by matching the source agent ID AND index URL in labels
+    // This ensures uniqueness across multiple indexes that might have the same developer/agent combo
     const configAgents = getAgents()
 
-    // First, try to match by index source ID (most accurate)
+    // Match by index URL + agent ID (most accurate - handles same developer/agent across different indexes)
+    if (agent._index_url) {
+      const matchByIndexAndId = configAgents.some(configAgent =>
+        configAgent.labels?.['index.source.index.url'] === agent._index_url &&
+        (configAgent.labels?.['index.source.agent.id'] === agent._id ||
+         configAgent.labels?.['index.source.agent.id'] === agent.id)  // Legacy support
+      )
+      if (matchByIndexAndId) return true
+    }
+
+    // Fallback: match by agent ID only (for agents added before index URL tracking)
     const matchById = configAgents.some(configAgent =>
       configAgent.labels?.['index.source.agent.id'] === agent._id ||
       configAgent.labels?.['index.source.agent.id'] === agent.id  // Legacy support
     )
     if (matchById) return true
 
-    // Fallback: match by name only for agents installed before ID tracking was added
+    // Fallback: match by name only for agents added before ID tracking was implemented
     // This only works if there's no ambiguity (no other agents with tracking labels using this name)
     const hasAnyTrackedAgent = configAgents.some(configAgent =>
       configAgent.labels?.['index.source.agent.id'] && configAgent.name === agent.name
@@ -417,7 +428,8 @@ export default function Discover() {
         labels: {
           'agent.port': '8000',
           'index.source.agent.id': agentToAdd._id,
-          'index.source.agent.name': agentToAdd.name
+          'index.source.agent.name': agentToAdd.name,
+          'index.source.index.url': agentToAdd._index_url || ''
         },
         envVariables: {},
         exposePorts: '8000'
@@ -452,12 +464,25 @@ export default function Discover() {
       // Get config store methods
       const { deleteAgent, saveConfig, getAgents } = useConfigStore.getState()
 
-      // Find the added agent by matching the source agent ID in labels
+      // Find the added agent by matching the source index URL + agent ID in labels
+      // This ensures we remove the correct agent when the same developer/agent exists in multiple indexes
       const configAgents = getAgents()
-      const addedAgent = configAgents.find(configAgent =>
-        configAgent.labels?.['index.source.agent.id'] === agentToRemove._id ||
-        configAgent.labels?.['index.source.agent.id'] === agentToRemove.id  // Legacy support
+
+      // First try to match by index URL + agent ID (most accurate)
+      let addedAgent = configAgents.find(configAgent =>
+        agentToRemove._index_url &&
+        configAgent.labels?.['index.source.index.url'] === agentToRemove._index_url &&
+        (configAgent.labels?.['index.source.agent.id'] === agentToRemove._id ||
+         configAgent.labels?.['index.source.agent.id'] === agentToRemove.id)  // Legacy support
       )
+
+      // Fallback: match by agent ID only (for agents added before index URL tracking)
+      if (!addedAgent) {
+        addedAgent = configAgents.find(configAgent =>
+          configAgent.labels?.['index.source.agent.id'] === agentToRemove._id ||
+          configAgent.labels?.['index.source.agent.id'] === agentToRemove.id  // Legacy support
+        )
+      }
 
       if (!addedAgent) {
         throw new Error('Agent not found in configuration')
