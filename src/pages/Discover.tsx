@@ -1348,12 +1348,6 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onAdd, onR
                       <span className={styles.badge}>{String(agent.facets.autonomy)}</span>
                     </li>
                   )}
-                  {(agent.facets.risk_tier as string | undefined) && (
-                    <li>
-                      <strong>Risk Tier:</strong>{' '}
-                      <span className={styles.badge}>{String(agent.facets.risk_tier)}</span>
-                    </li>
-                  )}
                   {(agent.facets.latency as string | undefined) && (
                     <li>
                       <strong>Latency:</strong>{' '}
