@@ -302,8 +302,6 @@ export default function AgentDetail() {
   const handleDeveloperClick = async (developerName: string) => {
     // Check if agent has index source labels to determine index URL
     const indexSourceId = agentConfig?.labels?.['index.source.agent.id']
-    console.log('Developer click - agent config:', agentConfig)
-    console.log('Developer click - index source ID:', indexSourceId)
 
     if (!indexSourceId) {
       showError('Developer profile unavailable for local agents. This feature requires an agent from an index.')
@@ -315,8 +313,6 @@ export default function AgentDetail() {
     const indexes = getIndexConnections()
     const enabledIndexes = indexes.filter(idx => idx.enabled)
 
-    console.log('Enabled indexes:', enabledIndexes)
-
     if (enabledIndexes.length === 0) {
       showError('No enabled index connections found.')
       return
@@ -325,8 +321,6 @@ export default function AgentDetail() {
     // For now, try the first enabled index - in production you'd want to track which index the agent came from
     const indexUrl = enabledIndexes[0].url
     const fetchUrl = `${indexUrl}/developers/${developerName}`
-
-    console.log('Fetching developer from:', fetchUrl)
 
     // Show modal immediately with placeholder data
     const placeholderInfo: DeveloperInfo = {
@@ -348,9 +342,6 @@ export default function AgentDetail() {
         fetch(`${indexUrl}/agents`)
       ])
 
-      console.log('Developer fetch response status:', developerResponse.status)
-      console.log('Agents fetch response status:', agentsResponse.status)
-
       // Handle developer response
       if (!developerResponse.ok) {
         const errorText = await developerResponse.text()
@@ -359,13 +350,11 @@ export default function AgentDetail() {
       }
 
       const developerData = await developerResponse.json()
-      console.log('Developer data received:', developerData)
       setSelectedDeveloper(developerData)
 
       // Handle agents response
       if (agentsResponse.ok) {
         const agentsData = await agentsResponse.json()
-        console.log('Agents data received:', agentsData)
 
         // Filter agents by this developer
         const developerAgentsList = (agentsData.agents || [])
@@ -377,7 +366,6 @@ export default function AgentDetail() {
             _index_name: enabledIndexes[0].name
           }))
 
-        console.log(`Found ${developerAgentsList.length} agents by ${developerName}`)
         setDeveloperAgents(developerAgentsList)
       } else {
         console.warn('Failed to fetch agents list:', agentsResponse.status)
