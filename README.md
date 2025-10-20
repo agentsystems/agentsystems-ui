@@ -3,14 +3,12 @@
 [![GitHub stars](https://img.shields.io/github/stars/agentsystems/agentsystems?style=flat-square&logo=github)](https://github.com/agentsystems/agentsystems/stargazers)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/agentsystems/agentsystems-ui/ci.yml?branch=main)](https://github.com/agentsystems/agentsystems-ui/actions)
 
-> [!NOTE]  
-> **Public Beta** - Part of the AgentSystems platform. Official public launch September 15, 2025.
+> [!NOTE]
+> **Pre-Release Software** - AgentSystems is in active development. Join our [Discord](https://discord.com/invite/JsxDxQ5zfV) for updates and early access.
 > ⭐ [**Star the main repository**](https://github.com/agentsystems/agentsystems) to show your support!
 
 > This is the **web interface** for AgentSystems. See the [main repository](https://github.com/agentsystems/agentsystems) for platform overview and documentation.
 [![TypeScript](https://img.shields.io/badge/typescript-strict-blue)](https://www.typescriptlang.org/)
-[![Accessibility](https://img.shields.io/badge/accessibility-WCAG%202.1-green)](https://www.w3.org/WAI/WCAG21/quickref/)
-[![Security](https://img.shields.io/badge/security-hardened-orange)](https://github.com/agentsystems/agentsystems-ui/security)
 
 A self-hostable web interface for the AgentSystems platform. Built with modern React patterns and TypeScript.
 
@@ -28,11 +26,11 @@ A self-hostable web interface for the AgentSystems platform. Built with modern R
 - ⚙️ **Settings**: Configuration with validation and security checks
 - 🔄 **File Uploads**: Support for agent file processing workflows
 
-### 🛡️ **Enterprise Security**
-- 🔒 **Input Sanitization**: XSS protection and malicious payload filtering
-- 🚦 **Rate Limiting**: Abuse prevention for forms and API calls
-- 🔐 **Authentication**: Secure token-handling practices (no hardcoded credentials)
-- 📋 **Form Validation**: Comprehensive client-side validation with user feedback
+### 🛡️ **Security Features**
+- 🔒 **Input Sanitization**: Configured with XSS protection and input filtering
+- 🚦 **Rate Limiting**: Configured for abuse prevention on forms and API calls
+- 🔐 **Authentication**: Token-handling practices (no hardcoded credentials)
+- 📋 **Form Validation**: Client-side validation with user feedback
 
 ### ♿ **Accessibility Excellence**
 - **Accessibility**: Aims to meet WCAG 2.1 guidelines; includes screen-reader and keyboard navigation support
@@ -53,7 +51,7 @@ A self-hostable web interface for the AgentSystems platform. Built with modern R
 - **Data Fetching**: TanStack Query with caching and error handling
 - **Routing**: React Router v6 with lazy loading support
 - **Testing**: Vitest + React Testing Library
-- **Security**: Comprehensive input sanitization and CSRF protection
+- **Security**: Input sanitization and validation
 - **Container**: Multi-stage Docker builds with nginx Alpine
 - **Audio**: Web Audio API for cyber theme sound effects
 
@@ -122,13 +120,13 @@ agentsystems-ui/
 
 ## Integration with AgentSystems
 
-The UI integrates seamlessly with other AgentSystems components:
+The UI integrates with other AgentSystems components:
 
 - **Agent Control Plane**: Connects to the gateway API on port 18080
 - **Agent Discovery**: Auto-discovers and displays available agents
 - **Invocation**: Supports sync/async agent invocation with progress tracking
 - **Artifacts**: Handles file uploads and downloads through the gateway
-- **Audit Logs**: Displays tamper-evident audit trail
+- **Audit Logs**: Displays hash-chained audit logs for operation tracking
 
 ## Development
 
@@ -173,8 +171,8 @@ npm run preview
 
 The application includes a test suite:
 
-- **Component Tests**: All UI components thoroughly tested
-- **Integration Tests**: Page-level functionality verification  
+- **Component Tests**: UI components include test coverage
+- **Integration Tests**: Page-level functionality verification
 - **Security Tests**: Input sanitization and validation testing
 - **Accessibility tests**: Automated checks against WCAG 2.1 rules
 - **API Tests**: Client functionality and error handling
@@ -206,11 +204,11 @@ All themes use CSS custom properties for easy customization and aim to align wit
 
 ## 🔒 Security Features
 
-- **Input Sanitization**: All user inputs are sanitized to prevent XSS attacks
-- **Rate Limiting**: Protection against form spam and API abuse
+- **Input Sanitization**: User inputs are sanitized to help prevent XSS attacks
+- **Rate Limiting**: Configured to help protect against form spam and API abuse
 - **Security headers**: CSRF protection and content-type validation
-- **Authentication**: Secure token handling without hardcoded credentials
-- **JSON Validation**: Safe parsing and sanitization of agent payloads
+- **Authentication**: Token handling without hardcoded credentials
+- **JSON Validation**: Parsing and validation of agent payloads
 
 ## 🤝 Contributing
 
