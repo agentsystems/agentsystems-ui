@@ -742,14 +742,6 @@ export default function AgentDetail() {
                       </div>
                     )}
 
-                    {/* Risk Tier */}
-                    {(metadata.facets.risk_tier as string | undefined) && (
-                      <div className={styles.metadataItem}>
-                        <label>Risk Tier</label>
-                        <span className={styles.badge}>{String(metadata.facets.risk_tier)}</span>
-                      </div>
-                    )}
-
                     {/* Latency */}
                     {(metadata.facets.latency as string | undefined) && (
                       <div className={styles.metadataItem}>
