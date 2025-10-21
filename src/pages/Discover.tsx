@@ -46,6 +46,7 @@ interface IndexAgent {
   version: string
   description: string
   container_image: string | null
+  container_image_full?: string | null // Full image reference with tag (e.g., docker.io/user/agent:0.2.0)
   source_repository_url: string | null
   listing_status: string
   container_image_access: string
@@ -71,6 +72,11 @@ interface IndexAgent {
   facets?: Record<string, unknown> | null
   _index_name?: string // Track which index this came from
   _index_url?: string // Track the index URL for API calls
+  _available_versions?: Array<{
+    version: string
+    is_latest: boolean
+    readiness_level?: string | null
+  }> // Available versions for multi-version deployment
 }
 
 interface DeveloperInfo {
@@ -119,6 +125,7 @@ export default function Discover() {
   const [developerFilter, setDeveloperFilter] = useState<string | null>(null)
   const [agentToAdd, setAgentToAdd] = useState<IndexAgent | null>(null)
   const [customAgentName, setCustomAgentName] = useState('')
+  const [selectedVersion, setSelectedVersion] = useState<string>('')
   const [nameError, setNameError] = useState<string | null>(null)
   const [hasAcknowledged, setHasAcknowledged] = useState(false)
   const [hasApprovedEgress, setHasApprovedEgress] = useState(false)
@@ -350,9 +357,15 @@ export default function Discover() {
       }
     }
 
-    // Show add modal with smart default name
+    // Show add modal with smart default name and default to latest version
     setAgentToAdd(agent)
     setCustomAgentName(suggestedName)
+
+    // Initialize version: prefer latest from _available_versions, fallback to agent.version
+    const availableVersions = agent._available_versions || []
+    const latestVersion = availableVersions.find(v => v.is_latest)?.version || agent.version
+    setSelectedVersion(latestVersion)
+
     setNameError(null)
     setHasAcknowledged(false)
     setHasApprovedEgress(false)
@@ -416,8 +429,10 @@ export default function Discover() {
         return { registryUrl, repoPath, tag }
       }
 
-      // container_image is non-null per the check at line 328
-      const { registryUrl, repoPath, tag } = parseImageUrl(agentToAdd.container_image!)
+      // Build full image reference with selected version
+      // container_image is non-null per the check at line 335
+      const fullImageReference = `${agentToAdd.container_image}:${selectedVersion}`
+      const { registryUrl, repoPath, tag } = parseImageUrl(fullImageReference)
 
       // Get config store methods
       const { getRegistryConnections, addRegistryConnection, addAgent, saveConfig } = useConfigStore.getState()
@@ -474,6 +489,7 @@ export default function Discover() {
       // Close modal
       setAgentToAdd(null)
       setCustomAgentName('')
+      setSelectedVersion('')
       setNameError(null)
       setHasAcknowledged(false)
       setHasApprovedEgress(false)
@@ -773,6 +789,7 @@ export default function Discover() {
         <div className={styles.modalOverlay} onClick={() => {
           setAgentToAdd(null)
           setCustomAgentName('')
+          setSelectedVersion('')
           setNameError(null)
           setHasAcknowledged(false)
           setHasApprovedEgress(false)
@@ -788,6 +805,7 @@ export default function Discover() {
               <button className={styles.closeButton} onClick={() => {
                 setAgentToAdd(null)
                 setCustomAgentName('')
+                setSelectedVersion('')
                 setNameError(null)
                 setHasAcknowledged(false)
                 setHasApprovedEgress(false)
@@ -846,6 +864,43 @@ export default function Discover() {
                   </div>
                 )}
               </div>
+
+              {/* Version Selector */}
+              {agentToAdd._available_versions && agentToAdd._available_versions.length > 1 && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                    Version
+                  </label>
+                  <select
+                    value={selectedVersion}
+                    onChange={(e) => setSelectedVersion(e.target.value)}
+                    className={styles.searchInput}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: '0.375rem',
+                      backgroundColor: 'var(--background)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {agentToAdd._available_versions.map((v) => (
+                      <option key={v.version} value={v.version}>
+                        {v.version}
+                        {v.is_latest ? ' (latest)' : ''}
+                        {v.readiness_level ? ` - ${v.readiness_level}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <div style={{
+                    marginTop: '0.5rem',
+                    fontSize: '0.875rem',
+                    color: 'var(--text-muted)'
+                  }}>
+                    Multiple versions of this agent are available. Each version may have different dependencies or features.
+                  </div>
+                </div>
+              )}
 
               {/* Required Egress Section */}
               {agentToAdd.required_egress && agentToAdd.required_egress.length > 0 && (
@@ -964,6 +1019,7 @@ export default function Discover() {
                 onClick={() => {
                   setAgentToAdd(null)
                   setCustomAgentName('')
+                  setSelectedVersion('')
                   setNameError(null)
                   setHasAcknowledged(false)
                   setHasApprovedEgress(false)
@@ -1116,6 +1172,12 @@ function AgentCard({ agent, onClick, onDeveloperClick, onAdd, onRemove, isAdded 
         {agent.container_image && (
           <span className={styles.imageRepo}>
             {agent.container_image.replace('docker.io/', '')}
+          </span>
+        )}
+        {agent.version && (
+          <span className={styles.badge} title={agent._available_versions && agent._available_versions.length > 1 ? `${agent._available_versions.length} versions available` : undefined}>
+            v{agent.version}
+            {agent._available_versions && agent._available_versions.length > 1 && ` (+${agent._available_versions.length - 1})`}
           </span>
         )}
       </div>
