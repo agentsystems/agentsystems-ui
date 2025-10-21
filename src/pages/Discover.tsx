@@ -45,10 +45,10 @@ interface IndexAgent {
   name: string
   version: string
   description: string
-  image_repository_url: string | null
+  container_image: string | null
   source_repository_url: string | null
   listing_status: string
-  image_repository_access: string
+  container_image_access: string
   source_repository_access: string
   created_at: string
   // Developer info - now flat structure from GitHub Pages API
@@ -325,8 +325,8 @@ export default function Discover() {
   }
 
   const handleAddAgent = (agent: IndexAgent) => {
-    if (!agent.image_repository_url) {
-      showError(`Cannot add ${agent.name}: No image repository URL available. This agent has a private image repository.`)
+    if (!agent.container_image) {
+      showError(`Cannot add ${agent.name}: No container image available. This agent has a private container image.`)
       return
     }
 
@@ -416,8 +416,8 @@ export default function Discover() {
         return { registryUrl, repoPath, tag }
       }
 
-      // At this point, image_repository_url is guaranteed to be non-null due to the check at line 288
-      const { registryUrl, repoPath, tag } = parseImageUrl(agentToAdd.image_repository_url!)
+      // container_image is non-null per the check at line 328
+      const { registryUrl, repoPath, tag } = parseImageUrl(agentToAdd.container_image!)
 
       // Get config store methods
       const { getRegistryConnections, addRegistryConnection, addAgent, saveConfig } = useConfigStore.getState()
@@ -1113,9 +1113,9 @@ function AgentCard({ agent, onClick, onDeveloperClick, onAdd, onRemove, isAdded 
             {agent._index_name}
           </span>
         )}
-        {agent.image_repository_url && (
+        {agent.container_image && (
           <span className={styles.imageRepo}>
-            {agent.image_repository_url.replace('docker.io/', '')}
+            {agent.container_image.replace('docker.io/', '')}
           </span>
         )}
       </div>
@@ -1415,14 +1415,14 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onAdd, onR
             </div>
           )}
 
-          {agent.image_repository_url && agent.image_repository_access === 'public' && (
+          {agent.container_image && agent.container_image_access === 'public' && (
             <div className={styles.modalSpecs}>
               <div className={styles.specGroup}>
-                <h4><CubeIcon />Image Repository</h4>
+                <h4><CubeIcon />Container Image</h4>
                 <ul>
                   <li>
-                    <strong>URL:</strong>{' '}
-                    <span style={{ fontFamily: 'var(--font-mono)' }}>{agent.image_repository_url}</span>
+                    <strong>Image:</strong>{' '}
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{agent.container_image}</span>
                   </li>
                   <li>
                     <strong>Access:</strong> Public (open access)

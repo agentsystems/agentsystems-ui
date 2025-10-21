@@ -31,8 +31,8 @@ export interface AgentMetadata {
   primary_function?: string | null
   readiness_level?: string | null
   listing_status?: string | null
-  image_repository_url?: string | null
-  image_repository_access?: string | null
+  container_image?: string | null
+  container_image_access?: string | null
   source_repository_url?: string | null
   source_repository_access?: string | null
 
