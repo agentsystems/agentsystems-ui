@@ -845,23 +845,16 @@ export default function AgentDetail() {
               )}
 
               {/* Repository URLs */}
-              {(metadata.image_repository_url || metadata.source_repository_url) && (
+              {(metadata.container_image || metadata.source_repository_url) && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Repositories</h4>
                   <div className={styles.metadataGrid}>
-                    {metadata.image_repository_url && (
+                    {metadata.container_image && (
                       <div className={styles.metadataItem}>
-                        <label>Image Repository</label>
-                        <a
-                          href={metadata.image_repository_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.repoLink}
-                        >
-                          {metadata.image_repository_url}
-                        </a>
-                        {metadata.image_repository_access && (
-                          <span className={styles.accessBadge}>{metadata.image_repository_access}</span>
+                        <label>Container Image</label>
+                        <code className={styles.containerImage}>{metadata.container_image}</code>
+                        {metadata.container_image_access && (
+                          <span className={styles.accessBadge}>{metadata.container_image_access}</span>
                         )}
                       </div>
                     )}
