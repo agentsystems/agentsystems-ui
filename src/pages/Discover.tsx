@@ -46,6 +46,7 @@ interface IndexAgent {
   version: string
   description: string
   container_image: string | null
+  container_image_full?: string | null // Full image reference with tag (e.g., docker.io/user/agent:0.2.0)
   source_repository_url: string | null
   listing_status: string
   container_image_access: string
@@ -71,6 +72,11 @@ interface IndexAgent {
   facets?: Record<string, unknown> | null
   _index_name?: string // Track which index this came from
   _index_url?: string // Track the index URL for API calls
+  _available_versions?: Array<{
+    version: string
+    is_latest: boolean
+    readiness_level?: string | null
+  }> // Available versions for multi-version deployment
 }
 
 interface DeveloperInfo {
@@ -119,10 +125,12 @@ export default function Discover() {
   const [developerFilter, setDeveloperFilter] = useState<string | null>(null)
   const [agentToAdd, setAgentToAdd] = useState<IndexAgent | null>(null)
   const [customAgentName, setCustomAgentName] = useState('')
+  const [selectedVersion, setSelectedVersion] = useState<string>('')
   const [nameError, setNameError] = useState<string | null>(null)
   const [hasAcknowledged, setHasAcknowledged] = useState(false)
   const [hasApprovedEgress, setHasApprovedEgress] = useState(false)
   const [agentToRemove, setAgentToRemove] = useState<IndexAgent | null>(null)
+  const [versionsToRemove, setVersionsToRemove] = useState<string[]>([])
   const [displayCount, setDisplayCount] = useState(12)
   const LOAD_MORE_INCREMENT = 12
 
@@ -133,8 +141,8 @@ export default function Discover() {
   // Note: Agent add status is checked dynamically via isAgentAdded()
 
   const isAgentAdded = (agent: IndexAgent) => {
-    // Check if this agent is added by matching the source agent ID AND index URL in labels
-    // This ensures uniqueness across multiple indexes that might have the same developer/agent combo
+    // Check if ANY version of this agent is added
+    // We check if at least one config agent matches this agent ID
     const configAgents = getAgents()
 
     // Match by index URL + agent ID (most accurate - handles same developer/agent across different indexes)
@@ -167,6 +175,19 @@ export default function Discover() {
 
     // Only match by name if no tracked agents use this name
     return configAgents.some(configAgent => configAgent.name === agent.name)
+  }
+
+  // Get all installed versions of an agent
+  const getInstalledVersions = (agent: IndexAgent): string[] => {
+    const configAgents = getAgents()
+
+    return configAgents
+      .filter(configAgent =>
+        configAgent.labels?.['index.source.agent.id'] === agent._id &&
+        configAgent.labels?.['index.source.index.url'] === agent._index_url
+      )
+      .map(configAgent => configAgent.labels?.['index.source.agent.version'])
+      .filter((v): v is string => !!v)
   }
 
   // Fetch agents when config loads or when selected index changes
@@ -330,29 +351,71 @@ export default function Discover() {
       return
     }
 
+    // Get already-added versions
+    const addedVersions = getInstalledVersions(agent)
+    const availableVersions = agent._available_versions || []
+
+    // Filter to only non-added versions
+    const nonAddedVersions = availableVersions.filter(v => !addedVersions.includes(v.version))
+
+    // Select first non-added version (prefer latest if not added, otherwise first available)
+    let selectedVersionToAdd: string
+    if (nonAddedVersions.length > 0) {
+      const latestNonAdded = nonAddedVersions.find(v => v.is_latest)
+      selectedVersionToAdd = latestNonAdded?.version || nonAddedVersions[0].version
+    } else {
+      // All versions are added - shouldn't happen if UI is working correctly, but fallback
+      selectedVersionToAdd = agent.version
+    }
+
     // Generate smart default name to avoid conflicts
     const existingAgents = getAgents()
     let suggestedName = agent.name
 
-    // Check if base name conflicts
-    if (existingAgents.some(a => a.name === suggestedName)) {
-      // Try appending developer name
-      const developer = agent.developer || agent._id.split('/')[0]
-      suggestedName = `${agent.name}-${developer}`
+    // Check if this specific version of this agent is already installed
+    const isVersionInstalled = existingAgents.some(a =>
+      a.labels?.['index.source.agent.id'] === agent._id &&
+      a.labels?.['index.source.agent.version'] === selectedVersionToAdd
+    )
 
-      // If developer variant also conflicts, append number
-      if (existingAgents.some(a => a.name === suggestedName)) {
-        let counter = 2
-        while (existingAgents.some(a => a.name === `${agent.name}-${counter}`)) {
-          counter++
+    if (isVersionInstalled) {
+      // This exact version is already installed, suggest versioned name for different version
+      suggestedName = `${agent.name}-${selectedVersionToAdd}`
+    } else {
+      // Check if base name conflicts (any version of this agent or different agent)
+      const baseNameConflict = existingAgents.some(a => a.name === suggestedName)
+
+      if (baseNameConflict) {
+        // Check if it's the same agent (different version)
+        const isSameAgent = existingAgents.some(a =>
+          a.labels?.['index.source.agent.id'] === agent._id
+        )
+
+        if (isSameAgent) {
+          // Installing different version of same agent - use version in name
+          suggestedName = `${agent.name}-${selectedVersionToAdd}`
+        } else {
+          // Different agent with same name - append developer
+          const developer = agent.developer || agent._id.split('/')[0]
+          suggestedName = `${agent.name}-${developer}`
+
+          // If developer variant also conflicts, append number
+          if (existingAgents.some(a => a.name === suggestedName)) {
+            let counter = 2
+            while (existingAgents.some(a => a.name === `${agent.name}-${counter}`)) {
+              counter++
+            }
+            suggestedName = `${agent.name}-${counter}`
+          }
         }
-        suggestedName = `${agent.name}-${counter}`
       }
     }
 
-    // Show add modal with smart default name
+    // Show add modal with smart default name and default to first non-added version
     setAgentToAdd(agent)
     setCustomAgentName(suggestedName)
+    setSelectedVersion(selectedVersionToAdd)
+
     setNameError(null)
     setHasAcknowledged(false)
     setHasApprovedEgress(false)
@@ -416,8 +479,10 @@ export default function Discover() {
         return { registryUrl, repoPath, tag }
       }
 
-      // container_image is non-null per the check at line 328
-      const { registryUrl, repoPath, tag } = parseImageUrl(agentToAdd.container_image!)
+      // Build full image reference with selected version
+      // container_image is non-null per the check at line 335
+      const fullImageReference = `${agentToAdd.container_image}:${selectedVersion}`
+      const { registryUrl, repoPath, tag } = parseImageUrl(fullImageReference)
 
       // Get config store methods
       const { getRegistryConnections, addRegistryConnection, addAgent, saveConfig } = useConfigStore.getState()
@@ -462,6 +527,7 @@ export default function Discover() {
           'agent.port': '8000',
           'index.source.agent.id': agentToAdd._id,
           'index.source.agent.name': agentToAdd.name,
+          'index.source.agent.version': selectedVersion,
           'index.source.index.url': agentToAdd._index_url || ''
         },
         envVariables: {},
@@ -474,6 +540,7 @@ export default function Discover() {
       // Close modal
       setAgentToAdd(null)
       setCustomAgentName('')
+      setSelectedVersion('')
       setNameError(null)
       setHasAcknowledged(false)
       setHasApprovedEgress(false)
@@ -486,57 +553,56 @@ export default function Discover() {
   }
 
   const handleRemoveAgent = (agent: IndexAgent) => {
-    // Show remove modal
+    // Get all installed versions
+    const installedVersions = getInstalledVersions(agent)
+
+    // Show remove modal and pre-select all versions
     setAgentToRemove(agent)
+    setVersionsToRemove(installedVersions)
   }
 
   const confirmRemoveAgent = async () => {
-    if (!agentToRemove) return
+    if (!agentToRemove || versionsToRemove.length === 0) return
 
     try {
       // Reload config from disk to ensure we have the latest state
-      // This prevents overwriting manual YAML edits
       const { loadConfig, deleteAgent, saveConfig, getAgents } = useConfigStore.getState()
       await loadConfig()
 
-      // Find the added agent by matching the source index URL + agent ID in labels
-      // This ensures we remove the correct agent when the same developer/agent exists in multiple indexes
       const configAgents = getAgents()
 
-      // First try to match by index URL + agent ID (most accurate)
-      let addedAgent = configAgents.find(configAgent =>
-        agentToRemove._index_url &&
+      // Find all agents matching the selected versions
+      const agentsToDelete = configAgents.filter(configAgent =>
+        configAgent.labels?.['index.source.agent.id'] === agentToRemove._id &&
         configAgent.labels?.['index.source.index.url'] === agentToRemove._index_url &&
-        (configAgent.labels?.['index.source.agent.id'] === agentToRemove._id ||
-         configAgent.labels?.['index.source.agent.id'] === agentToRemove.id)  // Legacy support
+        configAgent.labels?.['index.source.agent.version'] &&
+        versionsToRemove.includes(configAgent.labels['index.source.agent.version'])
       )
 
-      // Fallback: match by agent ID only (for agents added before index URL tracking)
-      if (!addedAgent) {
-        addedAgent = configAgents.find(configAgent =>
-          configAgent.labels?.['index.source.agent.id'] === agentToRemove._id ||
-          configAgent.labels?.['index.source.agent.id'] === agentToRemove.id  // Legacy support
-        )
+      if (agentsToDelete.length === 0) {
+        throw new Error('No matching versions found in configuration')
       }
 
-      if (!addedAgent) {
-        throw new Error('Agent not found in configuration')
+      // Delete each selected version
+      for (const agent of agentsToDelete) {
+        deleteAgent(agent.name)
       }
-
-      // Delete agent using its actual configured name
-      deleteAgent(addedAgent.name)
 
       // Auto-save config to disk
       await saveConfig()
 
       // Close modal
       setAgentToRemove(null)
+      setVersionsToRemove([])
 
-      showSuccess(`Successfully removed ${addedAgent.name}! Restart AgentSystems to stop the agent.`)
+      const removedCount = agentsToDelete.length
+      const versionText = removedCount === 1 ? 'version' : 'versions'
+      showSuccess(`Successfully removed ${removedCount} ${versionText} of ${agentToRemove.name}! Restart AgentSystems to stop the agent${removedCount > 1 ? 's' : ''}.`)
     } catch (error) {
       console.error('Error removing agent:', error)
       showError(`Failed to remove ${agentToRemove.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
       setAgentToRemove(null)
+      setVersionsToRemove([])
     }
   }
 
@@ -742,6 +808,8 @@ export default function Discover() {
           onAdd={() => handleAddAgent(selectedAgent)}
           onRemove={() => handleRemoveAgent(selectedAgent)}
           isAdded={isAgentAdded(selectedAgent)}
+          hasMultipleVersions={(selectedAgent._available_versions?.length || 0) > 1}
+          installedVersions={getInstalledVersions(selectedAgent)}
         />
       )}
 
@@ -773,6 +841,7 @@ export default function Discover() {
         <div className={styles.modalOverlay} onClick={() => {
           setAgentToAdd(null)
           setCustomAgentName('')
+          setSelectedVersion('')
           setNameError(null)
           setHasAcknowledged(false)
           setHasApprovedEgress(false)
@@ -788,6 +857,7 @@ export default function Discover() {
               <button className={styles.closeButton} onClick={() => {
                 setAgentToAdd(null)
                 setCustomAgentName('')
+                setSelectedVersion('')
                 setNameError(null)
                 setHasAcknowledged(false)
                 setHasApprovedEgress(false)
@@ -846,6 +916,49 @@ export default function Discover() {
                   </div>
                 )}
               </div>
+
+              {/* Version Selector */}
+              {agentToAdd._available_versions && agentToAdd._available_versions.length > 1 && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                    Version
+                  </label>
+                  <select
+                    value={selectedVersion}
+                    onChange={(e) => setSelectedVersion(e.target.value)}
+                    className={styles.searchInput}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: '0.375rem',
+                      backgroundColor: 'var(--background)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {agentToAdd._available_versions
+                      .filter((v) => {
+                        // Filter out already-added versions
+                        const addedVersions = getInstalledVersions(agentToAdd)
+                        return !addedVersions.includes(v.version)
+                      })
+                      .map((v) => (
+                        <option key={v.version} value={v.version}>
+                          {v.version}
+                          {v.is_latest ? ' (latest)' : ''}
+                          {v.readiness_level ? ` - ${v.readiness_level}` : ''}
+                        </option>
+                      ))}
+                  </select>
+                  <div style={{
+                    marginTop: '0.5rem',
+                    fontSize: '0.875rem',
+                    color: 'var(--text-muted)'
+                  }}>
+                    Multiple versions of this agent are available. Each version may have different dependencies or features.
+                  </div>
+                </div>
+              )}
 
               {/* Required Egress Section */}
               {agentToAdd.required_egress && agentToAdd.required_egress.length > 0 && (
@@ -964,6 +1077,7 @@ export default function Discover() {
                 onClick={() => {
                   setAgentToAdd(null)
                   setCustomAgentName('')
+                  setSelectedVersion('')
                   setNameError(null)
                   setHasAcknowledged(false)
                   setHasApprovedEgress(false)
@@ -988,61 +1102,138 @@ export default function Discover() {
       )}
 
       {/* Remove Confirmation Modal */}
-      {agentToRemove && (
-        <div className={styles.modalOverlay} onClick={() => setAgentToRemove(null)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
-            <div className={styles.modalHeader}>
-              <div>
-                <h2>Remove Agent</h2>
-                <p className={styles.modalDeveloper}>
-                  {agentToRemove.name} by @{agentToRemove.developer}
-                </p>
+      {agentToRemove && (() => {
+        const installedVersions = getInstalledVersions(agentToRemove)
+        return (
+          <div className={styles.modalOverlay} onClick={() => {
+            setAgentToRemove(null)
+            setVersionsToRemove([])
+          }}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+              <div className={styles.modalHeader}>
+                <div>
+                  <h2>Remove Agent</h2>
+                  <p className={styles.modalDeveloper}>
+                    {agentToRemove.name} by @{agentToRemove.developer}
+                  </p>
+                </div>
+                <button className={styles.closeButton} onClick={() => {
+                  setAgentToRemove(null)
+                  setVersionsToRemove([])
+                }}>×</button>
               </div>
-              <button className={styles.closeButton} onClick={() => setAgentToRemove(null)}>×</button>
-            </div>
 
-            <div className={styles.modalBody}>
-              <div className={styles.modalDescription}>
-                <p>{agentToRemove.description}</p>
+              <div className={styles.modalBody}>
+                <div className={styles.modalDescription}>
+                  <p>{agentToRemove.description}</p>
+                </div>
+
+                {installedVersions.length > 1 && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 500 }}>
+                      Select versions to remove:
+                    </label>
+                    <div style={{
+                      padding: '1rem',
+                      backgroundColor: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '0.375rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem'
+                    }}>
+                      {installedVersions.map((version) => (
+                        <label key={version} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          cursor: 'pointer',
+                          padding: '0.5rem',
+                          borderRadius: '0.25rem',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-tertiary, rgba(0,0,0,0.05))'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={versionsToRemove.includes(version)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setVersionsToRemove([...versionsToRemove, version])
+                              } else {
+                                setVersionsToRemove(versionsToRemove.filter(v => v !== version))
+                              }
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <span style={{ flex: 1 }}>
+                            Version {version}
+                            {agentToRemove._available_versions?.find(v => v.version === version && v.is_latest) && (
+                              <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>(latest)</span>
+                            )}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <div style={{
+                      marginTop: '0.5rem',
+                      fontSize: '0.875rem',
+                      color: 'var(--text-muted)'
+                    }}>
+                      {versionsToRemove.length === installedVersions.length
+                        ? 'All installed versions will be removed'
+                        : versionsToRemove.length === 0
+                        ? 'Select at least one version to remove'
+                        : `${versionsToRemove.length} of ${installedVersions.length} versions selected`}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{
+                  marginTop: '1.5rem',
+                  padding: '1rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.375rem'
+                }}>
+                  <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}>
+                    <ExclamationTriangleIcon style={{ width: '1.25rem', height: '1.25rem', display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom' }} />
+                    {installedVersions.length > 1 && versionsToRemove.length < installedVersions.length
+                      ? 'Remove selected versions?'
+                      : 'Are you sure you want to remove this agent?'}
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                    <li>The {versionsToRemove.length === 1 ? 'agent' : 'agents'} will be removed from your configuration</li>
+                    <li>You will need to restart AgentSystems to stop the agent container{versionsToRemove.length > 1 ? 's' : ''}</li>
+                    <li>Any data or state specific to {versionsToRemove.length === 1 ? 'this version' : 'these versions'} may be lost</li>
+                  </ul>
+                </div>
               </div>
 
-              <div style={{
-                marginTop: '1.5rem',
-                padding: '1rem',
-                backgroundColor: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
-                borderRadius: '0.375rem'
-              }}>
-                <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}>
-                  <ExclamationTriangleIcon style={{ width: '1.25rem', height: '1.25rem', display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom' }} />
-                  Are you sure you want to remove this agent?
-                </p>
-                <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                  <li>The agent will be removed from your configuration</li>
-                  <li>You will need to restart AgentSystems to stop the agent container</li>
-                  <li>Any data or state specific to this agent may be lost</li>
-                </ul>
+              <div className={styles.modalFooter}>
+                <button
+                  className="btn btn-lg btn-ghost"
+                  onClick={() => {
+                    setAgentToRemove(null)
+                    setVersionsToRemove([])
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-lg btn-subtle"
+                  onClick={confirmRemoveAgent}
+                  disabled={versionsToRemove.length === 0}
+                  style={{ color: 'var(--error)' }}
+                >
+                  Remove {versionsToRemove.length > 1 ? `${versionsToRemove.length} Versions` : 'Agent'}
+                </button>
               </div>
-            </div>
-
-            <div className={styles.modalFooter}>
-              <button
-                className="btn btn-lg btn-ghost"
-                onClick={() => setAgentToRemove(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn-lg btn-subtle"
-                onClick={confirmRemoveAgent}
-                style={{ color: 'var(--error)' }}
-              >
-                Remove Agent
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Toast notifications */}
       {toasts.map((toast, index) => (
@@ -1070,6 +1261,16 @@ interface AgentCardProps {
 }
 
 function AgentCard({ agent, onClick, onDeveloperClick, onAdd, onRemove, isAdded }: AgentCardProps) {
+  // Get installed versions for this agent
+  const configAgents = useConfigStore.getState().getAgents()
+  const installedVersions = configAgents
+    .filter(configAgent =>
+      configAgent.labels?.['index.source.agent.id'] === agent._id &&
+      configAgent.labels?.['index.source.index.url'] === agent._index_url
+    )
+    .map(configAgent => configAgent.labels?.['index.source.agent.version'])
+    .filter((v): v is string => !!v)
+
   return (
     <Card className={styles.agentCard} onClick={onClick}>
       <div className={styles.cardHeader}>
@@ -1118,6 +1319,30 @@ function AgentCard({ agent, onClick, onDeveloperClick, onAdd, onRemove, isAdded 
             {agent.container_image.replace('docker.io/', '')}
           </span>
         )}
+        {agent.version && (
+          <span className={styles.badge} title={
+            installedVersions.length > 0
+              ? `Added: ${installedVersions.join(', ')}`
+              : agent._available_versions && agent._available_versions.length > 1
+              ? `${agent._available_versions.length} versions available`
+              : undefined
+          }>
+            {installedVersions.length > 1 ? (
+              // Multiple versions added
+              `${installedVersions.length} versions added`
+            ) : installedVersions.length === 1 ? (
+              // One version added
+              agent._available_versions && agent._available_versions.length > 1
+                ? `v${installedVersions[0]} • Added (${agent._available_versions.length - 1} more available)`
+                : `v${installedVersions[0]} • Added`
+            ) : (
+              // None added
+              agent._available_versions && agent._available_versions.length > 1
+                ? `v${agent.version} (latest of ${agent._available_versions.length})`
+                : `v${agent.version}`
+            )}
+          </span>
+        )}
       </div>
 
       <div className={styles.cardActions}>
@@ -1140,7 +1365,7 @@ function AgentCard({ agent, onClick, onDeveloperClick, onAdd, onRemove, isAdded 
               onRemove()
             }}
           >
-            Remove
+            {installedVersions.length > 1 ? `Remove (${installedVersions.length})` : 'Remove'}
           </button>
         ) : (
           <button
@@ -1167,9 +1392,11 @@ interface AgentDetailModalProps {
   onAdd: () => void
   onRemove: () => void
   isAdded: boolean
+  hasMultipleVersions: boolean
+  installedVersions: string[]
 }
 
-function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onAdd, onRemove, isAdded }: AgentDetailModalProps) {
+function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onAdd, onRemove, isAdded, hasMultipleVersions, installedVersions }: AgentDetailModalProps) {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -1204,6 +1431,27 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onAdd, onR
           <div className={styles.modalDescription}>
             <p>{agent.description}</p>
           </div>
+
+          {/* Version Information */}
+          {hasMultipleVersions && agent._available_versions && (
+            <div className={styles.modalSpecs}>
+              <div className={styles.specGroup}>
+                <h4><CpuChipIcon />Available Versions</h4>
+                <ul>
+                  {agent._available_versions.map((versionInfo) => {
+                    const isInstalled = installedVersions.includes(versionInfo.version)
+                    return (
+                      <li key={versionInfo.version}>
+                        <strong>v{versionInfo.version}</strong>
+                        {versionInfo.is_latest && <span className={styles.badge} style={{ marginLeft: '0.5rem' }}>latest</span>}
+                        {isInstalled && <span className={styles.badge} style={{ marginLeft: '0.5rem', backgroundColor: 'var(--color-success)' }}>added</span>}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            </div>
+          )}
 
           {/* Agent Details */}
           {(agent.context || agent.primary_function || agent.readiness_level) && (
@@ -1485,11 +1733,23 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onAdd, onR
               View Source
             </a>
           )}
-          {isAdded ? (
+          {hasMultipleVersions && isAdded && installedVersions.length < (agent._available_versions?.length || 0) ? (
+            // Multi-version agent with at least one added but not all: show both buttons
+            <>
+              <button className="btn btn-lg btn-subtle" onClick={onAdd}>
+                Add Version
+              </button>
+              <button className="btn btn-lg btn-subtle" onClick={onRemove}>
+                Remove
+              </button>
+            </>
+          ) : isAdded ? (
+            // Single-version agent that's installed: show only Remove
             <button className="btn btn-lg btn-subtle" onClick={onRemove}>
               Remove
             </button>
           ) : (
+            // Not installed: show only Add
             <button className="btn btn-lg btn-subtle" onClick={onAdd}>
               Add
             </button>
