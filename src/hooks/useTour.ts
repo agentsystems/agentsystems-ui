@@ -2,7 +2,7 @@
  * Tour management hook using Driver.js for onboarding
  *
  * Provides execution-first tour for new users to demonstrate
- * The open runtime for AI agents, designed with a zero-trust approach
+ * Self-hosted platform for discovering and running AI agents
  */
 
 import { useCallback } from 'react'
