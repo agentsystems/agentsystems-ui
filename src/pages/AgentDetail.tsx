@@ -526,27 +526,31 @@ export default function AgentDetail() {
                     <span className={styles.metadataValue}>{metadata.name}</span>
                   </div>
 
-                  <div className={styles.metadataItem}>
-                    <label>Developer</label>
-                    <button
-                      className={styles.developerButton}
-                      onClick={() => handleDeveloperClick(metadata.developer)}
-                      title={agentConfig?.labels?.['index.source.agent.id'] ? 'Click to view developer profile' : 'Developer profile unavailable (local agent)'}
-                      disabled={!agentConfig?.labels?.['index.source.agent.id']}
-                    >
-                      {metadata.developer}
-                    </button>
-                  </div>
+                  {metadata.developer && (
+                    <div className={styles.metadataItem}>
+                      <label>Developer</label>
+                      <button
+                        className={styles.developerButton}
+                        onClick={() => handleDeveloperClick(metadata.developer)}
+                        title={agentConfig?.labels?.['index.source.agent.id'] ? 'Click to view developer profile' : 'Developer profile unavailable (local agent)'}
+                        disabled={!agentConfig?.labels?.['index.source.agent.id']}
+                      >
+                        {metadata.developer}
+                      </button>
+                    </div>
+                  )}
 
                   <div className={styles.metadataItem}>
                     <label>Version</label>
                     <span className={styles.metadataValue}>{metadata.version}</span>
                   </div>
 
-                  <div className={styles.metadataItem}>
-                    <label>Description</label>
-                    <span className={styles.metadataValue}>{metadata.description}</span>
-                  </div>
+                  {metadata.description && (
+                    <div className={styles.metadataItem}>
+                      <label>Description</label>
+                      <span className={styles.metadataValue}>{metadata.description}</span>
+                    </div>
+                  )}
 
                   {metadata.author && (
                     <div className={styles.metadataItem}>
