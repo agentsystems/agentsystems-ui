@@ -1280,7 +1280,7 @@ function AgentCard({ agent, onClick, onDeveloperClick, onAdd, onRemove, isAdded 
       <div className={styles.developerInfo}>
         {agent.developer_avatar_url || agent.developer ? (
           <img
-            src={agent.developer_avatar_url || `https://github.com/${agent.developer}.png?size=40`}
+            src={agent.developer_avatar_url || `/api/avatar/github/${agent.developer}`}
             alt={agent.developer}
             className={styles.developerAvatar}
             title={agent.developer_name || agent.developer}
@@ -1779,7 +1779,7 @@ function DeveloperModal({ developer, agents, onClose, onAgentClick, onViewAll, i
           <div className={styles.developerHeaderInfo}>
             {developer.avatar_url || developer.id ? (
               <img
-                src={developer.avatar_url || `https://github.com/${developer.id}.png?size=80`}
+                src={developer.avatar_url || `/api/avatar/github/${developer.id}`}
                 alt={developer.id}
                 className={styles.developerAvatar}
                 title={developer.name !== developer.id ? developer.name : undefined}
