@@ -2,7 +2,7 @@
  * Tour management hook using Driver.js for onboarding
  *
  * Provides execution-first tour for new users to demonstrate
- * The open runtime for AI agents, designed with a zero-trust approach
+ * Self-hosted platform for discovering and running AI agents
  */
 
 import { useCallback } from 'react'
@@ -552,11 +552,11 @@ Supported providers:<br>
       }
     },
 
-    // Step 18: Agents Configuration
+    // Step 18: Agent Connections
     {
-      element: '[data-tour="agents-config-card"]',
+      element: '[data-tour="agent-connections-card"]',
       popover: {
-        title: 'Agent Deployments 🚀',
+        title: 'Agent Connections 🚀',
         description: `Define and deploy your agent configurations.<br><br>
 Each deployment specifies:<br>
 • <strong>Image:</strong> Container and version to deploy<br>
