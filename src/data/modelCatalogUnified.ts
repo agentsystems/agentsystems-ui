@@ -137,8 +137,8 @@ export const AUTH_METHODS: Record<AuthMethodType, AuthMethodConfig> = {
 // Comprehensive model catalog with hosting provider support
 export const MODELS: Record<string, ModelDefinition> = {
   // Claude Models
-  'claude-opus-4.1': {
-    id: 'claude-opus-4.1',
+  'claude-opus-4-1': {
+    id: 'claude-opus-4-1',
     displayName: 'Claude Opus 4.1',
     vendor: 'anthropic',
     category: 'multimodal',
@@ -183,6 +183,30 @@ export const MODELS: Record<string, ModelDefinition> = {
     ]
   },
 
+  'claude-sonnet-4-5': {
+    id: 'claude-sonnet-4-5',
+    displayName: 'Claude Sonnet 4.5',
+    vendor: 'anthropic',
+    category: 'text',
+    description: 'Most advanced Claude Sonnet with enhanced capabilities for complex agents and coding',
+    hostingProviders: [
+      {
+        id: 'anthropic',
+        displayName: 'Anthropic',
+        hostingProviderModelId: 'claude-sonnet-4-5-20250929',
+        authMethod: 'api_key',
+        documentation: 'https://docs.anthropic.com'
+      },
+      {
+        id: 'amazon_bedrock',
+        displayName: 'Amazon Bedrock',
+        hostingProviderModelId: 'anthropic.claude-sonnet-4-5-20250929-v1:0',
+        authMethod: 'aws_credentials',
+        documentation: 'https://docs.aws.amazon.com/bedrock'
+      }
+    ]
+  },
+
   'claude-opus-4': {
     id: 'claude-opus-4',
     displayName: 'Claude Opus 4',
@@ -205,8 +229,8 @@ export const MODELS: Record<string, ModelDefinition> = {
     ]
   },
 
-  'claude-sonnet-3.7': {
-    id: 'claude-sonnet-3.7',
+  'claude-sonnet-3-7': {
+    id: 'claude-sonnet-3-7',
     displayName: 'Claude Sonnet 3.7',
     vendor: 'anthropic',
     category: 'text',
