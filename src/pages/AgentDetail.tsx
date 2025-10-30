@@ -1181,7 +1181,6 @@ export default function AgentDetail() {
                                 )
                               }
                             }}
-                            placeholder={fieldConfig.description || `Enter ${fieldName}`}
                             className={styles.formInput}
                             step={fieldType === 'integer' ? '1' : 'any'}
                           />
@@ -1191,7 +1190,6 @@ export default function AgentDetail() {
                             type="text"
                             value={value}
                             onChange={(e) => handleFormFieldChange(fieldName, e.target.value)}
-                            placeholder={fieldConfig.description || `Enter ${fieldName}`}
                             className={styles.formInput}
                           />
                         )}
