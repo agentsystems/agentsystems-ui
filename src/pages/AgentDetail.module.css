@@ -882,7 +882,7 @@
   font-size: 0.75rem;
   padding: 0.25rem 0.75rem;
   background-color: var(--info);
-  color: white;
+  color: var(--bg);
   border-radius: var(--radius);
   font-weight: 500;
   text-transform: uppercase;

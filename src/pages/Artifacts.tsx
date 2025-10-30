@@ -51,6 +51,7 @@ export default function Artifacts() {
   const [fileTypeFilter, setFileTypeFilter] = useState<string>('all')
   const [previewFile, setPreviewFile] = useState<ArtifactFile | null>(null)
   const [previewContent, setPreviewContent] = useState<string | null>(null)
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
 
   // Get filter from URL params
@@ -170,23 +171,33 @@ export default function Artifacts() {
       setPreviewFile(file)
       setPreviewLoading(true)
       setPreviewContent(null)
-      
+      setPreviewPdfUrl(null)
+
       // Check if file type is previewable
       const ext = file.name.split('.').pop()?.toLowerCase()
-      const previewableTypes = ['txt', 'md', 'json', 'csv', 'log', 'yaml', 'yml', 'py', 'js', 'ts', 'html', 'css']
-      
+      const previewableTypes = ['txt', 'md', 'json', 'csv', 'log', 'yaml', 'yml', 'py', 'js', 'ts', 'html', 'css', 'pdf']
+
       if (!previewableTypes.includes(ext || '')) {
         setPreviewContent(`Preview not available for .${ext} files`)
         setPreviewLoading(false)
         return
       }
-      
-      // Fetch file content as text
-      const response = await apiClient.get(file.path, {
-        responseType: 'text'
-      })
-      
-      setPreviewContent(response.data)
+
+      // Handle PDF separately (binary file)
+      if (ext === 'pdf') {
+        const response = await apiClient.get(file.path, {
+          responseType: 'blob'
+        })
+        const blob = new Blob([response.data], { type: 'application/pdf' })
+        const url = window.URL.createObjectURL(blob)
+        setPreviewPdfUrl(url)
+      } else {
+        // Fetch file content as text
+        const response = await apiClient.get(file.path, {
+          responseType: 'text'
+        })
+        setPreviewContent(response.data)
+      }
     } catch (error) {
       console.error('Preview failed:', error)
       setPreviewContent(`Failed to load preview: ${(error as ApiError)?.response?.status || 'Network error'}`)
@@ -421,7 +432,14 @@ export default function Artifacts() {
 
       {/* Preview Modal */}
       {previewFile && (
-        <div className={styles.modalOverlay} onClick={() => setPreviewFile(null)}>
+        <div className={styles.modalOverlay} onClick={() => {
+          // Clean up PDF blob URL when closing
+          if (previewPdfUrl) {
+            window.URL.revokeObjectURL(previewPdfUrl)
+            setPreviewPdfUrl(null)
+          }
+          setPreviewFile(null)
+        }}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div className={styles.modalTitle}>
@@ -432,7 +450,14 @@ export default function Artifacts() {
               </div>
               <button
                 className="btn btn-sm btn-subtle"
-                onClick={() => setPreviewFile(null)}
+                onClick={() => {
+                  // Clean up PDF blob URL when closing
+                  if (previewPdfUrl) {
+                    window.URL.revokeObjectURL(previewPdfUrl)
+                    setPreviewPdfUrl(null)
+                  }
+                  setPreviewFile(null)
+                }}
                 title="Close preview"
               >
                 <XMarkIcon />
@@ -441,6 +466,12 @@ export default function Artifacts() {
             <div className={styles.modalBody}>
               {previewLoading ? (
                 <div className={styles.previewLoading}>Loading preview...</div>
+              ) : previewPdfUrl ? (
+                <iframe
+                  src={previewPdfUrl}
+                  className={styles.pdfPreview}
+                  title="PDF Preview"
+                />
               ) : (
                 <pre className={styles.previewContent}>
                   {previewContent}
