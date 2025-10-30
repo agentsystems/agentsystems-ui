@@ -206,7 +206,7 @@ export default function AgentDetail() {
       
       // Poll for status with proper error handling and timeout
       const pollStatus = async (attempts = 0) => {
-        const maxAttempts = 120 // 2 minutes max polling
+        const maxAttempts = 7200 // Max 2 hours (most agents complete in seconds/minutes; matches gateway timeout)
         
         if (attempts >= maxAttempts) {
           setPollingStatus('')
@@ -222,9 +222,14 @@ export default function AgentDetail() {
 
         try {
           const status = await agentsApi.getStatus(response.thread_id)
-          
-          // Update polling status for user feedback
-          setPollingStatus(`Status: ${status.state}${status.progress?.message ? ` - ${status.progress.message}` : ''} (${attempts + 1}/${maxAttempts})`)
+
+          // Update polling status for user feedback - show elapsed time and max timeout
+          const elapsedSeconds = attempts + 1
+          const elapsedMinutes = Math.floor(elapsedSeconds / 60)
+          const elapsedTime = elapsedMinutes > 0
+            ? `${elapsedMinutes}m ${elapsedSeconds % 60}s`
+            : `${elapsedSeconds}s`
+          setPollingStatus(`Status: ${status.state}${status.progress?.message ? ` - ${status.progress.message}` : ''} (${elapsedTime} / max 2h)`)
           
           if (status.state === 'completed') {
             setPollingStatus('Getting results...')
