@@ -531,7 +531,60 @@ export default function AgentDetail() {
           </>
         )}
 
+      {/* Performance Metrics Card - placed at top full width */}
+      {performanceMetrics.totalExecutions > 0 && (
+        <Card className={styles.sectionCard}>
+          <h2>Performance Metrics</h2>
+          <div className={styles.performanceGrid}>
+            <div className={styles.performanceMetric}>
+              <BoltIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div className={styles.performanceValue}>{performanceMetrics.totalExecutions}</div>
+                <div className={styles.performanceLabel}>Total Executions</div>
+                <div className={styles.performanceSubtext}>
+                  {performanceMetrics.recentExecutions} in last 24h
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.performanceMetric}>
+              <CheckCircleIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div
+                  className={`${styles.performanceValue} ${
+                    performanceMetrics.successRate >= 95 ? styles.performanceSuccess :
+                    performanceMetrics.successRate >= 80 ? styles.performanceWarning : styles.performanceError
+                  }`}
+                >
+                  {performanceMetrics.successRate.toFixed(1)}%
+                </div>
+                <div className={styles.performanceLabel}>Success Rate</div>
+                <div className={styles.performanceSubtext}>
+                  {performanceMetrics.failureRate > 0 &&
+                    `${performanceMetrics.failureRate.toFixed(1)}% failures`
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.performanceMetric}>
+              <ClockIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div className={styles.performanceValue}>
+                  {formatDuration(performanceMetrics.avgResponseTime)}
+                </div>
+                <div className={styles.performanceLabel}>Avg Response Time</div>
+                <div className={styles.performanceSubtext}>
+                  Per execution
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <div className={styles.grid}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <Card>
           <h2>Agent Information</h2>
           
@@ -1002,6 +1055,75 @@ export default function AgentDetail() {
           )}
         </Card>
 
+        {/* Recent Executions */}
+        {executionHistory?.executions && executionHistory.executions.length > 0 && (
+          <Card className={styles.sectionCard}>
+            <div className={styles.executionHistoryHeader}>
+              <h2>Recent Executions</h2>
+              <button
+                className="btn btn-sm btn-subtle"
+                onClick={() => {
+                  playClickSound()
+                  window.open(`/executions?agent=${agentName}`, '_blank')
+                }}
+              >
+                <ListBulletIcon />
+                View All
+              </button>
+            </div>
+
+            <div className={styles.executionsTable} data-tour="executions-table">
+              <div className={styles.tableHeader}>
+                <span>Status</span>
+                <span>Started</span>
+                <span>Duration</span>
+                <span>Thread ID</span>
+              </div>
+
+              {executionHistory.executions.slice(0, 5).map((execution: Execution, index: number) => (
+                <div
+                  key={execution.thread_id}
+                  className={styles.executionRow}
+                  onClick={() => {
+                    playClickSound()
+                    navigate(`/executions?thread=${execution.thread_id}`)
+                  }}
+                  data-tour={index === 0 ? 'execution-row-first' : undefined}
+                >
+                  <span
+                    className={`${styles.status} ${
+                      execution.state === 'completed' ? styles.statusCompleted :
+                      execution.state === 'failed' ? styles.statusFailed :
+                      execution.state === 'running' ? styles.statusRunning : styles.statusQueued
+                    }`}
+                  >
+                    {execution.state}
+                  </span>
+                  <span className={styles.timestamp}>
+                    {execution.started_at
+                      ? formatDistanceToNow(new Date(execution.started_at))
+                      : 'Not started'
+                    }
+                  </span>
+                  <span className={styles.duration}>
+                    {(() => {
+                      if (!execution.started_at) return '—'
+                      const start = new Date(execution.started_at)
+                      const end = execution.ended_at ? new Date(execution.ended_at) : currentTime
+                      const duration = Math.round((end.getTime() - start.getTime()) / 1000)
+                      return duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}m ${duration % 60}s`
+                    })()}
+                  </span>
+                  <span className={styles.threadId}>
+                    {execution.thread_id.substring(0, 8)}...
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+        </div>
+
         <Card>
           <h2>Execute Agent</h2>
           <p className={styles.instructions}>
@@ -1231,126 +1353,6 @@ export default function AgentDetail() {
           </div>
         </Card>
       </div>
-
-      {/* Recent Executions */}
-      {executionHistory?.executions && executionHistory.executions.length > 0 && (
-        <Card className={styles.sectionCard}>
-          <div className={styles.executionHistoryHeader}>
-            <h2>Recent Executions</h2>
-            <button 
-              className="btn btn-sm btn-subtle"
-              onClick={() => {
-                playClickSound()
-                window.open(`/executions?agent=${agentName}`, '_blank')
-              }}
-            >
-              <ListBulletIcon />
-              View All
-            </button>
-          </div>
-          
-          <div className={styles.executionsTable} data-tour="executions-table">
-            <div className={styles.tableHeader}>
-              <span>Status</span>
-              <span>Started</span>
-              <span>Duration</span>
-              <span>Thread ID</span>
-            </div>
-            
-            {executionHistory.executions.slice(0, 5).map((execution: Execution, index: number) => (
-              <div
-                key={execution.thread_id}
-                className={styles.executionRow}
-                onClick={() => {
-                  playClickSound()
-                  navigate(`/executions?thread=${execution.thread_id}`)
-                }}
-                data-tour={index === 0 ? 'execution-row-first' : undefined}
-              >
-                <span 
-                  className={`${styles.status} ${
-                    execution.state === 'completed' ? styles.statusCompleted :
-                    execution.state === 'failed' ? styles.statusFailed :
-                    execution.state === 'running' ? styles.statusRunning : styles.statusQueued
-                  }`}
-                >
-                  {execution.state}
-                </span>
-                <span className={styles.timestamp}>
-                  {execution.started_at 
-                    ? formatDistanceToNow(new Date(execution.started_at))
-                    : 'Not started'
-                  }
-                </span>
-                <span className={styles.duration}>
-                  {(() => {
-                    if (!execution.started_at) return '—'
-                    const start = new Date(execution.started_at)
-                    const end = execution.ended_at ? new Date(execution.ended_at) : currentTime
-                    const duration = Math.round((end.getTime() - start.getTime()) / 1000)
-                    return duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}m ${duration % 60}s`
-                  })()}
-                </span>
-                <span className={styles.threadId}>
-                  {execution.thread_id.substring(0, 8)}...
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Performance Metrics Card - placed after executions */}
-      {performanceMetrics.totalExecutions > 0 && (
-        <Card className={styles.sectionCard}>
-          <h2>Performance Metrics</h2>
-          <div className={styles.performanceGrid}>
-            <div className={styles.performanceMetric}>
-              <BoltIcon className={styles.performanceIcon} />
-              <div className={styles.performanceData}>
-                <div className={styles.performanceValue}>{performanceMetrics.totalExecutions}</div>
-                <div className={styles.performanceLabel}>Total Executions</div>
-                <div className={styles.performanceSubtext}>
-                  {performanceMetrics.recentExecutions} in last 24h
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.performanceMetric}>
-              <CheckCircleIcon className={styles.performanceIcon} />
-              <div className={styles.performanceData}>
-                <div 
-                  className={`${styles.performanceValue} ${
-                    performanceMetrics.successRate >= 95 ? styles.performanceSuccess :
-                    performanceMetrics.successRate >= 80 ? styles.performanceWarning : styles.performanceError
-                  }`}
-                >
-                  {performanceMetrics.successRate.toFixed(1)}%
-                </div>
-                <div className={styles.performanceLabel}>Success Rate</div>
-                <div className={styles.performanceSubtext}>
-                  {performanceMetrics.failureRate > 0 && 
-                    `${performanceMetrics.failureRate.toFixed(1)}% failures`
-                  }
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.performanceMetric}>
-              <ClockIcon className={styles.performanceIcon} />
-              <div className={styles.performanceData}>
-                <div className={styles.performanceValue}>
-                  {formatDuration(performanceMetrics.avgResponseTime)}
-                </div>
-                <div className={styles.performanceLabel}>Avg Response Time</div>
-                <div className={styles.performanceSubtext}>
-                  Per execution
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
 
       {/* Developer Detail Modal */}
       {selectedDeveloper && (
