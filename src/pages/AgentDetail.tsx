@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
-import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, UserIcon, BriefcaseIcon, MapPinIcon, CalendarIcon, ChatBubbleLeftRightIcon, BuildingOfficeIcon, IdentificationIcon, EnvelopeIcon, BookOpenIcon, LightBulbIcon, FolderIcon, HandRaisedIcon, HeartIcon, LinkIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, UserIcon, BriefcaseIcon, MapPinIcon, CalendarIcon, ChatBubbleLeftRightIcon, BuildingOfficeIcon, IdentificationIcon, EnvelopeIcon, BookOpenIcon, LightBulbIcon, FolderIcon, HandRaisedIcon, HeartIcon, LinkIcon, UserGroupIcon, GlobeAltIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { useConfigStore } from '@stores/configStore'
 import { getAgentButtonText } from '@utils/agentHelpers'
@@ -59,6 +59,13 @@ export default function AgentDetail() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [currentTime, setCurrentTime] = useState(new Date())
   const previousAgentState = useRef<string | undefined>()
+
+  // Smart form state
+  const [formValues, setFormValues] = useState<Record<string, any>>({})
+  const [jsonParseError, setJsonParseError] = useState<string | null>(null)
+
+  // Metadata collapse state
+  const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(true)
 
   // Developer modal state
   const [selectedDeveloper, setSelectedDeveloper] = useState<DeveloperInfo | null>(null)
@@ -183,6 +190,63 @@ export default function AgentDetail() {
     refetchInterval: false, // Metadata is static - only refetch on agent state change
     staleTime: Infinity, // Cache metadata until query key changes (agent state)
   })
+
+  // Initialize form values and JSON payload from input schema when metadata becomes available
+  useEffect(() => {
+    if (metadata?.input_schema && Object.keys(metadata.input_schema).length > 0) {
+      // Generate initial values from schema
+      const initialValues: Record<string, any> = {}
+
+      Object.entries(metadata.input_schema).forEach(([fieldName, fieldConfig]) => {
+        // Only pre-populate required fields with empty values
+        if (fieldConfig.required) {
+          const fieldType = fieldConfig.type?.toLowerCase() || 'string'
+
+          if (fieldType === 'boolean') {
+            initialValues[fieldName] = false
+          } else if (fieldType === 'integer' || fieldType === 'number') {
+            // Leave numeric fields empty for user to fill
+            // Don't set a default value
+          } else {
+            initialValues[fieldName] = ''
+          }
+        }
+      })
+
+      setFormValues(initialValues)
+      setInvokePayload(JSON.stringify(initialValues, null, 2))
+      setJsonParseError(null)
+    }
+  }, [metadata?.input_schema])
+
+  // Handle form field changes - update form state and JSON textarea
+  const handleFormFieldChange = (fieldName: string, value: any) => {
+    const newFormValues = { ...formValues, [fieldName]: value }
+    setFormValues(newFormValues)
+
+    // Update JSON textarea
+    try {
+      const jsonString = JSON.stringify(newFormValues, null, 2)
+      setInvokePayload(jsonString)
+      setJsonParseError(null)
+    } catch (e) {
+      setJsonParseError((e as Error).message)
+    }
+  }
+
+  // Handle JSON textarea changes - update form state
+  const handleJsonChange = (jsonString: string) => {
+    setInvokePayload(jsonString)
+
+    try {
+      const parsed = JSON.parse(jsonString)
+      setFormValues(parsed)
+      setJsonParseError(null)
+    } catch (e) {
+      // Don't update form values if JSON is invalid, but keep the error
+      setJsonParseError((e as Error).message)
+    }
+  }
 
   const invokeMutation = useMutation({
     mutationFn: ({ payload, files }: { payload: Record<string, unknown>, files?: File[] }) => {
@@ -515,11 +579,49 @@ export default function AgentDetail() {
             </div>
           ) : metadata ? (
             <div className={styles.runtimeSection} data-tour="agent-metadata">
-              <div className={styles.sectionHeaderWithBadge}>
-                <h3 className={styles.sectionHeader}>Runtime Metadata</h3>
+              <div
+                className={styles.sectionHeaderWithBadge}
+                onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {isMetadataCollapsed ? (
+                    <ChevronDownIcon style={{ width: '20px', height: '20px' }} />
+                  ) : (
+                    <ChevronUpIcon style={{ width: '20px', height: '20px' }} />
+                  )}
+                  <h3 className={styles.sectionHeader} style={{ margin: 0 }}>Runtime Metadata</h3>
+                </div>
                 <span className={styles.metadataSourceBadge} title="Live metadata from running agent container">
                   From agent.yaml
                 </span>
+              </div>
+
+              {!isMetadataCollapsed && (
+                <>
+              {/* API Documentation Link */}
+              <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                {currentAgent?.state === 'running' ? (
+                  <a
+                    href={`${gatewayUrl}/${agentName}/docs`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-sm btn-subtle"
+                    title="View interactive API documentation"
+                  >
+                    <DocumentTextIcon className={styles.docIcon} />
+                    View API Documentation
+                  </a>
+                ) : (
+                  <button
+                    className="btn btn-sm btn-subtle"
+                    disabled
+                    title="Start the agent to view API documentation"
+                  >
+                    <DocumentTextIcon className={styles.docIcon} />
+                    View API Documentation
+                  </button>
+                )}
               </div>
 
               {/* Core Identity Section */}
@@ -887,6 +989,8 @@ export default function AgentDetail() {
                   </div>
                 </div>
               )}
+                </>
+              )}
             </div>
           ) : (
             <div className={styles.errorState}>
@@ -896,75 +1000,100 @@ export default function AgentDetail() {
               </p>
             </div>
           )}
-          
-          <div className={styles.documentationLinks}>
-            {currentAgent?.state === 'running' ? (
-              <a 
-                href={`${gatewayUrl}/${agentName}/docs`}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="btn btn-sm btn-subtle"
-                title="View interactive API documentation"
-              >
-                <DocumentTextIcon className={styles.docIcon} />
-                View API Documentation
-              </a>
-            ) : (
-              <button 
-                className="btn btn-sm btn-subtle"
-                disabled
-                title="Start the agent to view API documentation"
-              >
-                <DocumentTextIcon className={styles.docIcon} />
-                View API Documentation
-              </button>
-            )}
-            
-            {currentAgent?.state === 'running' ? (
-              <div className={styles.rawMetadata}>
-                <h4>Raw Metadata (JSON)</h4>
-                {metadataLoading ? (
-                  <div className={styles.metadataLoading}>
-                    <p>Loading metadata...</p>
-                    <p className={styles.loadingHint}>Agent just started - metadata endpoint is initializing</p>
-                  </div>
-                ) : metadataError ? (
-                  <div className={styles.metadataError}>
-                    <p>Metadata not yet available</p>
-                    <p className={styles.errorHint}>Agent may still be starting up</p>
-                  </div>
-                ) : (
-                  <pre className={styles.metadata}>
-                    {JSON.stringify(metadata, null, 2)}
-                  </pre>
-                )}
-              </div>
-            ) : (
-              <div className={styles.disabledNote}>
-                <p>
-                  <strong>API documentation and metadata are only available when the agent is running.</strong>
-                </p>
-                <p>Start the agent container to access interactive documentation and detailed metadata.</p>
-              </div>
-            )}
-          </div>
         </Card>
 
         <Card>
           <h2>Execute Agent</h2>
           <p className={styles.instructions}>
-            Enter a JSON payload to execute the agent.
+            {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0
+              ? 'Fill out the form below or edit the JSON directly. Both stay in sync.'
+              : 'Enter a JSON payload to execute the agent.'}
           </p>
           <div className={styles.invokeForm}>
+            {/* Smart Form - only show if input schema is available */}
+            {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0 && (
+              <div className={styles.smartForm}>
+                <h3 className={styles.smartFormTitle}>Input Parameters</h3>
+                <div className={styles.formFields}>
+                  {Object.entries(metadata.input_schema).map(([fieldName, fieldConfig]) => {
+                    const value = formValues[fieldName] ?? ''
+                    const fieldType = fieldConfig.type?.toLowerCase() || 'string'
+
+                    return (
+                      <div key={fieldName} className={styles.formField}>
+                        <label htmlFor={`field-${fieldName}`} className={styles.formLabel}>
+                          <span className={styles.labelText}>
+                            {fieldConfig.label || fieldName}
+                            {fieldConfig.required && <span className={styles.requiredStar}>*</span>}
+                          </span>
+                          {fieldConfig.description && (
+                            <span className={styles.formFieldDescription}>{fieldConfig.description}</span>
+                          )}
+                        </label>
+
+                        {fieldType === 'boolean' ? (
+                          <input
+                            id={`field-${fieldName}`}
+                            type="checkbox"
+                            checked={!!value}
+                            onChange={(e) => handleFormFieldChange(fieldName, e.target.checked)}
+                            className={styles.formCheckbox}
+                          />
+                        ) : fieldType === 'integer' || fieldType === 'number' ? (
+                          <input
+                            id={`field-${fieldName}`}
+                            type="number"
+                            value={value}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              if (val === '') {
+                                // Remove field from JSON when cleared
+                                const newFormValues = { ...formValues }
+                                delete newFormValues[fieldName]
+                                setFormValues(newFormValues)
+                                setInvokePayload(JSON.stringify(newFormValues, null, 2))
+                              } else {
+                                handleFormFieldChange(
+                                  fieldName,
+                                  fieldType === 'integer' ? parseInt(val) : parseFloat(val)
+                                )
+                              }
+                            }}
+                            placeholder={fieldConfig.description || `Enter ${fieldName}`}
+                            className={styles.formInput}
+                            step={fieldType === 'integer' ? '1' : 'any'}
+                          />
+                        ) : (
+                          <input
+                            id={`field-${fieldName}`}
+                            type="text"
+                            value={value}
+                            onChange={(e) => handleFormFieldChange(fieldName, e.target.value)}
+                            placeholder={fieldConfig.description || `Enter ${fieldName}`}
+                            className={styles.formInput}
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             <label>
-              Payload (JSON):
+              {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0
+                ? 'JSON (Auto-generated from form above):'
+                : 'Payload (JSON):'}
               <textarea
                 className={styles.payloadInput}
                 value={invokePayload}
-                onChange={(e) => setInvokePayload(e.target.value)}
+                onChange={(e) => handleJsonChange(e.target.value)}
                 rows={10}
                 placeholder='{"message": "Hello, agent!"}'
               />
+              {jsonParseError && (
+                <span className={styles.jsonError}>Invalid JSON: {jsonParseError}</span>
+              )}
             </label>
 
             <div className={styles.fileUpload}>
@@ -1081,7 +1210,20 @@ export default function AgentDetail() {
                     </div>
                   )}
                   <div className={styles.threadInfo}>
-                    <small>Thread ID: {invocationResult.thread_id}</small>
+                    <small>
+                      Thread ID: {invocationResult.thread_id}
+                      {' • '}
+                      <a
+                        href={`/executions?thread=${invocationResult.thread_id}`}
+                        className={styles.executionLink}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          navigate(`/executions?thread=${invocationResult.thread_id}`)
+                        }}
+                      >
+                        View Execution Details & Artifacts →
+                      </a>
+                    </small>
                   </div>
                 </>
               )}
