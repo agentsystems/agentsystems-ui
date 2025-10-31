@@ -212,6 +212,110 @@
   outline-offset: 2px;
 }
 
+/* Smart Form Styles */
+.smartForm {
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.smartFormTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.labelText {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9375rem;
+}
+
+.requiredStar {
+  color: var(--error);
+  font-weight: 700;
+}
+
+.formFieldDescription {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.formInput {
+  background-color: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.formInput:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+
+.formInput::placeholder {
+  color: var(--text-muted);
+}
+
+/* Style the calendar picker icon for date inputs */
+.formInput::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+
+.formCheckbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.jsonError {
+  display: block;
+  color: var(--error);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--error-bg);
+  border: 1px solid var(--error);
+  border-radius: var(--radius);
+}
 
 .result {
   margin-top: 1rem;
@@ -235,6 +339,8 @@
   font-family: var(--font-mono);
   font-size: 0.875rem;
   color: var(--text-secondary);
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .error {
@@ -285,6 +391,21 @@
   border-top: 1px solid var(--border);
   color: var(--text-muted);
   font-family: var(--font-mono);
+}
+
+.executionLink {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 3px;
+  padding: 1px 4px;
+  transition: all 0.2s ease;
+}
+
+.executionLink:hover {
+  background-color: var(--accent);
+  color: var(--bg);
+  text-decoration: none;
 }
 
 .statusIndicator {

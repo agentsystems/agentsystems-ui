@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
-import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, UserIcon, BriefcaseIcon, MapPinIcon, CalendarIcon, ChatBubbleLeftRightIcon, BuildingOfficeIcon, IdentificationIcon, EnvelopeIcon, BookOpenIcon, LightBulbIcon, FolderIcon, HandRaisedIcon, HeartIcon, LinkIcon, UserGroupIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, UserIcon, BriefcaseIcon, MapPinIcon, CalendarIcon, ChatBubbleLeftRightIcon, BuildingOfficeIcon, IdentificationIcon, EnvelopeIcon, BookOpenIcon, LightBulbIcon, FolderIcon, HandRaisedIcon, HeartIcon, LinkIcon, UserGroupIcon, GlobeAltIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { useConfigStore } from '@stores/configStore'
 import { getAgentButtonText } from '@utils/agentHelpers'
@@ -14,7 +14,7 @@ import { useToast } from '@hooks/useToast'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
 import { API_DEFAULTS } from '@constants/app'
-import type { InvocationResult, Execution } from '../types/api'
+import type { InvocationResult, Execution, RequiredCredential } from '../types/api'
 import styles from './AgentDetail.module.css'
 
 // Developer info interface for modal
@@ -53,12 +53,19 @@ export default function AgentDetail() {
   const { toasts, removeToast, showError } = useToast()
   const { gatewayUrl, isAuthenticated } = useAuthStore()
   const queryClient = useQueryClient()
-  const [invokePayload, setInvokePayload] = useState('{\n  "date": "March 15"\n}')
+  const [invokePayload, setInvokePayload] = useState('{}')
   const [invocationResult, setInvocationResult] = useState<InvocationResult | null>(null)
   const [pollingStatus, setPollingStatus] = useState<string>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [currentTime, setCurrentTime] = useState(new Date())
   const previousAgentState = useRef<string | undefined>()
+
+  // Smart form state
+  const [formValues, setFormValues] = useState<Record<string, unknown>>({})
+  const [jsonParseError, setJsonParseError] = useState<string | null>(null)
+
+  // Metadata collapse state
+  const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(true)
 
   // Developer modal state
   const [selectedDeveloper, setSelectedDeveloper] = useState<DeveloperInfo | null>(null)
@@ -183,6 +190,63 @@ export default function AgentDetail() {
     refetchInterval: false, // Metadata is static - only refetch on agent state change
     staleTime: Infinity, // Cache metadata until query key changes (agent state)
   })
+
+  // Initialize form values and JSON payload from input schema when metadata becomes available
+  useEffect(() => {
+    if (metadata?.input_schema && Object.keys(metadata.input_schema).length > 0) {
+      // Generate initial values from schema
+      const initialValues: Record<string, unknown> = {}
+
+      Object.entries(metadata.input_schema).forEach(([fieldName, fieldConfig]) => {
+        // Only pre-populate required fields with empty values
+        if (fieldConfig.required) {
+          const fieldType = fieldConfig.type?.toLowerCase() || 'string'
+
+          if (fieldType === 'boolean') {
+            initialValues[fieldName] = false
+          } else if (fieldType === 'integer' || fieldType === 'number') {
+            // Leave numeric fields empty for user to fill
+            // Don't set a default value
+          } else {
+            initialValues[fieldName] = ''
+          }
+        }
+      })
+
+      setFormValues(initialValues)
+      setInvokePayload(JSON.stringify(initialValues, null, 2))
+      setJsonParseError(null)
+    }
+  }, [metadata?.input_schema])
+
+  // Handle form field changes - update form state and JSON textarea
+  const handleFormFieldChange = (fieldName: string, value: unknown) => {
+    const newFormValues = { ...formValues, [fieldName]: value }
+    setFormValues(newFormValues)
+
+    // Update JSON textarea
+    try {
+      const jsonString = JSON.stringify(newFormValues, null, 2)
+      setInvokePayload(jsonString)
+      setJsonParseError(null)
+    } catch (e) {
+      setJsonParseError((e as Error).message)
+    }
+  }
+
+  // Handle JSON textarea changes - update form state
+  const handleJsonChange = (jsonString: string) => {
+    setInvokePayload(jsonString)
+
+    try {
+      const parsed = JSON.parse(jsonString)
+      setFormValues(parsed)
+      setJsonParseError(null)
+    } catch (e) {
+      // Don't update form values if JSON is invalid, but keep the error
+      setJsonParseError((e as Error).message)
+    }
+  }
 
   const invokeMutation = useMutation({
     mutationFn: ({ payload, files }: { payload: Record<string, unknown>, files?: File[] }) => {
@@ -467,7 +531,60 @@ export default function AgentDetail() {
           </>
         )}
 
+      {/* Performance Metrics Card - placed at top full width */}
+      {performanceMetrics.totalExecutions > 0 && (
+        <Card className={styles.sectionCard}>
+          <h2>Performance Metrics</h2>
+          <div className={styles.performanceGrid}>
+            <div className={styles.performanceMetric}>
+              <BoltIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div className={styles.performanceValue}>{performanceMetrics.totalExecutions}</div>
+                <div className={styles.performanceLabel}>Total Executions</div>
+                <div className={styles.performanceSubtext}>
+                  {performanceMetrics.recentExecutions} in last 24h
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.performanceMetric}>
+              <CheckCircleIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div
+                  className={`${styles.performanceValue} ${
+                    performanceMetrics.successRate >= 95 ? styles.performanceSuccess :
+                    performanceMetrics.successRate >= 80 ? styles.performanceWarning : styles.performanceError
+                  }`}
+                >
+                  {performanceMetrics.successRate.toFixed(1)}%
+                </div>
+                <div className={styles.performanceLabel}>Success Rate</div>
+                <div className={styles.performanceSubtext}>
+                  {performanceMetrics.failureRate > 0 &&
+                    `${performanceMetrics.failureRate.toFixed(1)}% failures`
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.performanceMetric}>
+              <ClockIcon className={styles.performanceIcon} />
+              <div className={styles.performanceData}>
+                <div className={styles.performanceValue}>
+                  {formatDuration(performanceMetrics.avgResponseTime)}
+                </div>
+                <div className={styles.performanceLabel}>Avg Response Time</div>
+                <div className={styles.performanceSubtext}>
+                  Per execution
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <div className={styles.grid}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <Card>
           <h2>Agent Information</h2>
           
@@ -515,11 +632,49 @@ export default function AgentDetail() {
             </div>
           ) : metadata ? (
             <div className={styles.runtimeSection} data-tour="agent-metadata">
-              <div className={styles.sectionHeaderWithBadge}>
-                <h3 className={styles.sectionHeader}>Runtime Metadata</h3>
+              <div
+                className={styles.sectionHeaderWithBadge}
+                onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {isMetadataCollapsed ? (
+                    <ChevronDownIcon style={{ width: '20px', height: '20px' }} />
+                  ) : (
+                    <ChevronUpIcon style={{ width: '20px', height: '20px' }} />
+                  )}
+                  <h3 className={styles.sectionHeader} style={{ margin: 0 }}>Runtime Metadata</h3>
+                </div>
                 <span className={styles.metadataSourceBadge} title="Live metadata from running agent container">
                   From agent.yaml
                 </span>
+              </div>
+
+              {!isMetadataCollapsed && (
+                <>
+              {/* API Documentation Link */}
+              <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                {currentAgent?.state === 'running' ? (
+                  <a
+                    href={`${gatewayUrl}/${agentName}/docs`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-sm btn-subtle"
+                    title="View interactive API documentation"
+                  >
+                    <DocumentTextIcon className={styles.docIcon} />
+                    View API Documentation
+                  </a>
+                ) : (
+                  <button
+                    className="btn btn-sm btn-subtle"
+                    disabled
+                    title="Start the agent to view API documentation"
+                  >
+                    <DocumentTextIcon className={styles.docIcon} />
+                    View API Documentation
+                  </button>
+                )}
               </div>
 
               {/* Core Identity Section */}
@@ -887,6 +1042,8 @@ export default function AgentDetail() {
                   </div>
                 </div>
               )}
+                </>
+              )}
             </div>
           ) : (
             <div className={styles.errorState}>
@@ -896,75 +1053,236 @@ export default function AgentDetail() {
               </p>
             </div>
           )}
-          
-          <div className={styles.documentationLinks}>
-            {currentAgent?.state === 'running' ? (
-              <a 
-                href={`${gatewayUrl}/${agentName}/docs`}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="btn btn-sm btn-subtle"
-                title="View interactive API documentation"
-              >
-                <DocumentTextIcon className={styles.docIcon} />
-                View API Documentation
-              </a>
-            ) : (
-              <button 
-                className="btn btn-sm btn-subtle"
-                disabled
-                title="Start the agent to view API documentation"
-              >
-                <DocumentTextIcon className={styles.docIcon} />
-                View API Documentation
-              </button>
-            )}
-            
-            {currentAgent?.state === 'running' ? (
-              <div className={styles.rawMetadata}>
-                <h4>Raw Metadata (JSON)</h4>
-                {metadataLoading ? (
-                  <div className={styles.metadataLoading}>
-                    <p>Loading metadata...</p>
-                    <p className={styles.loadingHint}>Agent just started - metadata endpoint is initializing</p>
-                  </div>
-                ) : metadataError ? (
-                  <div className={styles.metadataError}>
-                    <p>Metadata not yet available</p>
-                    <p className={styles.errorHint}>Agent may still be starting up</p>
-                  </div>
-                ) : (
-                  <pre className={styles.metadata}>
-                    {JSON.stringify(metadata, null, 2)}
-                  </pre>
-                )}
-              </div>
-            ) : (
-              <div className={styles.disabledNote}>
-                <p>
-                  <strong>API documentation and metadata are only available when the agent is running.</strong>
-                </p>
-                <p>Start the agent container to access interactive documentation and detailed metadata.</p>
-              </div>
-            )}
-          </div>
         </Card>
+
+        {/* Recent Executions */}
+        {executionHistory?.executions && executionHistory.executions.length > 0 && (
+          <Card className={styles.sectionCard}>
+            <div className={styles.executionHistoryHeader}>
+              <h2>Recent Executions</h2>
+              <button
+                className="btn btn-sm btn-subtle"
+                onClick={() => {
+                  playClickSound()
+                  window.open(`/executions?agent=${agentName}`, '_blank')
+                }}
+              >
+                <ListBulletIcon />
+                View All
+              </button>
+            </div>
+
+            <div className={styles.executionsTable} data-tour="executions-table">
+              <div className={styles.tableHeader}>
+                <span>Status</span>
+                <span>Started</span>
+                <span>Duration</span>
+                <span>Thread ID</span>
+              </div>
+
+              {executionHistory.executions.slice(0, 5).map((execution: Execution, index: number) => (
+                <div
+                  key={execution.thread_id}
+                  className={styles.executionRow}
+                  onClick={() => {
+                    playClickSound()
+                    navigate(`/executions?thread=${execution.thread_id}`)
+                  }}
+                  data-tour={index === 0 ? 'execution-row-first' : undefined}
+                >
+                  <span
+                    className={`${styles.status} ${
+                      execution.state === 'completed' ? styles.statusCompleted :
+                      execution.state === 'failed' ? styles.statusFailed :
+                      execution.state === 'running' ? styles.statusRunning : styles.statusQueued
+                    }`}
+                  >
+                    {execution.state}
+                  </span>
+                  <span className={styles.timestamp}>
+                    {execution.started_at
+                      ? formatDistanceToNow(new Date(execution.started_at))
+                      : 'Not started'
+                    }
+                  </span>
+                  <span className={styles.duration}>
+                    {(() => {
+                      if (!execution.started_at) return '—'
+                      const start = new Date(execution.started_at)
+                      const end = execution.ended_at ? new Date(execution.ended_at) : currentTime
+                      const duration = Math.round((end.getTime() - start.getTime()) / 1000)
+                      return duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}m ${duration % 60}s`
+                    })()}
+                  </span>
+                  <span className={styles.threadId}>
+                    {execution.thread_id.substring(0, 8)}...
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {/* Setup Card - only show if agent has required credentials or setup instructions */}
+        {metadata && (metadata.required_credentials || metadata.setup_instructions) && (
+          <Card>
+            <h2>Setup Requirements</h2>
+
+            {metadata.required_credentials && metadata.required_credentials.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+                  Required Credentials
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {metadata.required_credentials.map((cred: RequiredCredential, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        padding: '0.75rem',
+                        backgroundColor: 'var(--surface-2)',
+                        borderRadius: 'var(--radius)',
+                        borderLeft: '3px solid var(--info)'
+                      }}
+                    >
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.25rem' }}>
+                        {cred.name}
+                      </div>
+                      {cred.description && (
+                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                          {cred.description}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {metadata.setup_instructions && (
+              <div>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+                  Setup Instructions
+                </h3>
+                <div
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: 'var(--surface-2)',
+                    borderRadius: 'var(--radius)',
+                    fontSize: '0.875rem',
+                    color: 'var(--text)',
+                    whiteSpace: 'pre-wrap',
+                    lineHeight: '1.6'
+                  }}
+                >
+                  {metadata.setup_instructions}
+                </div>
+              </div>
+            )}
+          </Card>
+        )}
 
         <Card>
           <h2>Execute Agent</h2>
           <p className={styles.instructions}>
-            Enter a JSON payload to execute the agent.
+            {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0
+              ? 'Fill out the form below or edit the JSON directly. Both stay in sync.'
+              : 'Enter a JSON payload to execute the agent.'}
           </p>
           <div className={styles.invokeForm}>
+            {/* Smart Form - only show if input schema is available */}
+            {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0 && (
+              <div className={styles.smartForm}>
+                <h3 className={styles.smartFormTitle}>Input Parameters</h3>
+                <div className={styles.formFields}>
+                  {Object.entries(metadata.input_schema).map(([fieldName, fieldConfig]) => {
+                    const fieldType = fieldConfig.type?.toLowerCase() || 'string'
+                    const rawValue = formValues[fieldName]
+                    // Convert to string for input elements (they work with string values)
+                    const stringValue = String(rawValue ?? '')
+
+                    return (
+                      <div key={fieldName} className={styles.formField}>
+                        <label htmlFor={`field-${fieldName}`} className={styles.formLabel}>
+                          <span className={styles.labelText}>
+                            {fieldConfig.label || fieldName}
+                            {fieldConfig.required && <span className={styles.requiredStar}>*</span>}
+                          </span>
+                          {fieldConfig.description && (
+                            <span className={styles.formFieldDescription}>{fieldConfig.description}</span>
+                          )}
+                        </label>
+
+                        {fieldType === 'boolean' ? (
+                          <input
+                            id={`field-${fieldName}`}
+                            type="checkbox"
+                            checked={!!rawValue}
+                            onChange={(e) => handleFormFieldChange(fieldName, e.target.checked)}
+                            className={styles.formCheckbox}
+                          />
+                        ) : fieldType === 'integer' || fieldType === 'number' ? (
+                          <input
+                            id={`field-${fieldName}`}
+                            type="number"
+                            value={stringValue}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              if (val === '') {
+                                // Remove field from JSON when cleared
+                                const newFormValues = { ...formValues }
+                                delete newFormValues[fieldName]
+                                setFormValues(newFormValues)
+                                setInvokePayload(JSON.stringify(newFormValues, null, 2))
+                              } else {
+                                handleFormFieldChange(
+                                  fieldName,
+                                  fieldType === 'integer' ? parseInt(val) : parseFloat(val)
+                                )
+                              }
+                            }}
+                            className={styles.formInput}
+                            step={fieldType === 'integer' ? '1' : 'any'}
+                          />
+                        ) : fieldType === 'date' ? (
+                          <input
+                            id={`field-${fieldName}`}
+                            type="date"
+                            value={stringValue}
+                            onChange={(e) => handleFormFieldChange(fieldName, e.target.value)}
+                            className={styles.formInput}
+                          />
+                        ) : (
+                          <input
+                            id={`field-${fieldName}`}
+                            type="text"
+                            value={stringValue}
+                            onChange={(e) => handleFormFieldChange(fieldName, e.target.value)}
+                            className={styles.formInput}
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             <label>
-              Payload (JSON):
+              {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0
+                ? 'JSON (Auto-generated from form above):'
+                : 'Payload (JSON):'}
               <textarea
                 className={styles.payloadInput}
                 value={invokePayload}
-                onChange={(e) => setInvokePayload(e.target.value)}
+                onChange={(e) => handleJsonChange(e.target.value)}
                 rows={10}
                 placeholder='{"message": "Hello, agent!"}'
               />
+              {jsonParseError && (
+                <span className={styles.jsonError}>Invalid JSON: {jsonParseError}</span>
+              )}
             </label>
 
             <div className={styles.fileUpload}>
@@ -1081,134 +1399,28 @@ export default function AgentDetail() {
                     </div>
                   )}
                   <div className={styles.threadInfo}>
-                    <small>Thread ID: {invocationResult.thread_id}</small>
+                    <small>
+                      Thread ID: {invocationResult.thread_id}
+                      {' • '}
+                      <a
+                        href={`/executions?thread=${invocationResult.thread_id}`}
+                        className={styles.executionLink}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          navigate(`/executions?thread=${invocationResult.thread_id}`)
+                        }}
+                      >
+                        View Execution Details & Artifacts →
+                      </a>
+                    </small>
                   </div>
                 </>
               )}
             </div>
           </div>
         </Card>
+        </div>
       </div>
-
-      {/* Recent Executions */}
-      {executionHistory?.executions && executionHistory.executions.length > 0 && (
-        <Card className={styles.sectionCard}>
-          <div className={styles.executionHistoryHeader}>
-            <h2>Recent Executions</h2>
-            <button 
-              className="btn btn-sm btn-subtle"
-              onClick={() => {
-                playClickSound()
-                window.open(`/executions?agent=${agentName}`, '_blank')
-              }}
-            >
-              <ListBulletIcon />
-              View All
-            </button>
-          </div>
-          
-          <div className={styles.executionsTable} data-tour="executions-table">
-            <div className={styles.tableHeader}>
-              <span>Status</span>
-              <span>Started</span>
-              <span>Duration</span>
-              <span>Thread ID</span>
-            </div>
-            
-            {executionHistory.executions.slice(0, 5).map((execution: Execution, index: number) => (
-              <div
-                key={execution.thread_id}
-                className={styles.executionRow}
-                onClick={() => {
-                  playClickSound()
-                  navigate(`/executions?thread=${execution.thread_id}`)
-                }}
-                data-tour={index === 0 ? 'execution-row-first' : undefined}
-              >
-                <span 
-                  className={`${styles.status} ${
-                    execution.state === 'completed' ? styles.statusCompleted :
-                    execution.state === 'failed' ? styles.statusFailed :
-                    execution.state === 'running' ? styles.statusRunning : styles.statusQueued
-                  }`}
-                >
-                  {execution.state}
-                </span>
-                <span className={styles.timestamp}>
-                  {execution.started_at 
-                    ? formatDistanceToNow(new Date(execution.started_at))
-                    : 'Not started'
-                  }
-                </span>
-                <span className={styles.duration}>
-                  {(() => {
-                    if (!execution.started_at) return '—'
-                    const start = new Date(execution.started_at)
-                    const end = execution.ended_at ? new Date(execution.ended_at) : currentTime
-                    const duration = Math.round((end.getTime() - start.getTime()) / 1000)
-                    return duration < 60 ? `${duration}s` : `${Math.round(duration / 60)}m ${duration % 60}s`
-                  })()}
-                </span>
-                <span className={styles.threadId}>
-                  {execution.thread_id.substring(0, 8)}...
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Performance Metrics Card - placed after executions */}
-      {performanceMetrics.totalExecutions > 0 && (
-        <Card className={styles.sectionCard}>
-          <h2>Performance Metrics</h2>
-          <div className={styles.performanceGrid}>
-            <div className={styles.performanceMetric}>
-              <BoltIcon className={styles.performanceIcon} />
-              <div className={styles.performanceData}>
-                <div className={styles.performanceValue}>{performanceMetrics.totalExecutions}</div>
-                <div className={styles.performanceLabel}>Total Executions</div>
-                <div className={styles.performanceSubtext}>
-                  {performanceMetrics.recentExecutions} in last 24h
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.performanceMetric}>
-              <CheckCircleIcon className={styles.performanceIcon} />
-              <div className={styles.performanceData}>
-                <div 
-                  className={`${styles.performanceValue} ${
-                    performanceMetrics.successRate >= 95 ? styles.performanceSuccess :
-                    performanceMetrics.successRate >= 80 ? styles.performanceWarning : styles.performanceError
-                  }`}
-                >
-                  {performanceMetrics.successRate.toFixed(1)}%
-                </div>
-                <div className={styles.performanceLabel}>Success Rate</div>
-                <div className={styles.performanceSubtext}>
-                  {performanceMetrics.failureRate > 0 && 
-                    `${performanceMetrics.failureRate.toFixed(1)}% failures`
-                  }
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.performanceMetric}>
-              <ClockIcon className={styles.performanceIcon} />
-              <div className={styles.performanceData}>
-                <div className={styles.performanceValue}>
-                  {formatDuration(performanceMetrics.avgResponseTime)}
-                </div>
-                <div className={styles.performanceLabel}>Avg Response Time</div>
-                <div className={styles.performanceSubtext}>
-                  Per execution
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
 
       {/* Developer Detail Modal */}
       {selectedDeveloper && (

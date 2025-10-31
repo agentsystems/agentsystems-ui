@@ -18,6 +18,13 @@ export interface FieldConfig {
   [key: string]: unknown
 }
 
+// Credential configuration for required credentials
+export interface RequiredCredential {
+  name: string
+  description?: string
+  [key: string]: unknown
+}
+
 export interface AgentMetadata {
   // Core identity (required in agent.yaml)
   developer: string
@@ -39,6 +46,8 @@ export interface AgentMetadata {
   // Compatibility Requirements
   required_integrations?: Record<string, unknown>[] | null
   required_egress?: string[] | null
+  required_credentials?: RequiredCredential[] | null
+  setup_instructions?: string | null
   input_types?: Array<{ type: string; mime_types?: string[] }> | null
   output_types?: Array<{ type: string; mime_types?: string[] }> | null
   input_schema?: Record<string, FieldConfig> | null
