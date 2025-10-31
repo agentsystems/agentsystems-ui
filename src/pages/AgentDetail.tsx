@@ -14,7 +14,7 @@ import { useToast } from '@hooks/useToast'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
 import { API_DEFAULTS } from '@constants/app'
-import type { InvocationResult, Execution } from '../types/api'
+import type { InvocationResult, Execution, RequiredCredential } from '../types/api'
 import styles from './AgentDetail.module.css'
 
 // Developer info interface for modal
@@ -61,7 +61,7 @@ export default function AgentDetail() {
   const previousAgentState = useRef<string | undefined>()
 
   // Smart form state
-  const [formValues, setFormValues] = useState<Record<string, any>>({})
+  const [formValues, setFormValues] = useState<Record<string, unknown>>({})
   const [jsonParseError, setJsonParseError] = useState<string | null>(null)
 
   // Metadata collapse state
@@ -195,7 +195,7 @@ export default function AgentDetail() {
   useEffect(() => {
     if (metadata?.input_schema && Object.keys(metadata.input_schema).length > 0) {
       // Generate initial values from schema
-      const initialValues: Record<string, any> = {}
+      const initialValues: Record<string, unknown> = {}
 
       Object.entries(metadata.input_schema).forEach(([fieldName, fieldConfig]) => {
         // Only pre-populate required fields with empty values
@@ -220,7 +220,7 @@ export default function AgentDetail() {
   }, [metadata?.input_schema])
 
   // Handle form field changes - update form state and JSON textarea
-  const handleFormFieldChange = (fieldName: string, value: any) => {
+  const handleFormFieldChange = (fieldName: string, value: unknown) => {
     const newFormValues = { ...formValues, [fieldName]: value }
     setFormValues(newFormValues)
 
@@ -1136,7 +1136,7 @@ export default function AgentDetail() {
                   Required Credentials
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {metadata.required_credentials.map((cred: any, index: number) => (
+                  {metadata.required_credentials.map((cred: RequiredCredential, index: number) => (
                     <div
                       key={index}
                       style={{
@@ -1197,8 +1197,10 @@ export default function AgentDetail() {
                 <h3 className={styles.smartFormTitle}>Input Parameters</h3>
                 <div className={styles.formFields}>
                   {Object.entries(metadata.input_schema).map(([fieldName, fieldConfig]) => {
-                    const value = formValues[fieldName] ?? ''
                     const fieldType = fieldConfig.type?.toLowerCase() || 'string'
+                    const rawValue = formValues[fieldName]
+                    // Convert to string for input elements (they work with string values)
+                    const stringValue = String(rawValue ?? '')
 
                     return (
                       <div key={fieldName} className={styles.formField}>
@@ -1216,7 +1218,7 @@ export default function AgentDetail() {
                           <input
                             id={`field-${fieldName}`}
                             type="checkbox"
-                            checked={!!value}
+                            checked={!!rawValue}
                             onChange={(e) => handleFormFieldChange(fieldName, e.target.checked)}
                             className={styles.formCheckbox}
                           />
@@ -1224,7 +1226,7 @@ export default function AgentDetail() {
                           <input
                             id={`field-${fieldName}`}
                             type="number"
-                            value={value}
+                            value={stringValue}
                             onChange={(e) => {
                               const val = e.target.value
                               if (val === '') {
@@ -1247,7 +1249,7 @@ export default function AgentDetail() {
                           <input
                             id={`field-${fieldName}`}
                             type="date"
-                            value={value}
+                            value={stringValue}
                             onChange={(e) => handleFormFieldChange(fieldName, e.target.value)}
                             className={styles.formInput}
                           />
@@ -1255,7 +1257,7 @@ export default function AgentDetail() {
                           <input
                             id={`field-${fieldName}`}
                             type="text"
-                            value={value}
+                            value={stringValue}
                             onChange={(e) => handleFormFieldChange(fieldName, e.target.value)}
                             className={styles.formInput}
                           />
