@@ -1124,6 +1124,65 @@ export default function AgentDetail() {
         )}
         </div>
 
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {/* Setup Card - only show if agent has required credentials or setup instructions */}
+        {metadata && (metadata.required_credentials || metadata.setup_instructions) && (
+          <Card>
+            <h2>Setup Requirements</h2>
+
+            {metadata.required_credentials && metadata.required_credentials.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+                  Required Credentials
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {metadata.required_credentials.map((cred: any, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        padding: '0.75rem',
+                        backgroundColor: 'var(--surface-2)',
+                        borderRadius: 'var(--radius)',
+                        borderLeft: '3px solid var(--info)'
+                      }}
+                    >
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.25rem' }}>
+                        {cred.name}
+                      </div>
+                      {cred.description && (
+                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                          {cred.description}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {metadata.setup_instructions && (
+              <div>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+                  Setup Instructions
+                </h3>
+                <div
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: 'var(--surface-2)',
+                    borderRadius: 'var(--radius)',
+                    fontSize: '0.875rem',
+                    color: 'var(--text)',
+                    whiteSpace: 'pre-wrap',
+                    lineHeight: '1.6'
+                  }}
+                >
+                  {metadata.setup_instructions}
+                </div>
+              </div>
+            )}
+          </Card>
+        )}
+
         <Card>
           <h2>Execute Agent</h2>
           <p className={styles.instructions}>
@@ -1350,6 +1409,7 @@ export default function AgentDetail() {
             </div>
           </div>
         </Card>
+        </div>
       </div>
 
       {/* Developer Detail Modal */}
