@@ -545,9 +545,9 @@ export default function Discover() {
         envVariables: {},
         exposePorts: '8000',
         index_metadata: {
-          description: agentToAdd.description,
+          description: agentToAdd.description || undefined,
           readiness_level: selectedVersionData?.readiness_level || undefined,
-          source_repository_url: agentToAdd.source_repository_url,
+          source_repository_url: agentToAdd.source_repository_url || undefined,
           model_dependencies: selectedVersionData?.model_dependencies || undefined,
           required_egress: versionEgress,
           required_credentials: selectedVersionData?.required_credentials || undefined,

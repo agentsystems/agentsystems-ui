@@ -14,7 +14,7 @@ import { useToast } from '@hooks/useToast'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
 import { API_DEFAULTS } from '@constants/app'
-import type { InvocationResult, Execution, RequiredCredential } from '../types/api'
+import type { InvocationResult, Execution } from '../types/api'
 import styles from './AgentDetail.module.css'
 
 // Developer info interface for modal
