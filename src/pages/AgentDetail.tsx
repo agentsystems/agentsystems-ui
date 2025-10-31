@@ -14,7 +14,7 @@ import { useToast } from '@hooks/useToast'
 import { useAuthStore } from '@stores/authStore'
 import { sanitizeJsonString, rateLimiter } from '@utils/security'
 import { API_DEFAULTS } from '@constants/app'
-import type { InvocationResult, Execution, RequiredCredential } from '../types/api'
+import type { InvocationResult, Execution } from '../types/api'
 import styles from './AgentDetail.module.css'
 
 // Developer info interface for modal
@@ -1125,18 +1125,50 @@ export default function AgentDetail() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {/* Setup Card - only show if agent has required credentials or setup instructions */}
-        {metadata && (metadata.required_credentials || metadata.setup_instructions) && (
+        {/* Setup Card - display from config metadata (not container) */}
+        {agentConfig?.index_metadata && (
+          agentConfig.index_metadata.model_dependencies ||
+          agentConfig.index_metadata.required_credentials ||
+          agentConfig.index_metadata.setup_instructions
+        ) && (
           <Card>
             <h2>Setup Requirements</h2>
 
-            {metadata.required_credentials && metadata.required_credentials.length > 0 && (
+            {agentConfig.index_metadata.model_dependencies && agentConfig.index_metadata.model_dependencies.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+                  Required Models
+                </h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {agentConfig.index_metadata.model_dependencies.map((model, index) => (
+                    <code
+                      key={index}
+                      style={{
+                        padding: '0.375rem 0.625rem',
+                        backgroundColor: 'var(--surface-2)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius)',
+                        fontSize: '0.875rem',
+                        fontFamily: 'var(--font-mono)'
+                      }}
+                    >
+                      {model}
+                    </code>
+                  ))}
+                </div>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                  Configure these models in Settings → Model Connections
+                </p>
+              </div>
+            )}
+
+            {agentConfig.index_metadata.required_credentials && agentConfig.index_metadata.required_credentials.length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
                 <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   Required Credentials
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {metadata.required_credentials.map((cred: RequiredCredential, index: number) => (
+                  {agentConfig.index_metadata.required_credentials.map((cred, index) => (
                     <div
                       key={index}
                       style={{
@@ -1160,7 +1192,7 @@ export default function AgentDetail() {
               </div>
             )}
 
-            {metadata.setup_instructions && (
+            {agentConfig.index_metadata.setup_instructions && (
               <div>
                 <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   Setup Instructions
@@ -1176,7 +1208,7 @@ export default function AgentDetail() {
                     lineHeight: '1.6'
                   }}
                 >
-                  {metadata.setup_instructions}
+                  {agentConfig.index_metadata.setup_instructions}
                 </div>
               </div>
             )}

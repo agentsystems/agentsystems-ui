@@ -244,6 +244,9 @@ export const configUtils = {
     ...(form.artifact_permissions && {
       artifact_permissions: form.artifact_permissions
     }),
+    ...(form.index_metadata && {
+      index_metadata: form.index_metadata
+    }),
     overrides: {
       ...(form.envVariables && Object.keys(form.envVariables).length > 0 && {
         env: form.envVariables
@@ -267,6 +270,7 @@ export const configUtils = {
     egressAllowlist: config.egress_allowlist?.join(', ') || '',
     labels: config.labels || {},
     artifact_permissions: config.artifact_permissions,
+    index_metadata: config.index_metadata,
     envVariables: config.overrides?.env || {},
     exposePorts: config.overrides?.expose?.join(', ') || ''
   }),
