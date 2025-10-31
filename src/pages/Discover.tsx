@@ -62,7 +62,7 @@ interface IndexAgent {
   primary_function?: string | null
   readiness_level?: string | null
   // Compatibility Requirements
-  model_requirements?: string[] | null
+  model_dependencies?: string[] | null
   required_integrations?: Record<string, unknown>[] | null
   required_egress?: string[] | null
   input_types?: Array<{ type: string; mime_types?: string[] }> | null
@@ -76,6 +76,13 @@ interface IndexAgent {
     version: string
     is_latest: boolean
     readiness_level?: string | null
+    model_dependencies?: string[] | null
+    required_egress?: string[] | null
+    required_credentials?: Array<{
+      name: string
+      description: string
+    }> | null
+    setup_instructions?: string | null
   }> // Available versions for multi-version deployment
 }
 
@@ -424,6 +431,10 @@ export default function Discover() {
   const confirmAddAgent = async () => {
     if (!agentToAdd) return
 
+    // Get version-specific requirements for the selected version
+    const selectedVersionData = agentToAdd._available_versions?.find(v => v.version === selectedVersion)
+    const versionEgress = selectedVersionData?.required_egress || []
+
     try {
       // Reload config from disk to ensure we have the latest state
       // This prevents overwriting manual YAML edits
@@ -517,12 +528,13 @@ export default function Discover() {
       }
 
       // Add agent with custom name and metadata to track source
+      // Use version-specific egress requirements (not latest version)
       addAgent({
         name: customAgentName,
         repo: repoPath,
         tag: tag,
         registry_connection: registryId,
-        egressAllowlist: (agentToAdd.required_egress || []).join(', '),
+        egressAllowlist: versionEgress.join(', '),
         labels: {
           'agent.port': '8000',
           'index.source.agent.id': agentToAdd._id,
@@ -531,7 +543,16 @@ export default function Discover() {
           'index.source.index.url': agentToAdd._index_url || ''
         },
         envVariables: {},
-        exposePorts: '8000'
+        exposePorts: '8000',
+        index_metadata: {
+          description: agentToAdd.description,
+          readiness_level: selectedVersionData?.readiness_level || undefined,
+          source_repository_url: agentToAdd.source_repository_url,
+          model_dependencies: selectedVersionData?.model_dependencies || undefined,
+          required_egress: versionEgress,
+          required_credentials: selectedVersionData?.required_credentials || undefined,
+          setup_instructions: selectedVersionData?.setup_instructions || undefined
+        }
       })
 
       // Auto-save config to disk
@@ -837,7 +858,13 @@ export default function Discover() {
       )}
 
       {/* Add Agent Name Modal */}
-      {agentToAdd && (
+      {agentToAdd && (() => {
+        // Get requirements for the selected version (not latest version)
+        const selectedVersionData = agentToAdd._available_versions?.find(v => v.version === selectedVersion)
+        const versionModelDeps = selectedVersionData?.model_dependencies || []
+        const versionEgress = selectedVersionData?.required_egress || []
+
+        return (
         <div className={styles.modalOverlay} onClick={() => {
           setAgentToAdd(null)
           setCustomAgentName('')
@@ -960,8 +987,45 @@ export default function Discover() {
                 </div>
               )}
 
-              {/* Required Egress Section */}
-              {agentToAdd.required_egress && agentToAdd.required_egress.length > 0 && (
+              {/* Model Dependencies Section - Version-specific */}
+              {versionModelDeps.length > 0 && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                    Required Models
+                  </label>
+                  <div style={{
+                    padding: '0.75rem',
+                    backgroundColor: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.875rem'
+                  }}>
+                    <p style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
+                      This version requires the following models to be configured:
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+                      {versionModelDeps.map((model, index) => (
+                        <code key={index} style={{
+                          padding: '0.375rem 0.625rem',
+                          backgroundColor: 'var(--bg-tertiary, rgba(0,0,0,0.1))',
+                          border: '1px solid var(--border)',
+                          borderRadius: '0.25rem',
+                          fontSize: '0.875rem',
+                          fontFamily: 'var(--font-mono, monospace)'
+                        }}>
+                          {model}
+                        </code>
+                      ))}
+                    </div>
+                    <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                      Configure model connections in Settings → Model Connections before running this agent.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Required Egress Section - Version-specific */}
+              {versionEgress.length > 0 && (
                 <div style={{ marginTop: '1.5rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
                     Required Network Access
@@ -975,10 +1039,10 @@ export default function Discover() {
                     marginBottom: '0.75rem'
                   }}>
                     <p style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
-                      This agent requires access to the following URLs:
+                      This version requires access to the following URLs:
                     </p>
                     <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
-                      {agentToAdd.required_egress.map((url, index) => (
+                      {versionEgress.map((url, index) => (
                         <li key={index} style={{ marginBottom: '0.25rem' }}>
                           <code style={{ fontSize: '0.875rem' }}>{url}</code>
                         </li>
@@ -1091,7 +1155,7 @@ export default function Discover() {
                 disabled={
                   !customAgentName.trim() ||
                   !hasAcknowledged ||
-                  ((agentToAdd.required_egress?.length ?? 0) > 0 && !hasApprovedEgress)
+                  (versionEgress.length > 0 && !hasApprovedEgress)
                 }
               >
                 Add Agent
@@ -1099,7 +1163,8 @@ export default function Discover() {
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
 
       {/* Remove Confirmation Modal */}
       {agentToRemove && (() => {
@@ -1483,15 +1548,15 @@ function AgentDetailModal({ agent, onClose, onBack, onDeveloperClick, onAdd, onR
           )}
 
           {/* Requirements */}
-          {((agent.model_requirements && agent.model_requirements.length > 0) || (agent.required_egress && agent.required_egress.length > 0)) && (
+          {((agent.model_dependencies && agent.model_dependencies.length > 0) || (agent.required_egress && agent.required_egress.length > 0)) && (
             <div className={styles.modalSpecs}>
               <div className={styles.specGroup}>
                 <h4><WrenchScrewdriverIcon />Requirements</h4>
-                {agent.model_requirements && agent.model_requirements.length > 0 && (
+                {agent.model_dependencies && agent.model_dependencies.length > 0 && (
                   <>
-                    <strong style={{ display: 'block', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Model Requirements:</strong>
+                    <strong style={{ display: 'block', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Model Dependencies:</strong>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
-                      {agent.model_requirements.map((model, index) => (
+                      {agent.model_dependencies.map((model, index) => (
                         <code key={index} style={{ padding: '0.25rem 0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '0.25rem', fontSize: '0.875rem' }}>
                           {model}
                         </code>

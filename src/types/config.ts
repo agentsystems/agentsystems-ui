@@ -75,6 +75,18 @@ export interface AgentConfig {
     expose?: string[]
     [key: string]: unknown
   }
+  index_metadata?: {
+    description?: string
+    readiness_level?: string
+    source_repository_url?: string
+    model_dependencies?: string[]
+    required_egress?: string[]
+    required_credentials?: Array<{
+      name: string
+      description: string
+    }>
+    setup_instructions?: string
+  }
 }
 
 export interface AgentSystemsConfig {
