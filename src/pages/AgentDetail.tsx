@@ -53,7 +53,7 @@ export default function AgentDetail() {
   const { toasts, removeToast, showError } = useToast()
   const { gatewayUrl, isAuthenticated } = useAuthStore()
   const queryClient = useQueryClient()
-  const [invokePayload, setInvokePayload] = useState('{\n  "date": "March 15"\n}')
+  const [invokePayload, setInvokePayload] = useState('{}')
   const [invocationResult, setInvocationResult] = useState<InvocationResult | null>(null)
   const [pollingStatus, setPollingStatus] = useState<string>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
@@ -1242,6 +1242,14 @@ export default function AgentDetail() {
                             }}
                             className={styles.formInput}
                             step={fieldType === 'integer' ? '1' : 'any'}
+                          />
+                        ) : fieldType === 'date' ? (
+                          <input
+                            id={`field-${fieldName}`}
+                            type="date"
+                            value={value}
+                            onChange={(e) => handleFormFieldChange(fieldName, e.target.value)}
+                            className={styles.formInput}
                           />
                         ) : (
                           <input

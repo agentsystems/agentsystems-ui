@@ -293,6 +293,12 @@
   color: var(--text-muted);
 }
 
+/* Style the calendar picker icon for date inputs */
+.formInput::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+
 .formCheckbox {
   width: 20px;
   height: 20px;
