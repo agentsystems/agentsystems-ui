@@ -427,6 +427,57 @@ export default function AgentDetail() {
     }
   }
 
+  // Check if all requirements are met to enable execute button
+  const checkRequirements = (): { canExecute: boolean; missingRequirements: string[] } => {
+    const missing: string[] = []
+
+    if (!agentConfig?.index_metadata) {
+      return { canExecute: false, missingRequirements: ['Agent configuration not found'] }
+    }
+
+    const { getModelConnections, getEnvVars } = useConfigStore.getState()
+    const modelConnections = getModelConnections()
+    const envVars = getEnvVars()
+
+    // Check model dependencies
+    if (agentConfig.index_metadata.model_dependencies && agentConfig.index_metadata.model_dependencies.length > 0) {
+      const configuredModels = new Set(modelConnections.filter(m => m.enabled).map(m => m.model_id))
+      const missingModels = agentConfig.index_metadata.model_dependencies.filter(model => !configuredModels.has(model))
+      if (missingModels.length > 0) {
+        missing.push(`Models: ${missingModels.join(', ')}`)
+      }
+    }
+
+    // Check required credentials
+    if (agentConfig.index_metadata.required_credentials && agentConfig.index_metadata.required_credentials.length > 0) {
+      const configuredEnvVars = new Set(envVars.map(v => v.key))
+      const missingCreds = agentConfig.index_metadata.required_credentials.filter(cred => !configuredEnvVars.has(cred.name))
+      if (missingCreds.length > 0) {
+        missing.push(`Credentials: ${missingCreds.map(c => c.name).join(', ')}`)
+      }
+    }
+
+    // Check required input fields
+    if (agentConfig.index_metadata.input_schema) {
+      const requiredFields = Object.entries(agentConfig.index_metadata.input_schema)
+        .filter(([_, config]: [string, any]) => config.required)
+        .map(([name, _]) => name)
+
+      const missingFields = requiredFields.filter(field => {
+        const value = formValues[field]
+        return value === undefined || value === null || value === ''
+      })
+
+      if (missingFields.length > 0) {
+        missing.push(`Required fields: ${missingFields.join(', ')}`)
+      }
+    }
+
+    return { canExecute: missing.length === 0, missingRequirements: missing }
+  }
+
+  const requirementStatus = checkRequirements()
+
   const handleInvoke = () => {
     playClickSound()
 
@@ -1305,13 +1356,36 @@ export default function AgentDetail() {
             <button
               className="btn btn-lg btn-bright"
               onClick={handleInvoke}
-              disabled={!isAuthenticated() || invokeMutation.isPending || !!pollingStatus}
-              title={!isAuthenticated() ? 'Auth token required - configure in Configuration > Gateway Connection' : undefined}
+              disabled={!isAuthenticated() || !requirementStatus.canExecute || invokeMutation.isPending || !!pollingStatus}
+              title={
+                !isAuthenticated()
+                  ? 'Auth token required - configure in Configuration > Gateway Connection'
+                  : !requirementStatus.canExecute
+                  ? `Missing requirements: ${requirementStatus.missingRequirements.join('; ')}`
+                  : undefined
+              }
               data-tour="execute-agent-button"
             >
               <BoltIcon className={styles.executeIcon} />
               {!isAuthenticated() ? 'Auth Required' : invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Running...' : 'Execute'}
             </button>
+
+            {!requirementStatus.canExecute && isAuthenticated() && (
+              <div className={styles.authWarning}>
+                <ExclamationTriangleIcon className={styles.warningIcon} />
+                <div className={styles.warningContent}>
+                  <p className={styles.warningTitle}>Requirements Not Met</p>
+                  <p className={styles.warningMessage}>
+                    {requirementStatus.missingRequirements.map((req, idx) => (
+                      <span key={idx}>
+                        {req}
+                        {idx < requirementStatus.missingRequirements.length - 1 && <br />}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {!isAuthenticated() && (
               <div className={styles.authWarning}>
