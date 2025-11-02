@@ -86,6 +86,9 @@ export interface AgentConfig {
       description: string
     }>
     setup_instructions?: string
+    input_schema?: Record<string, unknown>
+    facets?: Record<string, unknown>
+    release_notes?: string
   }
 }
 

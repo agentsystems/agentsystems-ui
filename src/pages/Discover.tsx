@@ -441,21 +441,21 @@ export default function Discover() {
 
     const versionMetadataUrl = `${indexUrl}/@${agentToAdd.developer}/${agentToAdd.name}/${selectedVersion}/metadata.json`
 
-    let versionMetadata: any
+    let versionMetadata: Record<string, unknown> = {}
     try {
       const response = await fetch(versionMetadataUrl)
       if (!response.ok) {
         throw new Error(`Failed to fetch version metadata: ${response.statusText}`)
       }
-      versionMetadata = await response.json()
+      versionMetadata = (await response.json()) as Record<string, unknown>
     } catch (error) {
       console.error('Failed to fetch version metadata:', error)
       showError('Failed to fetch agent metadata. Using basic information.')
       // Fallback to lightweight version data from index.json
-      versionMetadata = agentToAdd._available_versions?.find(v => v.version === selectedVersion) || {}
+      versionMetadata = (agentToAdd._available_versions?.find(v => v.version === selectedVersion) || {}) as Record<string, unknown>
     }
 
-    const versionEgress = versionMetadata?.required_egress || []
+    const versionEgress = (versionMetadata?.required_egress as string[] | undefined) || []
 
     // Reload config from disk to ensure we have the latest state
     // This prevents overwriting manual YAML edits
@@ -568,15 +568,15 @@ export default function Discover() {
         exposePorts: '8000',
         index_metadata: {
           description: agentToAdd.description || undefined,
-          readiness_level: versionMetadata?.readiness_level || undefined,
+          readiness_level: (versionMetadata?.readiness_level as string) || undefined,
           source_repository_url: agentToAdd.source_repository_url || undefined,
-          model_dependencies: versionMetadata?.model_dependencies || undefined,
+          model_dependencies: (versionMetadata?.model_dependencies as string[]) || undefined,
           required_egress: versionEgress,
-          required_credentials: versionMetadata?.required_credentials || undefined,
-          setup_instructions: versionMetadata?.setup_instructions || undefined,
-          input_schema: versionMetadata?.input_schema || undefined,
-          facets: versionMetadata?.facets || undefined,
-          release_notes: versionMetadata?.release_notes || undefined
+          required_credentials: (versionMetadata?.required_credentials as Array<{ name: string; description: string }>) || undefined,
+          setup_instructions: (versionMetadata?.setup_instructions as string) || undefined,
+          input_schema: (versionMetadata?.input_schema as Record<string, unknown>) || undefined,
+          facets: (versionMetadata?.facets as Record<string, unknown>) || undefined,
+          release_notes: (versionMetadata?.release_notes as string) || undefined
         }
       })
 
