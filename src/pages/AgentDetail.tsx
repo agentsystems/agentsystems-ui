@@ -93,22 +93,10 @@ export default function AgentDetail() {
   const agentConfigs = getAgents()
   const agentConfig = agentConfigs.find(c => c.name === agentName)
 
-  // Watch for agent state changes and trigger metadata refresh
+  // Track previous agent state for UI updates
   useEffect(() => {
-    const currentState = currentAgent?.state
-    const previousState = previousAgentState.current
-
-    // If agent just became running (lazy start completed)
-    if (previousState && previousState !== 'running' && currentState === 'running') {
-      // Agent just became running - refresh metadata after short delay
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
-      }, 1000) // 1 second delay to ensure endpoint is ready
-    }
-
-    // Update ref for next comparison
-    previousAgentState.current = currentState
-  }, [currentAgent?.state, queryClient, agentName])
+    previousAgentState.current = currentAgent?.state
+  }, [currentAgent?.state])
 
   // Get execution history for this agent
   const { data: executionHistory } = useQuery({
@@ -182,13 +170,11 @@ export default function AgentDetail() {
   }
 
   const { data: metadata, isLoading: metadataLoading, error: metadataError } = useQuery({
-    queryKey: ['agent-metadata', agentName, currentAgent?.state],
+    queryKey: ['agent-metadata', agentName],
     queryFn: () => agentsApi.getMetadata(agentName!),
-    enabled: !!agentName && currentAgent?.state === 'running',
-    retry: 3, // Increased retries for newly started agents
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
-    refetchInterval: false, // Metadata is static - only refetch on agent state change
-    staleTime: Infinity, // Cache metadata until query key changes (agent state)
+    enabled: !!agentName, // Metadata now comes from config, not container endpoint
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes (metadata from config is static)
   })
 
   // Initialize form values and JSON payload from input schema when metadata becomes available
@@ -348,7 +334,7 @@ export default function AgentDetail() {
     mutationFn: agentsApi.startAgent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-      queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
+      // Metadata comes from config, not affected by agent state
     },
     onError: (error) => {
       console.error('Failed to start agent:', error)
@@ -360,7 +346,7 @@ export default function AgentDetail() {
     mutationFn: agentsApi.stopAgent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-      queryClient.invalidateQueries({ queryKey: ['agent-metadata', agentName] })
+      // Metadata comes from config, not affected by agent state
     },
     onError: (error) => {
       console.error('Failed to stop agent:', error)
