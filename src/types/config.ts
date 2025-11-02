@@ -90,6 +90,21 @@ export interface AgentConfig {
     facets?: Record<string, unknown>
     release_notes?: string
   }
+  declared_metadata?: {
+    description?: string
+    readiness_level?: string
+    source_repository_url?: string
+    model_dependencies?: string[]
+    required_egress?: string[]
+    required_credentials?: Array<{
+      name: string
+      description: string
+    }>
+    setup_instructions?: string
+    input_schema?: Record<string, unknown>
+    facets?: Record<string, unknown>
+    release_notes?: string
+  }
 }
 
 export interface AgentSystemsConfig {

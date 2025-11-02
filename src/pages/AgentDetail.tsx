@@ -93,6 +93,9 @@ export default function AgentDetail() {
   const agentConfigs = getAgents()
   const agentConfig = agentConfigs.find(c => c.name === agentName)
 
+  // Get metadata (from index or declared in config)
+  const metadata = agentConfig?.index_metadata || agentConfig?.declared_metadata
+
   // Track previous agent state for UI updates
   useEffect(() => {
     previousAgentState.current = currentAgent?.state
@@ -171,11 +174,11 @@ export default function AgentDetail() {
 
   // Initialize form values and JSON payload from input schema when metadata becomes available
   useEffect(() => {
-    if (agentConfig?.index_metadata?.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0) {
+    if (metadata?.input_schema && Object.keys(metadata.input_schema).length > 0) {
       // Generate initial values from schema
       const initialValues: Record<string, unknown> = {}
 
-      Object.entries(agentConfig.index_metadata.input_schema).forEach(([fieldName, fieldConfig]: [string, unknown]) => {
+      Object.entries(metadata.input_schema).forEach(([fieldName, fieldConfig]: [string, unknown]) => {
         // Only pre-populate required fields with empty values
         const config = fieldConfig as { required?: boolean; type?: string }
         if (config.required) {
@@ -196,7 +199,7 @@ export default function AgentDetail() {
       setInvokePayload(JSON.stringify(initialValues, null, 2))
       setJsonParseError(null)
     }
-  }, [agentConfig?.index_metadata?.input_schema])
+  }, [metadata?.input_schema])
 
   // Handle form field changes - update form state and JSON textarea
   const handleFormFieldChange = (fieldName: string, value: unknown) => {
@@ -429,11 +432,17 @@ export default function AgentDetail() {
   }
 
   // Check if all requirements are met to enable execute button
-  const checkRequirements = (): { canExecute: boolean; missingRequirements: string[] } => {
+  const checkRequirements = (): { canExecute: boolean; missingRequirements: string[]; warnings?: string[] } => {
     const missing: string[] = []
 
-    if (!agentConfig?.index_metadata) {
-      return { canExecute: false, missingRequirements: ['Agent configuration not found'] }
+    // Use the metadata from component scope (already has fallback logic)
+    if (!metadata) {
+      // No metadata available - allow execution but warn
+      return {
+        canExecute: true,
+        missingRequirements: [],
+        warnings: ['Agent metadata unavailable - requirements cannot be verified. Execution may fail if dependencies are not configured.']
+      }
     }
 
     const { getModelConnections, getEnvVars } = useConfigStore.getState()
@@ -441,25 +450,25 @@ export default function AgentDetail() {
     const envVars = getEnvVars()
 
     // Check model dependencies
-    if (agentConfig.index_metadata.model_dependencies && agentConfig.index_metadata.model_dependencies.length > 0) {
+    if (metadata.model_dependencies && metadata.model_dependencies.length > 0) {
       const configuredModels = new Set(modelConnections.filter(m => m.enabled).map(m => m.model_id))
-      const missingModels = agentConfig.index_metadata.model_dependencies.filter(model => !configuredModels.has(model))
+      const missingModels = metadata.model_dependencies.filter(model => !configuredModels.has(model))
       if (missingModels.length > 0) {
         missing.push(`Models: ${missingModels.join(', ')}`)
       }
     }
 
     // Check required credentials
-    if (agentConfig.index_metadata.required_credentials && agentConfig.index_metadata.required_credentials.length > 0) {
+    if (metadata.required_credentials && metadata.required_credentials.length > 0) {
       const configuredEnvVars = new Set(envVars.map(v => v.key))
-      const missingCreds = agentConfig.index_metadata.required_credentials.filter(cred => !configuredEnvVars.has(cred.name))
+      const missingCreds = metadata.required_credentials.filter(cred => !configuredEnvVars.has(cred.name))
       if (missingCreds.length > 0) {
         missing.push(`Credentials: ${missingCreds.map(c => c.name).join(', ')}`)
       }
     }
 
     // Check required egress URLs are in egress_allowlist
-    if (agentConfig.index_metadata.required_egress && agentConfig.index_metadata.required_egress.length > 0) {
+    if (metadata.required_egress && metadata.required_egress.length > 0) {
       const allowlistStr = agentConfig.egressAllowlist || ''
       const allowlist = new Set(
         allowlistStr
@@ -467,15 +476,15 @@ export default function AgentDetail() {
           .map(url => url.trim())
           .filter(url => url.length > 0)
       )
-      const missingEgress = agentConfig.index_metadata.required_egress.filter(url => !allowlist.has(url))
+      const missingEgress = metadata.required_egress.filter(url => !allowlist.has(url))
       if (missingEgress.length > 0) {
         missing.push(`Network access: ${missingEgress.join(', ')}`)
       }
     }
 
     // Check required input fields
-    if (agentConfig.index_metadata.input_schema) {
-      const requiredFields = Object.entries(agentConfig.index_metadata.input_schema)
+    if (metadata.input_schema) {
+      const requiredFields = Object.entries(metadata.input_schema)
         .filter(([, config]) => (config as { required?: boolean }).required)
         .map(([name]) => name)
 
@@ -654,7 +663,7 @@ export default function AgentDetail() {
             </div>
           )}
 
-          {agentConfig?.index_metadata ? (
+          {metadata ? (
             <div className={styles.runtimeSection} data-tour="agent-metadata">
               <div
                 className={styles.sectionHeaderWithBadge}
@@ -704,24 +713,24 @@ export default function AgentDetail() {
                     <span className={styles.metadataValue}>{agentConfig.tag}</span>
                   </div>
 
-                  {agentConfig.index_metadata.description && (
+                  {metadata.description && (
                     <div className={styles.metadataItem}>
                       <label>Description</label>
-                      <span className={styles.metadataValue}>{agentConfig.index_metadata.description}</span>
+                      <span className={styles.metadataValue}>{metadata.description}</span>
                     </div>
                   )}
 
-                  {agentConfig.index_metadata.source_repository_url && (
+                  {metadata.source_repository_url && (
                     <div className={styles.metadataItem}>
                       <label>Source Repository</label>
                       <a
-                        href={agentConfig.index_metadata.source_repository_url}
+                        href={metadata.source_repository_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={styles.metadataValue}
                         style={{ color: 'var(--primary)' }}
                       >
-                        {agentConfig.index_metadata.source_repository_url}
+                        {metadata.source_repository_url}
                       </a>
                     </div>
                   )}
@@ -729,35 +738,35 @@ export default function AgentDetail() {
               </div>
 
               {/* Discovery & Classification Section */}
-              {(Boolean(agentConfig.index_metadata.facets?.context) || agentConfig.index_metadata.readiness_level) && (
+              {(Boolean(metadata.facets?.context) || metadata.readiness_level) && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Discovery & Classification</h4>
                   <div className={styles.metadataGrid}>
-                    {Boolean(agentConfig.index_metadata.facets?.context) && (
+                    {Boolean(metadata.facets?.context) && (
                       <div className={styles.metadataItem}>
                         <label>Context</label>
-                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets?.context)}</span>
+                        <span className={styles.badge}>{String(metadata.facets?.context)}</span>
                       </div>
                     )}
 
-                    {Boolean(agentConfig.index_metadata.facets?.autonomy) && (
+                    {Boolean(metadata.facets?.autonomy) && (
                       <div className={styles.metadataItem}>
                         <label>Autonomy</label>
-                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets?.autonomy)}</span>
+                        <span className={styles.badge}>{String(metadata.facets?.autonomy)}</span>
                       </div>
                     )}
 
-                    {agentConfig.index_metadata.readiness_level && (
+                    {metadata.readiness_level && (
                       <div className={styles.metadataItem}>
                         <label>Readiness Level</label>
-                        <span className={styles.badge}>{agentConfig.index_metadata.readiness_level}</span>
+                        <span className={styles.badge}>{metadata.readiness_level}</span>
                       </div>
                     )}
 
-                    {Boolean(agentConfig.index_metadata.facets?.latency) && (
+                    {Boolean(metadata.facets?.latency) && (
                       <div className={styles.metadataItem}>
                         <label>Latency</label>
-                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets?.latency)}</span>
+                        <span className={styles.badge}>{String(metadata.facets?.latency)}</span>
                       </div>
                     )}
                   </div>
@@ -765,11 +774,11 @@ export default function AgentDetail() {
               )}
 
               {/* Model Dependencies Section */}
-              {agentConfig.index_metadata.model_dependencies && agentConfig.index_metadata.model_dependencies.length > 0 && (
+              {metadata.model_dependencies && metadata.model_dependencies.length > 0 && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Model Dependencies</h4>
                   <div className={styles.modelDependencies}>
-                    {agentConfig.index_metadata.model_dependencies.map((model, index) => (
+                    {metadata.model_dependencies.map((model, index) => (
                       <span key={index} className={styles.modelTag}>
                         {model}
                       </span>
@@ -779,11 +788,11 @@ export default function AgentDetail() {
               )}
 
               {/* Required Network Access Section */}
-              {agentConfig.index_metadata.required_egress && agentConfig.index_metadata.required_egress.length > 0 && (
+              {metadata.required_egress && metadata.required_egress.length > 0 && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Required Network Access</h4>
                   <ul className={styles.egressList}>
-                    {agentConfig.index_metadata.required_egress.map((url, index) => (
+                    {metadata.required_egress.map((url, index) => (
                       <li key={index}>
                         <code>{url}</code>
                       </li>
@@ -793,11 +802,11 @@ export default function AgentDetail() {
               )}
 
               {/* Input Schema Section */}
-              {agentConfig.index_metadata.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0 && (
+              {metadata.input_schema && Object.keys(metadata.input_schema).length > 0 && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Input Parameters</h4>
                   <div className={styles.inputSchemaList}>
-                    {Object.entries(agentConfig.index_metadata.input_schema).map(([fieldName, fieldConfig]) => {
+                    {Object.entries(metadata.input_schema).map(([fieldName, fieldConfig]) => {
                       const config = fieldConfig as { required?: boolean; type?: string; label?: string; description?: string }
                       return (
                         <div key={fieldName} className={styles.schemaField}>
@@ -824,40 +833,40 @@ export default function AgentDetail() {
               )}
 
               {/* Facets Section */}
-              {agentConfig.index_metadata.facets && Object.keys(agentConfig.index_metadata.facets).length > 0 && (
+              {metadata.facets && Object.keys(metadata.facets).length > 0 && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Agent Characteristics (Facets)</h4>
                   <div className={styles.facetsGrid}>
                     {/* Autonomy */}
-                    {(agentConfig.index_metadata.facets.autonomy as string | undefined) && (
+                    {(metadata.facets.autonomy as string | undefined) && (
                       <div className={styles.metadataItem}>
                         <label>Autonomy Level</label>
-                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets.autonomy)}</span>
+                        <span className={styles.badge}>{String(metadata.facets.autonomy)}</span>
                       </div>
                     )}
 
                     {/* Latency */}
-                    {(agentConfig.index_metadata.facets.latency as string | undefined) && (
+                    {(metadata.facets.latency as string | undefined) && (
                       <div className={styles.metadataItem}>
                         <label>Latency</label>
-                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets.latency)}</span>
+                        <span className={styles.badge}>{String(metadata.facets.latency)}</span>
                       </div>
                     )}
 
                     {/* Cost Profile */}
-                    {(agentConfig.index_metadata.facets.cost_profile as string | undefined) && (
+                    {(metadata.facets.cost_profile as string | undefined) && (
                       <div className={styles.metadataItem}>
                         <label>Cost Profile</label>
-                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets.cost_profile)}</span>
+                        <span className={styles.badge}>{String(metadata.facets.cost_profile)}</span>
                       </div>
                     )}
 
                     {/* Domains */}
-                    {Array.isArray(agentConfig.index_metadata.facets.domains) && agentConfig.index_metadata.facets.domains.length > 0 && (
+                    {Array.isArray(metadata.facets.domains) && metadata.facets.domains.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Domains</label>
                         <div className={styles.tagList}>
-                          {(agentConfig.index_metadata.facets.domains as string[]).map((domain, index) => (
+                          {(metadata.facets.domains as string[]).map((domain, index) => (
                             <span key={index} className={styles.tag}>{domain}</span>
                           ))}
                         </div>
@@ -865,11 +874,11 @@ export default function AgentDetail() {
                     )}
 
                     {/* Modalities */}
-                    {Array.isArray(agentConfig.index_metadata.facets.modalities) && agentConfig.index_metadata.facets.modalities.length > 0 && (
+                    {Array.isArray(metadata.facets.modalities) && metadata.facets.modalities.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Modalities</label>
                         <div className={styles.tagList}>
-                          {(agentConfig.index_metadata.facets.modalities as string[]).map((modality, index) => (
+                          {(metadata.facets.modalities as string[]).map((modality, index) => (
                             <span key={index} className={styles.tag}>{modality}</span>
                           ))}
                         </div>
@@ -877,11 +886,11 @@ export default function AgentDetail() {
                     )}
 
                     {/* Model Tooling */}
-                    {Array.isArray(agentConfig.index_metadata.facets.model_tooling) && agentConfig.index_metadata.facets.model_tooling.length > 0 && (
+                    {Array.isArray(metadata.facets.model_tooling) && metadata.facets.model_tooling.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Model Tooling</label>
                         <div className={styles.tagList}>
-                          {(agentConfig.index_metadata.facets.model_tooling as string[]).map((tool, index) => (
+                          {(metadata.facets.model_tooling as string[]).map((tool, index) => (
                             <span key={index} className={styles.tag}>{tool}</span>
                           ))}
                         </div>
@@ -889,11 +898,11 @@ export default function AgentDetail() {
                     )}
 
                     {/* Industries */}
-                    {Array.isArray(agentConfig.index_metadata.facets.industries) && agentConfig.index_metadata.facets.industries.length > 0 && (
+                    {Array.isArray(metadata.facets.industries) && metadata.facets.industries.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Industries</label>
                         <div className={styles.tagList}>
-                          {(agentConfig.index_metadata.facets.industries as string[]).map((industry, index) => (
+                          {(metadata.facets.industries as string[]).map((industry, index) => (
                             <span key={index} className={styles.tag}>{industry}</span>
                           ))}
                         </div>
@@ -901,11 +910,11 @@ export default function AgentDetail() {
                     )}
 
                     {/* Integrations */}
-                    {Array.isArray(agentConfig.index_metadata.facets.integrations) && agentConfig.index_metadata.facets.integrations.length > 0 && (
+                    {Array.isArray(metadata.facets.integrations) && metadata.facets.integrations.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Integrations</label>
                         <div className={styles.tagList}>
-                          {(agentConfig.index_metadata.facets.integrations as string[]).map((integration, index) => (
+                          {(metadata.facets.integrations as string[]).map((integration, index) => (
                             <span key={index} className={styles.tag}>{integration}</span>
                           ))}
                         </div>
@@ -916,17 +925,17 @@ export default function AgentDetail() {
               )}
 
               {/* Source Repository */}
-              {agentConfig.index_metadata.source_repository_url && (
+              {metadata.source_repository_url && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Source Repository</h4>
                   <div className={styles.metadataItem}>
                     <a
-                      href={agentConfig.index_metadata.source_repository_url}
+                      href={metadata.source_repository_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.repoLink}
                     >
-                      {agentConfig.index_metadata.source_repository_url}
+                      {metadata.source_repository_url}
                     </a>
                   </div>
                 </div>
@@ -1015,21 +1024,21 @@ export default function AgentDetail() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {/* Setup Card - display from config metadata (not container) */}
-        {agentConfig?.index_metadata && (
-          agentConfig.index_metadata?.model_dependencies ||
-          agentConfig.index_metadata?.required_credentials ||
-          agentConfig.index_metadata?.setup_instructions
+        {metadata && (
+          metadata?.model_dependencies ||
+          metadata?.required_credentials ||
+          metadata?.setup_instructions
         ) && (
           <Card>
             <h2>Setup Requirements</h2>
 
-            {agentConfig.index_metadata.model_dependencies && agentConfig.index_metadata.model_dependencies.length > 0 && (
+            {metadata.model_dependencies && metadata.model_dependencies.length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
                 <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   Required Models
                 </h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {agentConfig.index_metadata.model_dependencies.map((model, index) => (
+                  {metadata.model_dependencies.map((model, index) => (
                     <code
                       key={index}
                       style={{
@@ -1051,13 +1060,13 @@ export default function AgentDetail() {
               </div>
             )}
 
-            {agentConfig.index_metadata.required_credentials && agentConfig.index_metadata.required_credentials.length > 0 && (
+            {metadata.required_credentials && metadata.required_credentials.length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
                 <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   Required Credentials
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {agentConfig.index_metadata.required_credentials.map((cred, index) => (
+                  {metadata.required_credentials.map((cred, index) => (
                     <div
                       key={index}
                       style={{
@@ -1081,7 +1090,7 @@ export default function AgentDetail() {
               </div>
             )}
 
-            {agentConfig.index_metadata.setup_instructions && (
+            {metadata.setup_instructions && (
               <div>
                 <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   Setup Instructions
@@ -1097,7 +1106,7 @@ export default function AgentDetail() {
                     lineHeight: '1.6'
                   }}
                 >
-                  {agentConfig.index_metadata.setup_instructions}
+                  {metadata.setup_instructions}
                 </div>
               </div>
             )}
@@ -1107,17 +1116,17 @@ export default function AgentDetail() {
         <Card>
           <h2>Execute Agent</h2>
           <p className={styles.instructions}>
-            {agentConfig?.index_metadata?.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0
+            {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0
               ? 'Fill out the form below or edit the JSON directly. Both stay in sync.'
               : 'Enter a JSON payload to execute the agent.'}
           </p>
           <div className={styles.invokeForm}>
             {/* Smart Form - only show if input schema is available */}
-            {agentConfig?.index_metadata?.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0 && (
+            {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0 && (
               <div className={styles.smartForm}>
                 <h3 className={styles.smartFormTitle}>Input Parameters</h3>
                 <div className={styles.formFields}>
-                  {Object.entries(agentConfig.index_metadata.input_schema).map(([fieldName, fieldConfig]) => {
+                  {Object.entries(metadata.input_schema).map(([fieldName, fieldConfig]) => {
                     const config = fieldConfig as { required?: boolean; type?: string; label?: string; description?: string }
                     const fieldType = config.type?.toLowerCase() || 'string'
                     const rawValue = formValues[fieldName]
@@ -1192,7 +1201,7 @@ export default function AgentDetail() {
             )}
 
             <label>
-              {agentConfig?.index_metadata?.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0
+              {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0
                 ? 'JSON (Auto-generated from form above):'
                 : 'Payload (JSON):'}
               <textarea
@@ -1268,6 +1277,23 @@ export default function AgentDetail() {
                       <span key={idx}>
                         {req}
                         {idx < requirementStatus.missingRequirements.length - 1 && <br />}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {requirementStatus.canExecute && requirementStatus.warnings && requirementStatus.warnings.length > 0 && isAuthenticated() && (
+              <div className={styles.authWarning}>
+                <ExclamationTriangleIcon className={styles.warningIcon} />
+                <div className={styles.warningContent}>
+                  <p className={styles.warningTitle}>Requirements Unknown</p>
+                  <p className={styles.warningMessage}>
+                    {requirementStatus.warnings?.map((warning, idx) => (
+                      <span key={idx}>
+                        {warning}
+                        {idx < (requirementStatus.warnings?.length ?? 0) - 1 && <br />}
                       </span>
                     ))}
                   </p>
