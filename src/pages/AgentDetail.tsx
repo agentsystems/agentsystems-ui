@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow, differenceInMilliseconds } from 'date-fns'
-import { ChartBarIcon, DocumentTextIcon, BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, UserIcon, BriefcaseIcon, MapPinIcon, CalendarIcon, ChatBubbleLeftRightIcon, BuildingOfficeIcon, IdentificationIcon, EnvelopeIcon, BookOpenIcon, LightBulbIcon, FolderIcon, HandRaisedIcon, HeartIcon, LinkIcon, UserGroupIcon, GlobeAltIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { BoltIcon, PowerIcon, ListBulletIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, UserIcon, BriefcaseIcon, MapPinIcon, CalendarIcon, ChatBubbleLeftRightIcon, BuildingOfficeIcon, IdentificationIcon, EnvelopeIcon, BookOpenIcon, LightBulbIcon, FolderIcon, HandRaisedIcon, HeartIcon, LinkIcon, UserGroupIcon, GlobeAltIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { agentsApi } from '@api/agents'
 import { useConfigStore } from '@stores/configStore'
 import { getAgentButtonText } from '@utils/agentHelpers'
@@ -51,7 +51,7 @@ export default function AgentDetail() {
   const navigate = useNavigate()
   const { playClickSound } = useAudio()
   const { toasts, removeToast, showError } = useToast()
-  const { gatewayUrl, isAuthenticated } = useAuthStore()
+  const { isAuthenticated } = useAuthStore()
   const queryClient = useQueryClient()
   const [invokePayload, setInvokePayload] = useState('{}')
   const [invocationResult, setInvocationResult] = useState<InvocationResult | null>(null)
@@ -169,24 +169,17 @@ export default function AgentDetail() {
     return `${(ms / 60000).toFixed(1)}m`
   }
 
-  const { data: metadata, isLoading: metadataLoading, error: metadataError } = useQuery({
-    queryKey: ['agent-metadata', agentName],
-    queryFn: () => agentsApi.getMetadata(agentName!),
-    enabled: !!agentName, // Metadata now comes from config, not container endpoint
-    retry: 2,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes (metadata from config is static)
-  })
-
   // Initialize form values and JSON payload from input schema when metadata becomes available
   useEffect(() => {
-    if (metadata?.input_schema && Object.keys(metadata.input_schema).length > 0) {
+    if (agentConfig?.index_metadata?.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0) {
       // Generate initial values from schema
       const initialValues: Record<string, unknown> = {}
 
-      Object.entries(metadata.input_schema).forEach(([fieldName, fieldConfig]) => {
+      Object.entries(agentConfig.index_metadata.input_schema).forEach(([fieldName, fieldConfig]: [string, unknown]) => {
         // Only pre-populate required fields with empty values
-        if (fieldConfig.required) {
-          const fieldType = fieldConfig.type?.toLowerCase() || 'string'
+        const config = fieldConfig as { required?: boolean; type?: string }
+        if (config.required) {
+          const fieldType = config.type?.toLowerCase() || 'string'
 
           if (fieldType === 'boolean') {
             initialValues[fieldName] = false
@@ -203,7 +196,7 @@ export default function AgentDetail() {
       setInvokePayload(JSON.stringify(initialValues, null, 2))
       setJsonParseError(null)
     }
-  }, [metadata?.input_schema])
+  }, [agentConfig?.index_metadata?.input_schema])
 
   // Handle form field changes - update form state and JSON textarea
   const handleFormFieldChange = (fieldName: string, value: unknown) => {
@@ -435,6 +428,57 @@ export default function AgentDetail() {
     }
   }
 
+  // Check if all requirements are met to enable execute button
+  const checkRequirements = (): { canExecute: boolean; missingRequirements: string[] } => {
+    const missing: string[] = []
+
+    if (!agentConfig?.index_metadata) {
+      return { canExecute: false, missingRequirements: ['Agent configuration not found'] }
+    }
+
+    const { getModelConnections, getEnvVars } = useConfigStore.getState()
+    const modelConnections = getModelConnections()
+    const envVars = getEnvVars()
+
+    // Check model dependencies
+    if (agentConfig.index_metadata.model_dependencies && agentConfig.index_metadata.model_dependencies.length > 0) {
+      const configuredModels = new Set(modelConnections.filter(m => m.enabled).map(m => m.model_id))
+      const missingModels = agentConfig.index_metadata.model_dependencies.filter(model => !configuredModels.has(model))
+      if (missingModels.length > 0) {
+        missing.push(`Models: ${missingModels.join(', ')}`)
+      }
+    }
+
+    // Check required credentials
+    if (agentConfig.index_metadata.required_credentials && agentConfig.index_metadata.required_credentials.length > 0) {
+      const configuredEnvVars = new Set(envVars.map(v => v.key))
+      const missingCreds = agentConfig.index_metadata.required_credentials.filter(cred => !configuredEnvVars.has(cred.name))
+      if (missingCreds.length > 0) {
+        missing.push(`Credentials: ${missingCreds.map(c => c.name).join(', ')}`)
+      }
+    }
+
+    // Check required input fields
+    if (agentConfig.index_metadata.input_schema) {
+      const requiredFields = Object.entries(agentConfig.index_metadata.input_schema)
+        .filter(([, config]) => (config as { required?: boolean }).required)
+        .map(([name]) => name)
+
+      const missingFields = requiredFields.filter(field => {
+        const value = formValues[field]
+        return value === undefined || value === null || value === ''
+      })
+
+      if (missingFields.length > 0) {
+        missing.push(`Required fields: ${missingFields.join(', ')}`)
+      }
+    }
+
+    return { canExecute: missing.length === 0, missingRequirements: missing }
+  }
+
+  const requirementStatus = checkRequirements()
+
   const handleInvoke = () => {
     playClickSound()
 
@@ -594,29 +638,8 @@ export default function AgentDetail() {
               </div>
             </div>
           )}
-          
-          {currentAgent && (currentAgent.state === 'stopped' || currentAgent.state === 'not-created') ? (
-            <div className={styles.unavailableState}>
-              <div className={styles.placeholderIcon}>
-                <ChartBarIcon />
-              </div>
-              <p>Agent metadata unavailable</p>
-              <p className={styles.placeholderHint}>
-                Turn the agent on to view detailed information
-              </p>
-            </div>
-          ) : metadataLoading ? (
-            <div className={styles.loadingState}>
-              Loading agent metadata...
-            </div>
-          ) : metadataError ? (
-            <div className={styles.errorState}>
-              <p>Failed to load agent metadata</p>
-              <p className={styles.errorDetails}>
-                {metadataError instanceof Error ? metadataError.message : 'Unknown error'}
-              </p>
-            </div>
-          ) : metadata ? (
+
+          {agentConfig?.index_metadata ? (
             <div className={styles.runtimeSection} data-tour="agent-metadata">
               <div
                 className={styles.sectionHeaderWithBadge}
@@ -629,128 +652,97 @@ export default function AgentDetail() {
                   ) : (
                     <ChevronUpIcon style={{ width: '20px', height: '20px' }} />
                   )}
-                  <h3 className={styles.sectionHeader} style={{ margin: 0 }}>Runtime Metadata</h3>
+                  <h3 className={styles.sectionHeader} style={{ margin: 0 }}>Agent Information</h3>
                 </div>
-                <span className={styles.metadataSourceBadge} title="Live metadata from running agent container">
-                  From agent.yaml
+                <span className={styles.metadataSourceBadge} title="Metadata from agent-index cached in config">
+                  From agent-index
                 </span>
               </div>
 
               {!isMetadataCollapsed && (
                 <>
-              {/* API Documentation Link */}
-              <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-                {currentAgent?.state === 'running' ? (
-                  <a
-                    href={`${gatewayUrl}/${agentName}/docs`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-sm btn-subtle"
-                    title="View interactive API documentation"
-                  >
-                    <DocumentTextIcon className={styles.docIcon} />
-                    View API Documentation
-                  </a>
-                ) : (
-                  <button
-                    className="btn btn-sm btn-subtle"
-                    disabled
-                    title="Start the agent to view API documentation"
-                  >
-                    <DocumentTextIcon className={styles.docIcon} />
-                    View API Documentation
-                  </button>
-                )}
-              </div>
-
               {/* Core Identity Section */}
               <div className={styles.metadataSection}>
                 <h4 className={styles.subsectionHeader}>Core Identity</h4>
                 <div className={styles.metadataGrid}>
                   <div className={styles.metadataItem}>
                     <label>Name</label>
-                    <span className={styles.metadataValue}>{metadata.name}</span>
+                    <span className={styles.metadataValue}>{agentConfig.name}</span>
                   </div>
 
-                  {metadata.developer && (
+                  {agentConfig.labels?.['index.source.agent.developer'] && (
                     <div className={styles.metadataItem}>
                       <label>Developer</label>
                       <button
                         className={styles.developerButton}
-                        onClick={() => handleDeveloperClick(metadata.developer)}
+                        onClick={() => handleDeveloperClick(agentConfig.labels?.['index.source.agent.developer'] ?? '')}
                         title={agentConfig?.labels?.['index.source.agent.id'] ? 'Click to view developer profile' : 'Developer profile unavailable (local agent)'}
                         disabled={!agentConfig?.labels?.['index.source.agent.id']}
                       >
-                        {metadata.developer}
+                        {agentConfig.labels?.['index.source.agent.developer']}
                       </button>
                     </div>
                   )}
 
                   <div className={styles.metadataItem}>
                     <label>Version</label>
-                    <span className={styles.metadataValue}>{metadata.version}</span>
+                    <span className={styles.metadataValue}>{agentConfig.tag}</span>
                   </div>
 
-                  {metadata.description && (
+                  {agentConfig.index_metadata.description && (
                     <div className={styles.metadataItem}>
                       <label>Description</label>
-                      <span className={styles.metadataValue}>{metadata.description}</span>
+                      <span className={styles.metadataValue}>{agentConfig.index_metadata.description}</span>
                     </div>
                   )}
 
-                  {metadata.author && (
+                  {agentConfig.index_metadata.source_repository_url && (
                     <div className={styles.metadataItem}>
-                      <label>Author</label>
-                      <span className={styles.metadataValue}>{metadata.author}</span>
-                    </div>
-                  )}
-
-                  {metadata.created_at && (
-                    <div className={styles.metadataItem}>
-                      <label>Created</label>
-                      <span className={styles.metadataValue}>{new Date(metadata.created_at).toLocaleDateString()}</span>
-                    </div>
-                  )}
-
-                  {metadata.last_updated && (
-                    <div className={styles.metadataItem}>
-                      <label>Last Updated</label>
-                      <span className={styles.metadataValue}>{new Date(metadata.last_updated).toLocaleDateString()}</span>
+                      <label>Source Repository</label>
+                      <a
+                        href={agentConfig.index_metadata.source_repository_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.metadataValue}
+                        style={{ color: 'var(--primary)' }}
+                      >
+                        {agentConfig.index_metadata.source_repository_url}
+                      </a>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Discovery & Classification Section */}
-              {(metadata.context || metadata.primary_function || metadata.readiness_level || metadata.listing_status) && (
+              {(Boolean(agentConfig.index_metadata.facets?.context) || agentConfig.index_metadata.readiness_level) && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Discovery & Classification</h4>
                   <div className={styles.metadataGrid}>
-                    {metadata.context && (
+                    {Boolean(agentConfig.index_metadata.facets?.context) && (
                       <div className={styles.metadataItem}>
                         <label>Context</label>
-                        <span className={styles.badge}>{metadata.context}</span>
+                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets?.context)}</span>
                       </div>
                     )}
 
-                    {metadata.primary_function && (
+                    {Boolean(agentConfig.index_metadata.facets?.autonomy) && (
                       <div className={styles.metadataItem}>
-                        <label>Primary Function</label>
-                        <span className={styles.badge}>{metadata.primary_function}</span>
+                        <label>Autonomy</label>
+                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets?.autonomy)}</span>
                       </div>
                     )}
 
-                    {metadata.readiness_level && (
+                    {agentConfig.index_metadata.readiness_level && (
                       <div className={styles.metadataItem}>
                         <label>Readiness Level</label>
-                        <span className={styles.badge}>{metadata.readiness_level}</span>
+                        <span className={styles.badge}>{agentConfig.index_metadata.readiness_level}</span>
                       </div>
                     )}
 
-                    {metadata.listing_status && (
+                    {Boolean(agentConfig.index_metadata.facets?.latency) && (
                       <div className={styles.metadataItem}>
-                        <label>Listing Status</label>
-                        <span className={styles.badge}>{metadata.listing_status}</span>
+                        <label>Latency</label>
+                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets?.latency)}</span>
                       </div>
                     )}
                   </div>
@@ -758,11 +750,11 @@ export default function AgentDetail() {
               )}
 
               {/* Model Dependencies Section */}
-              {metadata.model_dependencies && metadata.model_dependencies.length > 0 && (
+              {agentConfig.index_metadata.model_dependencies && agentConfig.index_metadata.model_dependencies.length > 0 && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Model Dependencies</h4>
                   <div className={styles.modelDependencies}>
-                    {metadata.model_dependencies.map((model, index) => (
+                    {agentConfig.index_metadata.model_dependencies.map((model, index) => (
                       <span key={index} className={styles.modelTag}>
                         {model}
                       </span>
@@ -771,137 +763,86 @@ export default function AgentDetail() {
                 </div>
               )}
 
-              {/* Requirements Section */}
-              {((metadata.required_integrations && metadata.required_integrations.length > 0) ||
-                (metadata.required_egress && metadata.required_egress.length > 0)) && (
+              {/* Required Network Access Section */}
+              {agentConfig.index_metadata.required_egress && agentConfig.index_metadata.required_egress.length > 0 && (
                 <div className={styles.metadataSection}>
-                  <h4 className={styles.subsectionHeader}>Requirements</h4>
-
-                  {metadata.required_integrations && metadata.required_integrations.length > 0 && (
-                    <div className={styles.metadataSubsection}>
-                      <label>Required Integrations</label>
-                      <div className={styles.integrationsList}>
-                        {metadata.required_integrations.map((integration, index) => (
-                          <div key={index} className={styles.integrationItem}>
-                            {JSON.stringify(integration)}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {metadata.required_egress && metadata.required_egress.length > 0 && (
-                    <div className={styles.metadataSubsection}>
-                      <label>Required Network Access</label>
-                      <ul className={styles.egressList}>
-                        {metadata.required_egress.map((url, index) => (
-                          <li key={index}>
-                            <code>{url}</code>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Input/Output Types Section */}
-              {((metadata.input_types && metadata.input_types.length > 0) ||
-                (metadata.output_types && metadata.output_types.length > 0)) && (
-                <div className={styles.metadataSection}>
-                  <h4 className={styles.subsectionHeader}>Data Types</h4>
-
-                  {metadata.input_types && metadata.input_types.length > 0 && (
-                    <div className={styles.metadataSubsection}>
-                      <label>Input Types</label>
-                      <ul className={styles.typesList}>
-                        {metadata.input_types.map((type, index) => (
-                          <li key={index}>
-                            <strong>{type.type}:</strong> {type.mime_types?.join(', ') || 'Any'}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {metadata.output_types && metadata.output_types.length > 0 && (
-                    <div className={styles.metadataSubsection}>
-                      <label>Output Types</label>
-                      <ul className={styles.typesList}>
-                        {metadata.output_types.map((type, index) => (
-                          <li key={index}>
-                            <strong>{type.type}:</strong> {type.mime_types?.join(', ') || 'Any'}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  <h4 className={styles.subsectionHeader}>Required Network Access</h4>
+                  <ul className={styles.egressList}>
+                    {agentConfig.index_metadata.required_egress.map((url, index) => (
+                      <li key={index}>
+                        <code>{url}</code>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
               {/* Input Schema Section */}
-              {metadata.input_schema && Object.keys(metadata.input_schema).length > 0 && (
+              {agentConfig.index_metadata.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0 && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Input Parameters</h4>
                   <div className={styles.inputSchemaList}>
-                    {Object.entries(metadata.input_schema).map(([fieldName, fieldConfig]) => (
-                      <div key={fieldName} className={styles.schemaField}>
-                        <div className={styles.schemaFieldHeader}>
-                          <code className={styles.fieldName}>{fieldName}</code>
-                          <span className={fieldConfig.required ? styles.requiredBadge : styles.optionalBadge}>
-                            {fieldConfig.required ? 'required' : 'optional'}
-                          </span>
+                    {Object.entries(agentConfig.index_metadata.input_schema).map(([fieldName, fieldConfig]) => {
+                      const config = fieldConfig as { required?: boolean; type?: string; label?: string; description?: string }
+                      return (
+                        <div key={fieldName} className={styles.schemaField}>
+                          <div className={styles.schemaFieldHeader}>
+                            <code className={styles.fieldName}>{fieldName}</code>
+                            <span className={config.required ? styles.requiredBadge : styles.optionalBadge}>
+                              {config.required ? 'required' : 'optional'}
+                            </span>
+                          </div>
+                          {config.label && (
+                            <div className={styles.schemaFieldLabel}>{config.label}</div>
+                          )}
+                          {config.description && (
+                            <div className={styles.schemaFieldDescription}>{config.description}</div>
+                          )}
+                          {config.type && (
+                            <div className={styles.schemaFieldType}>Type: {config.type}</div>
+                          )}
                         </div>
-                        {fieldConfig.label && (
-                          <div className={styles.schemaFieldLabel}>{fieldConfig.label}</div>
-                        )}
-                        {fieldConfig.description && (
-                          <div className={styles.schemaFieldDescription}>{fieldConfig.description}</div>
-                        )}
-                        {fieldConfig.type && (
-                          <div className={styles.schemaFieldType}>Type: {fieldConfig.type}</div>
-                        )}
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}
 
               {/* Facets Section */}
-              {metadata.facets && Object.keys(metadata.facets).length > 0 && (
+              {agentConfig.index_metadata.facets && Object.keys(agentConfig.index_metadata.facets).length > 0 && (
                 <div className={styles.metadataSection}>
                   <h4 className={styles.subsectionHeader}>Agent Characteristics (Facets)</h4>
                   <div className={styles.facetsGrid}>
                     {/* Autonomy */}
-                    {(metadata.facets.autonomy as string | undefined) && (
+                    {(agentConfig.index_metadata.facets.autonomy as string | undefined) && (
                       <div className={styles.metadataItem}>
                         <label>Autonomy Level</label>
-                        <span className={styles.badge}>{String(metadata.facets.autonomy)}</span>
+                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets.autonomy)}</span>
                       </div>
                     )}
 
                     {/* Latency */}
-                    {(metadata.facets.latency as string | undefined) && (
+                    {(agentConfig.index_metadata.facets.latency as string | undefined) && (
                       <div className={styles.metadataItem}>
                         <label>Latency</label>
-                        <span className={styles.badge}>{String(metadata.facets.latency)}</span>
+                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets.latency)}</span>
                       </div>
                     )}
 
                     {/* Cost Profile */}
-                    {(metadata.facets.cost_profile as string | undefined) && (
+                    {(agentConfig.index_metadata.facets.cost_profile as string | undefined) && (
                       <div className={styles.metadataItem}>
                         <label>Cost Profile</label>
-                        <span className={styles.badge}>{String(metadata.facets.cost_profile)}</span>
+                        <span className={styles.badge}>{String(agentConfig.index_metadata.facets.cost_profile)}</span>
                       </div>
                     )}
 
                     {/* Domains */}
-                    {Array.isArray(metadata.facets.domains) && metadata.facets.domains.length > 0 && (
+                    {Array.isArray(agentConfig.index_metadata.facets.domains) && agentConfig.index_metadata.facets.domains.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Domains</label>
                         <div className={styles.tagList}>
-                          {(metadata.facets.domains as string[]).map((domain, index) => (
+                          {(agentConfig.index_metadata.facets.domains as string[]).map((domain, index) => (
                             <span key={index} className={styles.tag}>{domain}</span>
                           ))}
                         </div>
@@ -909,11 +850,11 @@ export default function AgentDetail() {
                     )}
 
                     {/* Modalities */}
-                    {Array.isArray(metadata.facets.modalities) && metadata.facets.modalities.length > 0 && (
+                    {Array.isArray(agentConfig.index_metadata.facets.modalities) && agentConfig.index_metadata.facets.modalities.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Modalities</label>
                         <div className={styles.tagList}>
-                          {(metadata.facets.modalities as string[]).map((modality, index) => (
+                          {(agentConfig.index_metadata.facets.modalities as string[]).map((modality, index) => (
                             <span key={index} className={styles.tag}>{modality}</span>
                           ))}
                         </div>
@@ -921,11 +862,11 @@ export default function AgentDetail() {
                     )}
 
                     {/* Model Tooling */}
-                    {Array.isArray(metadata.facets.model_tooling) && metadata.facets.model_tooling.length > 0 && (
+                    {Array.isArray(agentConfig.index_metadata.facets.model_tooling) && agentConfig.index_metadata.facets.model_tooling.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Model Tooling</label>
                         <div className={styles.tagList}>
-                          {(metadata.facets.model_tooling as string[]).map((tool, index) => (
+                          {(agentConfig.index_metadata.facets.model_tooling as string[]).map((tool, index) => (
                             <span key={index} className={styles.tag}>{tool}</span>
                           ))}
                         </div>
@@ -933,11 +874,11 @@ export default function AgentDetail() {
                     )}
 
                     {/* Industries */}
-                    {Array.isArray(metadata.facets.industries) && metadata.facets.industries.length > 0 && (
+                    {Array.isArray(agentConfig.index_metadata.facets.industries) && agentConfig.index_metadata.facets.industries.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Industries</label>
                         <div className={styles.tagList}>
-                          {(metadata.facets.industries as string[]).map((industry, index) => (
+                          {(agentConfig.index_metadata.facets.industries as string[]).map((industry, index) => (
                             <span key={index} className={styles.tag}>{industry}</span>
                           ))}
                         </div>
@@ -945,11 +886,11 @@ export default function AgentDetail() {
                     )}
 
                     {/* Integrations */}
-                    {Array.isArray(metadata.facets.integrations) && metadata.facets.integrations.length > 0 && (
+                    {Array.isArray(agentConfig.index_metadata.facets.integrations) && agentConfig.index_metadata.facets.integrations.length > 0 && (
                       <div className={styles.metadataItem}>
                         <label>Integrations</label>
                         <div className={styles.tagList}>
-                          {(metadata.facets.integrations as string[]).map((integration, index) => (
+                          {(agentConfig.index_metadata.facets.integrations as string[]).map((integration, index) => (
                             <span key={index} className={styles.tag}>{integration}</span>
                           ))}
                         </div>
@@ -959,72 +900,19 @@ export default function AgentDetail() {
                 </div>
               )}
 
-              {/* Tags & Capabilities (Legacy) */}
-              {((metadata.tags && metadata.tags.length > 0) ||
-                (metadata.capabilities && metadata.capabilities.length > 0)) && (
+              {/* Source Repository */}
+              {agentConfig.index_metadata.source_repository_url && (
                 <div className={styles.metadataSection}>
-                  <h4 className={styles.subsectionHeader}>Tags & Capabilities</h4>
-                  <div className={styles.metadataGrid}>
-                    {metadata.tags && metadata.tags.length > 0 && (
-                      <div className={styles.metadataItem}>
-                        <label>Tags</label>
-                        <div className={styles.tags}>
-                          {metadata.tags.map((tag, index) => (
-                            <span key={index} className={styles.tag}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {metadata.capabilities && metadata.capabilities.length > 0 && (
-                      <div className={styles.metadataItem}>
-                        <label>Capabilities</label>
-                        <div className={styles.capabilities}>
-                          {metadata.capabilities.map((capability, index) => (
-                            <span key={index} className={styles.capability}>
-                              {capability}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Repository URLs */}
-              {(metadata.container_image || metadata.source_repository_url) && (
-                <div className={styles.metadataSection}>
-                  <h4 className={styles.subsectionHeader}>Repositories</h4>
-                  <div className={styles.metadataGrid}>
-                    {metadata.container_image && (
-                      <div className={styles.metadataItem}>
-                        <label>Container Image</label>
-                        <code className={styles.containerImage}>{metadata.container_image}</code>
-                        {metadata.container_image_access && (
-                          <span className={styles.accessBadge}>{metadata.container_image_access}</span>
-                        )}
-                      </div>
-                    )}
-
-                    {metadata.source_repository_url && (
-                      <div className={styles.metadataItem}>
-                        <label>Source Repository</label>
-                        <a
-                          href={metadata.source_repository_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.repoLink}
-                        >
-                          {metadata.source_repository_url}
-                        </a>
-                        {metadata.source_repository_access && (
-                          <span className={styles.accessBadge}>{metadata.source_repository_access}</span>
-                        )}
-                      </div>
-                    )}
+                  <h4 className={styles.subsectionHeader}>Source Repository</h4>
+                  <div className={styles.metadataItem}>
+                    <a
+                      href={agentConfig.index_metadata.source_repository_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.repoLink}
+                    >
+                      {agentConfig.index_metadata.source_repository_url}
+                    </a>
                   </div>
                 </div>
               )}
@@ -1113,9 +1001,9 @@ export default function AgentDetail() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {/* Setup Card - display from config metadata (not container) */}
         {agentConfig?.index_metadata && (
-          agentConfig.index_metadata.model_dependencies ||
-          agentConfig.index_metadata.required_credentials ||
-          agentConfig.index_metadata.setup_instructions
+          agentConfig.index_metadata?.model_dependencies ||
+          agentConfig.index_metadata?.required_credentials ||
+          agentConfig.index_metadata?.setup_instructions
         ) && (
           <Card>
             <h2>Setup Requirements</h2>
@@ -1204,18 +1092,19 @@ export default function AgentDetail() {
         <Card>
           <h2>Execute Agent</h2>
           <p className={styles.instructions}>
-            {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0
+            {agentConfig?.index_metadata?.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0
               ? 'Fill out the form below or edit the JSON directly. Both stay in sync.'
               : 'Enter a JSON payload to execute the agent.'}
           </p>
           <div className={styles.invokeForm}>
             {/* Smart Form - only show if input schema is available */}
-            {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0 && (
+            {agentConfig?.index_metadata?.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0 && (
               <div className={styles.smartForm}>
                 <h3 className={styles.smartFormTitle}>Input Parameters</h3>
                 <div className={styles.formFields}>
-                  {Object.entries(metadata.input_schema).map(([fieldName, fieldConfig]) => {
-                    const fieldType = fieldConfig.type?.toLowerCase() || 'string'
+                  {Object.entries(agentConfig.index_metadata.input_schema).map(([fieldName, fieldConfig]) => {
+                    const config = fieldConfig as { required?: boolean; type?: string; label?: string; description?: string }
+                    const fieldType = config.type?.toLowerCase() || 'string'
                     const rawValue = formValues[fieldName]
                     // Convert to string for input elements (they work with string values)
                     const stringValue = String(rawValue ?? '')
@@ -1224,11 +1113,11 @@ export default function AgentDetail() {
                       <div key={fieldName} className={styles.formField}>
                         <label htmlFor={`field-${fieldName}`} className={styles.formLabel}>
                           <span className={styles.labelText}>
-                            {fieldConfig.label || fieldName}
-                            {fieldConfig.required && <span className={styles.requiredStar}>*</span>}
+                            {config.label || fieldName}
+                            {config.required && <span className={styles.requiredStar}>*</span>}
                           </span>
-                          {fieldConfig.description && (
-                            <span className={styles.formFieldDescription}>{fieldConfig.description}</span>
+                          {config.description && (
+                            <span className={styles.formFieldDescription}>{config.description}</span>
                           )}
                         </label>
 
@@ -1288,7 +1177,7 @@ export default function AgentDetail() {
             )}
 
             <label>
-              {metadata?.input_schema && Object.keys(metadata.input_schema).length > 0
+              {agentConfig?.index_metadata?.input_schema && Object.keys(agentConfig.index_metadata.input_schema).length > 0
                 ? 'JSON (Auto-generated from form above):'
                 : 'Payload (JSON):'}
               <textarea
@@ -1340,13 +1229,36 @@ export default function AgentDetail() {
             <button
               className="btn btn-lg btn-bright"
               onClick={handleInvoke}
-              disabled={!isAuthenticated() || invokeMutation.isPending || !!pollingStatus}
-              title={!isAuthenticated() ? 'Auth token required - configure in Configuration > Gateway Connection' : undefined}
+              disabled={!isAuthenticated() || !requirementStatus.canExecute || invokeMutation.isPending || !!pollingStatus}
+              title={
+                !isAuthenticated()
+                  ? 'Auth token required - configure in Configuration > Gateway Connection'
+                  : !requirementStatus.canExecute
+                  ? `Missing requirements: ${requirementStatus.missingRequirements.join('; ')}`
+                  : undefined
+              }
               data-tour="execute-agent-button"
             >
               <BoltIcon className={styles.executeIcon} />
               {!isAuthenticated() ? 'Auth Required' : invokeMutation.isPending ? 'Executing...' : pollingStatus ? 'Running...' : 'Execute'}
             </button>
+
+            {!requirementStatus.canExecute && isAuthenticated() && (
+              <div className={styles.authWarning}>
+                <ExclamationTriangleIcon className={styles.warningIcon} />
+                <div className={styles.warningContent}>
+                  <p className={styles.warningTitle}>Requirements Not Met</p>
+                  <p className={styles.warningMessage}>
+                    {requirementStatus.missingRequirements.map((req, idx) => (
+                      <span key={idx}>
+                        {req}
+                        {idx < requirementStatus.missingRequirements.length - 1 && <br />}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {!isAuthenticated() && (
               <div className={styles.authWarning}>
