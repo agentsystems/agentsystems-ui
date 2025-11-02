@@ -458,6 +458,21 @@ export default function AgentDetail() {
       }
     }
 
+    // Check required egress URLs are in egress_allowlist
+    if (agentConfig.index_metadata.required_egress && agentConfig.index_metadata.required_egress.length > 0) {
+      const allowlistStr = agentConfig.egressAllowlist || ''
+      const allowlist = new Set(
+        allowlistStr
+          .split(',')
+          .map(url => url.trim())
+          .filter(url => url.length > 0)
+      )
+      const missingEgress = agentConfig.index_metadata.required_egress.filter(url => !allowlist.has(url))
+      if (missingEgress.length > 0) {
+        missing.push(`Network access: ${missingEgress.join(', ')}`)
+      }
+    }
+
     // Check required input fields
     if (agentConfig.index_metadata.input_schema) {
       const requiredFields = Object.entries(agentConfig.index_metadata.input_schema)
