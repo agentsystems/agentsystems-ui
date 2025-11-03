@@ -247,6 +247,9 @@ export const configUtils = {
     ...(form.index_metadata && {
       index_metadata: form.index_metadata
     }),
+    ...(form.declared_metadata && {
+      declared_metadata: form.declared_metadata
+    }),
     overrides: {
       ...(form.envVariables && Object.keys(form.envVariables).length > 0 && {
         env: form.envVariables
@@ -271,6 +274,7 @@ export const configUtils = {
     labels: config.labels || {},
     artifact_permissions: config.artifact_permissions,
     index_metadata: config.index_metadata,
+    declared_metadata: config.declared_metadata,
     envVariables: config.overrides?.env || {},
     exposePorts: config.overrides?.expose?.join(', ') || ''
   }),
